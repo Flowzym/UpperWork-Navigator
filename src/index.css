@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import './styles.css';
 
 /* A11y: sr-only + :focus-visible Ring */
 .sr-only {
