@@ -18,6 +18,8 @@ export default function SegmentControl<T extends string>({
       {options.map((option) => (
         <button
           key={option}
+          role="radio"
+          aria-checked={value === option}
           className={`segment-option ${value === option ? 'active' : ''}`}
           onClick={() => onChange(option)}
         >

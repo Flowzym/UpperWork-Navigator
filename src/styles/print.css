@@ -1,0 +1,44 @@
+@media print {
+  @page { 
+    size: A4; 
+    margin: 14mm 14mm 16mm; 
+  }
+  
+  html, body { 
+    print-color-adjust: exact; 
+    -webkit-print-color-adjust: exact; 
+  }
+  
+  h2, h3 { 
+    break-after: avoid; 
+  }
+  
+  .row, .card, .table-row { 
+    break-inside: avoid; 
+  }
+  
+  .footnotes { 
+    break-before: auto; 
+    font-size: 10pt; 
+    margin-top: 20pt;
+    border-top: 1pt solid #ccc;
+    padding-top: 10pt;
+  }
+  
+  .cite { 
+    vertical-align: super; 
+    font-size: .8em; 
+  }
+  
+  /* Hide UI elements in print */
+  .btn, .navbar, .sidebar, .ki-panel, .toast, .modal-backdrop {
+    display: none !important;
+  }
+  
+  /* Optimize text for print */
+  body {
+    font-size: 11pt;
+    line-height: 1.4;
+    color: #000;
+  }
+}

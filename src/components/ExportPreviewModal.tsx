@@ -158,9 +158,22 @@ Quelle: Broschüre OÖ 2025 (Dummy Export)`;
         {/* Preview Content */}
         <div className="export-preview-content">
           <div className="export-preview-paper">
-            <pre className="export-preview-text">
-              {content}
-            </pre>
+            <div className="export-preview-text">
+              <div dangerouslySetInnerHTML={{ __html: cleanedHtml }} />
+              
+              {notes.length > 0 && (
+                <section className="footnotes">
+                  <h3>Quellen</h3>
+                  <ol>
+                    {notes.map(n => (
+                      <li key={n.id}>
+                        {n.label} – Programm {n.programId}, Seite {n.page}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+            </div>
           </div>
         </div>
 

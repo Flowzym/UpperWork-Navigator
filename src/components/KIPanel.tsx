@@ -197,6 +197,8 @@ export default function KIPanel({
           <div className="mb-4">
             <div className="flex items-center gap-4">
               <button
+                role="switch"
+                aria-checked={onlyBrochure}
                 className={`toggle-btn ${onlyBrochure ? 'active' : ''}`}
                 onClick={onToggleOnlyBrochure}
               >
@@ -204,6 +206,8 @@ export default function KIPanel({
                 Nur Broschüre
               </button>
               <button
+                role="switch"
+                aria-checked={withSources}
                 className={`toggle-btn ${withSources ? 'active' : ''}`}
                 onClick={onToggleWithSources}
               >

@@ -914,7 +914,7 @@ function App() {
           onShowToast={pushToast}
         />
 
-        <main className="main-content">
+        <main id="main" role="main" tabIndex={-1} className="main-content">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800">
               Förderprogramme ({displayProgramCount})

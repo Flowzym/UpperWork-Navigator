@@ -3,6 +3,8 @@ import { Provider, Mode, ContextType, Answer } from '../types';
 import { EndpointConfig, buildChatCompletionsUrl, buildModelsUrl, createRequestHeaders, createAbortController } from '../config/endpoints';
 import { useRag } from './useRag';
 import { useMetrics } from '../metrics/useMetrics';
+import { detectInjection } from '../lib/rag/guardrails';
+import { showToast } from '../lib/ui/toast';
 
 export function useChatApi() {
   const [loading, setLoading] = useState(false);
@@ -17,6 +19,11 @@ export function useChatApi() {
     onlyBrochure: boolean,
     withSources: boolean
   ): Promise<Answer> => {
+    // Check for injection attempts
+    if (detectInjection(prompt)) {
+      showToast('Mögliche Prompt-Injection erkannt – bleibe streng bei der Broschüre.', 'warn');
+    }
+    
     let ragContext = '';
     let ragCitations: any[] = [];
     

@@ -1,5 +1,7 @@
 import { DocChunk, ProgramMeta, IngestionStats } from './schema';
 import { programMeta } from '../data/programMeta';
+import { showToast } from '../lib/ui/toast';
+import { loadStats, loadChunksCached } from '../lib/cache/ragCache';
 
 // Normalisierung für Suche (wie in searchIndex.ts)
 function normalizeText(text: string): string {
@@ -22,30 +24,29 @@ function normalizeText(text: string): string {
 // Lade Chunks aus Build-Time Ingestion
 async function loadChunksFromJSON(): Promise<DocChunk[]> {
   try {
-    const response = await fetch('/rag/chunks.json');
-    if (!response.ok) {
-      console.warn('chunks.json nicht gefunden, verwende Fallback-Simulation');
+    // Try to load with cache
+    const stats = await loadStats();
+    if (!stats) {
+      console.warn('[RAG] Stats nicht verfügbar – verwende Fallback-Simulation');
+      showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
       return [];
     }
     
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      console.warn('chunks.json nicht verfügbar (HTML-Response), verwende Fallback-Simulation');
+    const { chunks, source } = await loadChunksCached(stats);
+    if (!chunks.length) {
+      console.warn('[RAG] Keine Chunks verfügbar – verwende Fallback-Simulation');
+      showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
       return [];
     }
     
-    const text = await response.text();
-    
-    // Check if response is HTML (404 page)
-    if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<!DOCTYPE')) {
-      console.warn('chunks.json nicht verfügbar (404 HTML-Response), verwende Fallback-Simulation');
-      return [];
+    if (source === 'idb') {
+      showToast(`Offline – verwende Cache (build ${stats.buildId})`, 'info');
     }
     
-    const chunks = JSON.parse(text);
     return chunks as DocChunk[];
   } catch (error) {
-    console.warn('Fehler beim Laden der Chunks, verwende Fallback-Simulation:', error);
+    console.warn('[RAG] Verwende simulierte Broschüren-Inhalte (chunks.json nicht gefunden). Für echte Antworten: npm run ingest.');
+    showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
     return [];
   }
 }
