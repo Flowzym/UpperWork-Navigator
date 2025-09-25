@@ -152,12 +152,17 @@ export async function importOverridesFile(file: File): Promise<RagOverrides> {
         
         // Basic validation
         if (!overrides.version || overrides.version !== 1) {
-          throw new Error('Invalid overrides format or version');
+          reject(new Error('Invalid overrides format or version'));
+          return;
         }
         
         resolve(overrides);
       } catch (error) {
-        reject(new Error('Failed to parse overrides file'));
+        if (error instanceof SyntaxError) {
+          reject(new Error('Failed to parse overrides file'));
+        } else {
+          reject(error);
+        }
       }
     };
     reader.onerror = () => reject(new Error('Failed to read file'));
