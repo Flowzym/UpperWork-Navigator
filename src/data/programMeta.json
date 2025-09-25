@@ -1,0 +1,38 @@
+{
+  "oe_bildungskonto": {
+    "name": "Bildungskonto OÖ",
+    "pages": [12, 15],
+    "stand": "09/2025",
+    "status": "aktiv"
+  },
+  "ams_qbn": {
+    "name": "QBN – Qualifizierungsförderung für Beschäftigte", 
+    "pages": [8, 11],
+    "stand": "10/2025",
+    "status": "aktiv"
+  },
+  "innovative_skills_ooe": {
+    "name": "Innovative Skills - Land OÖ",
+    "pages": [24, 27],
+    "stand": "11/2025", 
+    "status": "endet_am"
+  },
+  "qualifizierungsverbund_digi_nachhaltigkeit": {
+    "name": "Qualifizierungsverbund - Digitale Kompetenz & Nachhaltigkeit",
+    "pages": [18, 21],
+    "stand": "09/2025",
+    "status": "aktiv"
+  },
+  "aqua": {
+    "name": "AQUA - Arbeitsplatznahe Qualifizierung",
+    "pages": [32, 35],
+    "stand": "10/2025",
+    "status": "aktiv"
+  },
+  "fit": {
+    "name": "FiT - Frauen in Handwerk und Technik",
+    "pages": [45, 48],
+    "stand": "11/2025",
+    "status": "aktiv"
+  }
+}
