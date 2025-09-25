@@ -2148,10 +2148,15 @@ body {
   color: var(--color-gray-900);
   box-shadow: var(--shadow-sm);
 }
-
+  @apply p-2 border border-gray-200 rounded-lg;
 .ki-segment-small .segment-option {
   padding: 4px 8px;
-  font-size: 11px;
+  @apply min-h-[48px] gap-1;
+  @apply text-center;
+}
+
+.quick-action-btn-small:hover {
+  @apply bg-gray-50 border-gray-300;
 }
 
 /* Context Pills */
@@ -2183,7 +2188,7 @@ body {
 }
 
 /* Quick Action Buttons */
-.quick-action-btn {
+.quick-action-btn-small {
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -693,9 +693,31 @@ function App() {
       if (program) {
         pushToast(`"${program.name}" an Chat gesendet`, 'info');
         addHistoryEntry('chat', program.id, program.name);
+        // Add program card to chat
+        handleAddProgramCard(programId);
       }
     } else {
       pushToast('Chat geöffnet', 'info');
+    }
+  };
+
+  // Handle adding program card to chat
+  const handleAddProgramCard = (programId: string) => {
+    const program = apiPrograms.find(p => p.id === programId);
+    if (program) {
+      // Create a program card answer
+      const cardAnswer: Answer = {
+        id: `card-${Date.now()}`,
+        text: `**${program.name}**\n\n${program.teaser}\n\n**Zielgruppe:** ${program.zielgruppe.join(', ')}\n**Region:** ${program.region}\n**Status:** ${program.status === 'aktiv' ? 'Aktiv' : program.status}`,
+        sources: [{ seite: program.quelle.seite, stand: program.quelle.stand }],
+        meta: {
+          provider: 'System',
+          mode: 'Fakten',
+          context: 'Aktuelle Karte',
+          timestamp: new Date().toISOString()
+        }
+      };
+      handleAddAnswerDirect(cardAnswer);
     }
   };
 
@@ -996,6 +1018,7 @@ function App() {
           onAddAnswer={handleAddAnswerDirect}
           onRemoveAnswer={handleRemoveAnswer}
           onClearAnswers={handleClearAnswers}
+          onAddProgramCard={handleAddProgramCard}
           onClose={handleCloseKIPanel}
           onShowToast={pushToast}
           chatLoading={chatApiLoading || chatLoading}
