@@ -438,3 +438,20 @@ Die App hat jetzt vollständige API-Integration für alle 5 Provider-Typen! 🚀
 - Konsistentes Design-System mit CSS Custom Properties
 - RAG-System mit lokaler Dokumenten-Indexierung
 - BM25-basierte Textsuche ohne externe Abhängigkeiten
+
+## Echte Broschüre laden
+
+Für echte RAG-Antworten mit Quellenangaben:
+
+1. PDF-Broschüre in `src/data/` ablegen (z.B. `Foerderbroschuere_OOE_2025.pdf`)
+2. `npm run ingest` ausführen (erstellt `public/rag/chunks.json` & `stats.json`)
+3. App neu laden - "Nur Broschüre"-Modus nutzt jetzt echte Inhalte
+
+Ohne diese Dateien laufen Simulationsdaten (gelber Toast in der App).
+
+## Offline/Cache
+
+- IndexedDB-Cache für RAG-Chunks (buildId-basiert)
+- Automatische Cache-Bereinigung bei neuen Versionen
+- Offline-Funktionalität nach erstem Laden
+- Cache-Status wird in Toast-Nachrichten angezeigt
