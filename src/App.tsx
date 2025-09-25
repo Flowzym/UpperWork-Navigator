@@ -36,6 +36,7 @@ import EmptyState from './components/EmptyState';
 import { useMetrics } from './metrics/useMetrics';
 import { documentRetriever } from './rag/retriever';
 import AdminApp from './features/admin/AdminApp';
+import './styles.css';
 
 let toastIdCounter = 0;
 let historyIdCounter = 0;
