@@ -1,174 +1,114 @@
-import React, { useState } from 'react';
-import { Program } from '../types';
-import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
-import OverflowMenu from './OverflowMenu';
-import Tooltip from './Tooltip';
-import { useRef } from 'react';
-
-interface ProgramCardProps {
-  program: Program;
-  onShowDetail: (programId: string) => void;
-  onToggleCompare: (programId: string) => void;
-  onToggleStar: (programId: string) => void;
-  onOpenChat: (programId: string) => void;
-  onShowOnePager: (program: Program) => void;
-  onShowEmail: (program: Program) => void;
-  onShowToast: (message: string) => void;
-  isCompared: boolean;
-  isStarred: boolean;
-  onShowChecklist: (program: Program) => void;
+export interface Program {
+  id: string;
+  name: string;
+  status: 'aktiv' | 'endet_am' | 'ausgesetzt' | 'entfallen';
+  teaser: string;
+  zielgruppe: string[];
+  foerderart: ('kurskosten' | 'personalkosten' | 'beihilfe' | 'beratung')[];
+  foerderhoehe: FoerderHoehe[];
+  voraussetzungen: string[];
+  antragsweg: 'eams' | 'land_ooe_portal' | 'wko_verbund' | 'traeger_direkt';
+  frist: Frist;
+  region: string;
+  themen: string[];
+  passt_wenn: string[];
+  passt_nicht_wenn: string[];
+  quelle: Quelle;
+  
+  // Legacy compatibility
+  tags: string[];
+  portal: string;
+  description: string;
+  budget: string;
+  targetGroup: string[];
+  fundingType: string;
+  requirements: string[];
+  themeField: string;
+  deadline: string;
 }
 
-export default function ProgramCard({ 
-  program, 
-  onShowDetail, 
-  onToggleCompare, 
-  onToggleStar,
-  onOpenChat,
-  onShowOnePager,
-  onShowEmail,
-  onShowToast,
-  isCompared,
-  isStarred,
-  onShowChecklist
-}: ProgramCardProps) {
-  const [showOverflow, setShowOverflow] = useState(false);
-  const overflowRef = useRef<HTMLButtonElement>(null);
+export interface FoerderHoehe {
+  label: string;
+  quote?: number;
+  min?: number;
+  max?: number;
+  deckel?: number;
+  note?: string;
+}
 
-  const getStatusBadge = () => {
-    switch (program.status) {
-      case 'aktiv':
-        return <span className="status-badge status-active"><CheckCircle size={12} className="mr-1" />Aktiv</span>;
-      case 'endet_am':
-        return <span className="status-badge status-ending"><Clock size={12} className="mr-1" />Endet {program.frist.datum}</span>;
-      case 'ausgesetzt':
-        return <span className="status-badge status-paused"><Pause size={12} className="mr-1" />Ausgesetzt</span>;
-      case 'entfallen':
-        return <span className="status-badge status-cancelled"><X size={12} className="mr-1" />Entfallen</span>;
-      default:
-        return null;
-    }
+export interface Frist {
+  typ: 'laufend' | 'stichtag' | 'entfallen';
+  datum?: string;
+}
+
+export interface Quelle {
+  seite: number;
+  stand: string;
+}
+
+export type Provider = 'ChatGPT' | 'Mistral' | 'Claude' | 'Lokal' | 'Custom';
+export type Mode = 'Fakten' | 'Vergleich' | 'Checkliste' | 'E-Mail' | 'Was-wäre-wenn';
+export type ContextType = 'Aktuelle Karte' | 'Vergleichsauswahl' | 'Ergebnisliste' | 'Freie Frage';
+export type NavigationTab = 'explorer' | 'wizard' | 'profil-matching' | 'help';
+export type HelpTab = 'quickstart' | 'tips' | 'shortcuts' | 'changelog' | 'contact';
+export type FacetGroup = 'status' | 'zielgruppe' | 'foerderart' | 'voraussetzungen' | 'themen' | 'frist' | 'region' | 'budget';
+
+export interface FilterState {
+  status: string[];
+  zielgruppe: string[];
+  foerderart: string[];
+  voraussetzungen: string[];
+  themen: string[];
+  frist: string[];
+  region: string[];
+  budget?: string[];
+}
+
+export interface ProviderPreset {
+  style: string;
+  length: string;
+  creativity: string;
+}
+
+export interface Answer {
+  id: string;
+  text: string;
+  sources?: { seite: number; stand: string }[];
+  warning?: string;
+  meta: {
+    provider: Provider;
+    mode: Mode;
+    context: ContextType;
+    timestamp: string;
   };
+}
 
-  const overflowItems = [
-    {
-      label: 'Vergleichen',
-      icon: <BarChart3 size={14} />,
-      checked: isCompared,
-      onClick: () => onToggleCompare(program.id)
-    },
-    {
-      label: '1-Pager',
-      icon: <FileText size={14} />,
-      onClick: () => onShowOnePager(program)
-    },
-    {
-      label: 'E-Mail-Text',
-      icon: <Mail size={14} />,
-      onClick: () => onShowEmail(program)
-    },
-    {
-      label: 'Merken',
-      icon: isStarred ? <Star size={14} fill="currentColor" /> : <Star size={14} />,
-      checked: isStarred,
-      onClick: () => onToggleStar(program.id)
-    }
-  ];
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  programId: string;
+  programName: string;
+  type: 'view' | 'checkliste' | 'vergleich' | 'chat' | 'onepager' | 'email' | 'search' | 'filter' | 'wizard';
+}
 
-  return (
-    <div className={`program-card ${isCompared ? 'compared' : ''}`}>
-      {/* Header */}
-      <div className="card-header">
-        <div className="flex-1">
-          <h3 className="card-title">{program.name}</h3>
-          <div className="card-meta">
-            {getStatusBadge()}
-            <span className="portal-badge">{program.portal}</span>
-          </div>
-        </div>
-        
-        <div className="relative">
-          <Tooltip content="Weitere Aktionen">
-            <button
-              ref={overflowRef}
-              className="overflow-trigger"
-              onClick={() => setShowOverflow(!showOverflow)}
-            >
-              <MoreHorizontal size={16} />
-            </button>
-          </Tooltip>
-          
-          <OverflowMenu
-            items={overflowItems}
-            isOpen={showOverflow}
-            onClose={() => setShowOverflow(false)}
-            anchorRef={overflowRef}
-          />
-        </div>
-      </div>
-
-      {/* Description */}
-      <div className="card-teaser">
-        <p>{program.teaser}</p>
-      </div>
-
-      {/* Tags */}
-      <div className="card-tags">
-        {program.themen.slice(0, 4).map((tag) => (
-          <span key={tag} className="tag">
-            {tag}
-          </span>
-        ))}
-        {program.themen.length > 4 && (
-          <span className="tag-more">+{program.themen.length - 4}</span>
-        )}
-      </div>
-
-      {/* Info Row */}
-      <div className="card-info">
-        <span className="info-item">
-          <Euro size={12} className="mr-1" />
-          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
-        </span>
-        <span className="info-item">
-          <MapPin size={12} className="mr-1" />
-          {program.region}
-        </span>
-        <span className="info-item">
-          <Clock size={12} className="mr-1" />
-          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
-        </span>
-      </div>
-
-      {/* Primary Actions */}
-      <div className="card-actions">
-        <Tooltip content="Detailansicht öffnen">
-          <button
-            className="btn btn-primary btn-sm flex-1"
-            onClick={() => onShowDetail(program.id)}
-          >
-            <FileText size={12} className="mr-1" />
-            Detail
-          </button>
-        </Tooltip>
-        <Tooltip content="5-Schritte-Checkliste anzeigen">
-          <button
-            className="btn btn-secondary btn-sm flex-1"
-            onClick={() => onShowChecklist(program)}
-          >
-            <CheckSquare size={12} className="mr-1" />
-            Checkliste
-          </button>
-        </Tooltip>
-        <Tooltip content="An KI-Chat senden">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => onOpenChat(program.id)}
-          >
-            <Bot size={12} />
-          </button>
-        </Tooltip>
-      </div>
-    </div>
-  );
+export interface AppState {
+  programs: Program[];
+  filteredPrograms: Program[];
+  selectedProgram: Program | null;
+  comparedPrograms: string[];
+  starredPrograms: string[];
+  searchQuery: string;
+  filters: FilterState;
+  showWizard: boolean;
+  showHelp: boolean;
+  showSettings: boolean;
+  showKI: boolean;
+  showHistory: boolean;
+  showMetrics: boolean;
+  showAdmin: boolean;
+  showCompare?: boolean;
+  toasts: any[];
+  history: HistoryEntry[];
+  theme: 'light' | 'dark' | 'high-contrast';
+  viewMode: 'comfort' | 'compact';
 }
