@@ -68,7 +68,8 @@ function App() {
       voraussetzungen: [],
       themen: [],
       frist: [],
-      region: []
+      region: [],
+      budget: []
     },
     showWizard: false,
     showHelp: false,
