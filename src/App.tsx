@@ -1,175 +1,147 @@
-import React, { useState } from 'react';
-import { Program } from '../types';
-import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
-import OverflowMenu from './OverflowMenu';
-import Tooltip from './Tooltip';
-import { useRef } from 'react';
-            className="btn btn-secondary flex-1"
-interface ProgramCardProps {
-  program: Program;
-  onShowDetail: (programId: string) => void;
-  onToggleCompare: (programId: string) => void;
-  onToggleStar: (programId: string) => void;
-  onOpenChat: (programId: string) => void;
-  onShowOnePager: (program: Program) => void;
-  onShowEmail: (program: Program) => void;
-  onShowToast: (message: string) => void;
-  isCompared: boolean;
-  isStarred: boolean;
-  onShowChecklist: (program: Program) => void;
+import React, { useState, useEffect } from 'react';
+import { Program } from './types';
+import { samplePrograms } from './data/samplePrograms';
+import AppShell from './components/AppShell';
+import ToastHost from './components/ToastHost';
+import { documentRetriever } from "./rag/retriever";
+import AdminApp from "./features/admin/AdminApp";
+
+let toastIdCounter = 0;
+let historyIdCounter = 0;
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  duration?: number;
 }
 
-export default function ProgramCard({ 
-  program, 
-  onShowDetail, 
-  onToggleCompare, 
-  onToggleStar,
-  onOpenChat,
-  onShowOnePager,
-  onShowEmail,
-  onShowToast,
-  isCompared,
-  isStarred,
-  onShowChecklist
-}: ProgramCardProps) {
-  const [showOverflow, setShowOverflow] = useState(false);
-  const overflowRef = useRef<HTMLButtonElement>(null);
+export interface HistoryEntry {
+  id: string;
+  timestamp: Date;
+  query: string;
+  results: Program[];
+  type: 'search' | 'filter' | 'wizard';
+}
 
-  const getStatusBadge = () => {
-    switch (program.status) {
-      case 'aktiv':
-        return <span className="status-badge status-active"><CheckCircle size={12} className="mr-1" />Aktiv</span>;
-      case 'endet_am':
-        return <span className="status-badge status-ending"><Clock size={12} className="mr-1" />Endet {program.frist.datum}</span>;
-      case 'ausgesetzt':
-        return <span className="status-badge status-paused"><Pause size={12} className="mr-1" />Ausgesetzt</span>;
-      case 'entfallen':
-        return <span className="status-badge status-cancelled"><X size={12} className="mr-1" />Entfallen</span>;
-      default:
-        return null;
-    }
+export interface AppState {
+  programs: Program[];
+  filteredPrograms: Program[];
+  selectedProgram: Program | null;
+  comparedPrograms: string[];
+  starredPrograms: string[];
+  searchQuery: string;
+  filters: {
+    status: string[];
+    zielgruppe: string[];
+    foerderart: string[];
+    voraussetzungen: string[];
+    themen: string[];
+    frist: string[];
+    region: string[];
+  };
+  showWizard: boolean;
+  showHelp: boolean;
+  showSettings: boolean;
+  showKI: boolean;
+  showHistory: boolean;
+  showMetrics: boolean;
+  showAdmin: boolean;
+  toasts: Toast[];
+  history: HistoryEntry[];
+  theme: 'light' | 'dark' | 'high-contrast';
+  viewMode: 'comfort' | 'compact';
+}
+
+function App() {
+  const [state, setState] = useState<AppState>({
+    programs: samplePrograms,
+    filteredPrograms: samplePrograms,
+    selectedProgram: null,
+    comparedPrograms: [],
+    starredPrograms: [],
+    searchQuery: '',
+    filters: {
+      status: [],
+      zielgruppe: [],
+      foerderart: [],
+      voraussetzungen: [],
+      themen: [],
+      frist: [],
+      region: []
+    },
+    showWizard: false,
+    showHelp: false,
+    showSettings: false,
+    showKI: false,
+    showHistory: false,
+    showMetrics: false,
+    showAdmin: false,
+    toasts: [],
+    history: [],
+    theme: 'light',
+    viewMode: 'comfort'
+  });
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', state.theme);
+  }, [state.theme]);
+
+  const showToast = (message: string, type: Toast['type'] = 'info', duration = 5000) => {
+    const toast: Toast = {
+      id: `toast-${++toastIdCounter}`,
+      message,
+      type,
+      duration
+    };
+    
+    setState(prev => ({
+      ...prev,
+      toasts: [...prev.toasts, toast]
+    }));
   };
 
-  const overflowItems = [
-    {
-      label: 'Vergleichen',
-      icon: <BarChart3 size={14} />,
-      checked: isCompared,
-      onClick: () => onToggleCompare(program.id)
-    },
-    {
-      label: '1-Pager',
-      icon: <FileText size={14} />,
-      onClick: () => onShowOnePager(program)
-    },
-    {
-      label: 'E-Mail-Text',
-      icon: <Mail size={14} />,
-      onClick: () => onShowEmail(program)
-    },
-    {
-      label: 'Merken',
-      icon: isStarred ? <Star size={14} fill="currentColor" /> : <Star size={14} />,
-      checked: isStarred,
-      onClick: () => onToggleStar(program.id)
-    }
-  ];
+  const removeToast = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      toasts: prev.toasts.filter(toast => toast.id !== id)
+    }));
+  };
+
+  const addToHistory = (query: string, results: Program[], type: HistoryEntry['type']) => {
+    const entry: HistoryEntry = {
+      id: `history-${++historyIdCounter}`,
+      timestamp: new Date(),
+      query,
+      results,
+      type
+    };
+    
+    setState(prev => ({
+      ...prev,
+      history: [entry, ...prev.history.slice(0, 49)] // Keep last 50 entries
+    }));
+  };
+
+  if (state.showAdmin) {
+    return <AdminApp onClose={() => setState(prev => ({ ...prev, showAdmin: false }))} />;
+  }
 
   return (
-            <span className="portal-badge">{program.portal}</span>
-          </div>
-        </div>
-        
-        <div className="relative">
-          <Tooltip content="Weitere Aktionen">
-            <button
-              ref={overflowRef}
-              className="overflow-trigger"
-              onClick={() => setShowOverflow(!showOverflow)}
-            >
-              <MoreHorizontal size={16} />
-            </button>
-          </Tooltip>
-          
-          <OverflowMenu
-            items={overflowItems}
-            isOpen={showOverflow}
-            onClose={() => setShowOverflow(false)}
-            anchorRef={overflowRef}
-          />
-        </div>
-      </div>
-
-      {/* Description */}
-      <div className="card-teaser">
-        <p>{program.teaser}</p>
-      </div>
-
-      {/* Tags */}
-      <div className="card-tags">
-        {program.themen.slice(0, 4).map((tag) => (
-          <span key={tag} className="tag">
-            {tag}
-          </span>
-        ))}
-        {program.themen.length > 4 && (
-          <span className="tag-more">+{program.themen.length - 4}</span>
-        )}
-      </div>
-
-      {/* Info Row */}
-      <div className="card-info">
-        <span className="info-item">
-          <Euro size={12} className="mr-1" />
-          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
-        </span>
-        <span className="info-item">
-          <MapPin size={12} className="mr-1" />
-          {program.region}
-        </span>
-        <span className="info-item">
-          <Clock size={12} className="mr-1" />
-          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
-        </span>
-      </div>
-
-      {/* Primary Actions */}
-      <div className="card-actions">
-        <Tooltip content="Detailansicht öffnen">
-          <button
-            className="btn btn-primary btn-sm flex-1"
-            onClick={() => onShowDetail(program.id)}
-          >
-            <FileText size={12} className="mr-1" />
-            Detail
-          </button>
-        </Tooltip>
-        <Tooltip content="5-Schritte-Checkliste anzeigen">
-          <button
-            className="btn btn-secondary btn-sm flex-1"
-            onClick={() => onShowChecklist(program)}
-          >
-            <CheckSquare size={12} className="mr-1" />
-            Checkliste
-          </button>
-        </Tooltip>
-        <Tooltip content="An KI-Chat senden">
-          <button
-            className="btn btn-ghost"
-            onClick={() => onOpenChat(program.id)}
-          >
-            <Bot size={12} />
-          </button>
-        </Tooltip>
-        <Tooltip content="An KI-Chat senden">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => onOpenChat(program.id)}
-          >
-            <Bot size={12} />
-          </button>
-        </Tooltip>
-      </div>
-    </div>
+    <>
+      <AppShell 
+        state={state}
+        setState={setState}
+        showToast={showToast}
+        addToHistory={addToHistory}
+      />
+      <ToastHost 
+        toasts={state.toasts}
+        onRemove={removeToast}
+      />
+    </>
   );
 }
+
+export default App;
