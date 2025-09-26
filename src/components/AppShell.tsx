@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, HistoryEntry, Program, NavigationTab, HelpTab, FilterState, FacetGroup } from '../types';
+import { AppState, HistoryEntry, Program, NavigationTab, HelpTab, FilterState, FacetGroup, Provider, Mode, ContextType, Answer } from '../types';
 import { samplePrograms } from '../data/samplePrograms';
 import { buildIndex, search, generateSuggestions, SearchSuggestion } from '../search/searchIndex';
 import { applyFilters } from '../filters/applyFilters';
@@ -8,6 +8,7 @@ import { useRag } from '../hooks/useRag';
 import { useChatApi } from '../hooks/useChatApi';
 import { useMetrics } from '../metrics/useMetrics';
 import { defaultEndpoints } from '../config/endpoints';
+import { providerPresets } from '../presets/providerPresets';
 
 // Components
 import { NavBar } from './NavBar';
@@ -49,6 +50,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
   const rag = useRag();
   const chatApi = useChatApi();
   const { track } = useMetrics();
+  const [localEndpoint, setLocalEndpoint] = useState(defaultEndpoints.local);
+  const [customEndpoint, setCustomEndpoint] = useState(defaultEndpoints.custom);
 
   // Initialize RAG on mount
   useEffect(() => {
@@ -176,6 +179,42 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
     }
   };
 
+  // KI-Panel Handlers
+  const handleKIProviderChange = (provider: Provider) => {
+    setState(prev => ({ ...prev, kiProvider: provider }));
+  };
+
+  const handleKIModeChange = (mode: Mode) => {
+    setState(prev => ({ ...prev, kiMode: mode }));
+  };
+
+  const handleKIContextChange = (context: ContextType) => {
+    setState(prev => ({ ...prev, kiContext: context }));
+  };
+
+  const handleToggleOnlyBrochure = () => {
+    setState(prev => ({ ...prev, kiOnlyBrochure: !prev.kiOnlyBrochure }));
+  };
+
+  const handleToggleWithSources = () => {
+    setState(prev => ({ ...prev, kiWithSources: !prev.kiWithSources }));
+  };
+
+  const handleAddAnswer = (answer: Answer) => {
+    setState(prev => ({ ...prev, kiAnswers: [answer, ...prev.kiAnswers] }));
+  };
+
+  const handleRemoveAnswer = (answerId: string) => {
+    setState(prev => ({ 
+      ...prev, 
+      kiAnswers: prev.kiAnswers.filter(a => a.id !== answerId) 
+    }));
+  };
+
+  const handleClearAnswers = () => {
+    setState(prev => ({ ...prev, kiAnswers: [] }));
+  };
+
   const starredPrograms = state.programs.filter(p => state.starredPrograms.includes(p.id));
   const comparedPrograms = state.programs.filter(p => state.comparedPrograms.includes(p.id));
 
@@ -291,23 +330,25 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
         {state.showKI && (
           <KIPanel
             isOpen={state.showKI}
-            provider="ChatGPT"
-            mode="Fakten"
-            context="Freie Frage"
-            onlyBrochure={true}
-            withSources={true}
-            providerPreset={{ style: "präzise", length: "mittel", creativity: "moderat" }}
-            answers={[]}
-            onProviderChange={() => {}}
-            onModeChange={() => {}}
-            onContextChange={() => {}}
-            onToggleOnlyBrochure={() => {}}
-            onToggleWithSources={() => {}}
-            onAddAnswer={() => {}}
-            onRemoveAnswer={() => {}}
-            onClearAnswers={() => {}}
+            provider={state.kiProvider}
+            mode={state.kiMode}
+            context={state.kiContext}
+            onlyBrochure={state.kiOnlyBrochure}
+            withSources={state.kiWithSources}
+            providerPreset={providerPresets[state.kiProvider]}
+            answers={state.kiAnswers}
+            onProviderChange={handleKIProviderChange}
+            onModeChange={handleKIModeChange}
+            onContextChange={handleKIContextChange}
+            onToggleOnlyBrochure={handleToggleOnlyBrochure}
+            onToggleWithSources={handleToggleWithSources}
+            onAddAnswer={handleAddAnswer}
+            onRemoveAnswer={handleRemoveAnswer}
+            onClearAnswers={handleClearAnswers}
             onClose={() => setState(prev => ({ ...prev, showKI: false }))}
             onShowToast={showToast}
+            chatLoading={chatApi.loading}
+            chatApiError={chatApi.error}
           />
         )}
       </div>
@@ -325,6 +366,15 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
       />
 
       {/* Modals */}
+      {state.showCompare && comparedPrograms.length > 0 && (
+        <CompareModal
+          isOpen={state.showCompare}
+          programs={comparedPrograms}
+          onClose={() => setState(prev => ({ ...prev, showCompare: false }))}
+          onShowToast={showToast}
+        />
+      )}
+
       {state.selectedProgram && (
         <ProgramDetail
           program={state.selectedProgram}
@@ -357,11 +407,15 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
       <SettingsDrawer
         isOpen={state.showSettings}
         onClose={() => setState(prev => ({ ...prev, showSettings: false }))}
-        theme={state.theme}
-        viewMode={state.viewMode}
-        onThemeChange={(theme) => setState(prev => ({ ...prev, theme }))}
-        onViewModeChange={(viewMode) => setState(prev => ({ ...prev, viewMode }))}
-        onShowToast={showToast}
+        settings={{
+          themeMode: state.theme === 'dark' ? 'dark' : 'light',
+          viewMode: state.viewMode === 'compact' ? 'list' : 'grid'
+        }}
+        onSettingsChange={(settings) => setState(prev => ({ 
+          ...prev, 
+          theme: settings.themeMode === 'dark' ? 'dark' : 'light',
+          viewMode: settings.viewMode === 'list' ? 'compact' : 'comfort'
+        }))}
       />
     </div>
   );
