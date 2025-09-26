@@ -47,10 +47,18 @@ export interface AppState {
   showHistory: boolean;
   showMetrics: boolean;
   showAdmin: boolean;
+  showCompare: boolean;
   toasts: Toast[];
   history: HistoryEntry[];
   theme: 'light' | 'dark' | 'high-contrast';
   viewMode: 'comfort' | 'compact';
+  // KI-Panel States
+  kiProvider: 'ChatGPT' | 'Mistral' | 'Claude' | 'Lokal' | 'Custom';
+  kiMode: 'Fakten' | 'Vergleich' | 'Checkliste' | 'E-Mail' | 'Was-wäre-wenn';
+  kiContext: 'Aktuelle Karte' | 'Vergleichsauswahl' | 'Ergebnisliste' | 'Freie Frage';
+  kiOnlyBrochure: boolean;
+  kiWithSources: boolean;
+  kiAnswers: any[];
 }
 
 function App() {
@@ -78,10 +86,18 @@ function App() {
     showHistory: false,
     showMetrics: false,
     showAdmin: false,
+    showCompare: false,
     toasts: [],
     history: [],
     theme: 'light',
-    viewMode: 'comfort'
+    viewMode: 'comfort',
+    // KI-Panel States
+    kiProvider: 'ChatGPT',
+    kiMode: 'Fakten',
+    kiContext: 'Freie Frage',
+    kiOnlyBrochure: true,
+    kiWithSources: true,
+    kiAnswers: []
   });
 
   // Apply theme to document
