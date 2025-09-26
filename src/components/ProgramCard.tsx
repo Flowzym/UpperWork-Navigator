@@ -4,7 +4,6 @@ import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, C
 import OverflowMenu from './OverflowMenu';
 import Tooltip from './Tooltip';
 import { useRef } from 'react';
-            className="btn btn-secondary flex-1"
 interface ProgramCardProps {
   program: Program;
   onShowDetail: (programId: string) => void;
