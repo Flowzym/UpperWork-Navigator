@@ -10,7 +10,7 @@ import { useMetrics } from '../metrics/useMetrics';
 import { defaultEndpoints } from '../config/endpoints';
 
 // Components
-import NavBar from './NavBar';
+import { NavBar } from './NavBar';
 import FilterSidebar from './FilterSidebar';
 import ProgramGrid from './ProgramGrid';
 import ProgramDetail from './ProgramDetail';
