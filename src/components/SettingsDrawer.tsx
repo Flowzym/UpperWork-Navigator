@@ -1,181 +1,78 @@
-import React, { useState } from 'react';
-import { Program } from '../types';
-import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
-import OverflowMenu from './OverflowMenu';
-import Tooltip from './Tooltip';
-                  <SegmentControl
-                    options={['light', 'dark'] as const}
-                    value={settings.themeMode}
-                    onChange={handleThemeChange}
-                    className="settings-segment"
-                  />
-                </div>
-import { useRef } from 'react';
+import React from 'react';
+import { X, Settings, Palette, Monitor } from 'lucide-react';
+import SegmentControl from './SegmentControl';
 
-interface ProgramCardProps {
-  program: Program;
-  onShowDetail: (programId: string) => void;
-  onToggleCompare: (programId: string) => void;
-  onToggleStar: (programId: string) => void;
-  onOpenChat: (programId: string) => void;
-  onShowOnePager: (program: Program) => void;
-  onShowEmail: (program: Program) => void;
-  onShowToast: (message: string) => void;
-  isCompared: boolean;
-  isStarred: boolean;
-  onShowChecklist: (program: Program) => void;
+interface SettingsDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  settings: {
+    themeMode: 'light' | 'dark';
+    viewMode: 'grid' | 'list';
+  };
+  onSettingsChange: (settings: { themeMode: 'light' | 'dark'; viewMode: 'grid' | 'list' }) => void;
 }
 
-export default function ProgramCard({ 
-  program, 
-  onShowDetail, 
-  onToggleCompare, 
-  onToggleStar,
-  onOpenChat,
-  onShowOnePager,
-  onShowEmail,
-  onShowToast,
-  isCompared,
-  isStarred,
-  onShowChecklist
-}: ProgramCardProps) {
-  const [showOverflow, setShowOverflow] = useState(false);
-  const overflowRef = useRef<HTMLButtonElement>(null);
-
-  const getStatusBadge = () => {
-    switch (program.status) {
-      case 'aktiv':
-        return <span className="status-badge status-active"><CheckCircle size={12} className="mr-1" />Aktiv</span>;
-      case 'endet_am':
-        return <span className="status-badge status-ending"><Clock size={12} className="mr-1" />Endet {program.frist.datum}</span>;
-      case 'ausgesetzt':
-        return <span className="status-badge status-paused"><Pause size={12} className="mr-1" />Ausgesetzt</span>;
-      case 'entfallen':
-        return <span className="status-badge status-cancelled"><X size={12} className="mr-1" />Entfallen</span>;
-      default:
-        return null;
-    }
+export default function SettingsDrawer({ 
+  isOpen, 
+  onClose, 
+  settings, 
+  onSettingsChange 
+}: SettingsDrawerProps) {
+  const handleThemeChange = (themeMode: 'light' | 'dark') => {
+    onSettingsChange({ ...settings, themeMode });
   };
 
-  const overflowItems = [
-    {
-      label: 'Vergleichen',
-      icon: <BarChart3 size={14} />,
-      checked: isCompared,
-      onClick: () => onToggleCompare(program.id)
-    },
-    {
-      label: '1-Pager',
-      icon: <FileText size={14} />,
-      onClick: () => onShowOnePager(program)
-    },
-    {
-      label: 'E-Mail-Text',
-      icon: <Mail size={14} />,
-      onClick: () => onShowEmail(program)
-    },
-    {
-      label: 'Merken',
-      icon: isStarred ? <Star size={14} fill="currentColor" /> : <Star size={14} />,
-      checked: isStarred,
-      onClick: () => onToggleStar(program.id)
-    }
-  ];
+  const handleViewModeChange = (viewMode: 'grid' | 'list') => {
+    onSettingsChange({ ...settings, viewMode });
+  };
+
+  if (!isOpen) return null;
 
   return (
-    <div className={`program-card ${isCompared ? 'compared' : ''}`}>
-      {/* Header */}
-      <div className="card-header">
-        <div className="flex-1">
-          <h3 className="card-title">{program.name}</h3>
-          <div className="card-meta">
-            {getStatusBadge()}
-            <span className="portal-badge">{program.portal}</span>
+    <>
+      <div className="settings-overlay" onClick={onClose} />
+      <div className="settings-drawer">
+        <div className="settings-header">
+          <div className="flex items-center">
+            <Settings size={20} className="mr-2" />
+            <h2 className="text-lg font-semibold">Einstellungen</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="btn btn-ghost btn-sm"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="settings-content">
+          <div className="settings-section">
+            <div className="settings-label">
+              <Palette size={16} className="mr-2" />
+              Theme
+            </div>
+            <SegmentControl
+              options={['light', 'dark'] as const}
+              value={settings.themeMode}
+              onChange={handleThemeChange}
+              className="settings-segment"
+            />
+          </div>
+
+          <div className="settings-section">
+            <div className="settings-label">
+              <Monitor size={16} className="mr-2" />
+              Ansicht
+            </div>
+            <SegmentControl
+              options={['grid', 'list'] as const}
+              value={settings.viewMode}
+              onChange={handleViewModeChange}
+              className="settings-segment"
+            />
           </div>
         </div>
-        
-        <div className="relative">
-          <Tooltip content="Weitere Aktionen">
-            <button
-              ref={overflowRef}
-              className="overflow-trigger"
-              onClick={() => setShowOverflow(!showOverflow)}
-            >
-              <MoreHorizontal size={16} />
-            </button>
-          </Tooltip>
-          
-          <OverflowMenu
-            items={overflowItems}
-            isOpen={showOverflow}
-            onClose={() => setShowOverflow(false)}
-            anchorRef={overflowRef}
-          />
-        </div>
       </div>
-
-      {/* Description */}
-      <div className="card-teaser">
-        <p>{program.teaser}</p>
-      </div>
-
-      {/* Tags */}
-      <div className="card-tags">
-        {program.themen.slice(0, 4).map((tag) => (
-          <span key={tag} className="tag">
-            {tag}
-          </span>
-        ))}
-        {program.themen.length > 4 && (
-          <span className="tag-more">+{program.themen.length - 4}</span>
-        )}
-      </div>
-
-      {/* Info Row */}
-      <div className="card-info">
-        <span className="info-item">
-          <Euro size={12} className="mr-1" />
-          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
-        </span>
-        <span className="info-item">
-          <MapPin size={12} className="mr-1" />
-          {program.region}
-        </span>
-        <span className="info-item">
-          <Clock size={12} className="mr-1" />
-          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
-        </span>
-      </div>
-
-      {/* Primary Actions */}
-      <div className="card-actions">
-        <Tooltip content="Detailansicht öffnen">
-          <button
-            className="btn btn-primary btn-sm flex-1"
-            onClick={() => onShowDetail(program.id)}
-          >
-            <FileText size={12} className="mr-1" />
-            Detail
-          </button>
-        </Tooltip>
-        <Tooltip content="5-Schritte-Checkliste anzeigen">
-          <button
-            className="btn btn-secondary btn-sm flex-1"
-            onClick={() => onShowChecklist(program)}
-          >
-            <CheckSquare size={12} className="mr-1" />
-            Checkliste
-          </button>
-        </Tooltip>
-        <Tooltip content="An KI-Chat senden">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => onOpenChat(program.id)}
-          >
-            <Bot size={12} />
-          </button>
-        </Tooltip>
-      </div>
-    </div>
+    </>
   );
 }
