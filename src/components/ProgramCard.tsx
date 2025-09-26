@@ -167,14 +167,6 @@ export default function ProgramCard({
             <Bot size={12} />
           </button>
         </Tooltip>
-        <Tooltip content="An KI-Chat senden">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => onOpenChat(program.id)}
-          >
-            <Bot size={12} />
-          </button>
-        </Tooltip>
       </div>
     </div>
   );
