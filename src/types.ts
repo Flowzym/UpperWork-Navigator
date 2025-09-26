@@ -1,151 +1,174 @@
-export type Status = 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen';
+import React, { useState } from 'react';
+import { Program } from '../types';
+import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
+import OverflowMenu from './OverflowMenu';
+import Tooltip from './Tooltip';
+import { useRef } from 'react';
 
-export interface Frist {
-  typ: 'laufend' | 'stichtag' | 'entfallen';
-  datum?: string;
+interface ProgramCardProps {
+  program: Program;
+  onShowDetail: (programId: string) => void;
+  onToggleCompare: (programId: string) => void;
+  onToggleStar: (programId: string) => void;
+  onOpenChat: (programId: string) => void;
+  onShowOnePager: (program: Program) => void;
+  onShowEmail: (program: Program) => void;
+  onShowToast: (message: string) => void;
+  isCompared: boolean;
+  isStarred: boolean;
+  onShowChecklist: (program: Program) => void;
 }
 
-export interface FoerderHoehe {
-  label: string;
-  quote?: number;
-  min?: number;
-  max?: number;
-  deckel?: number;
-  note?: string;
-}
+export default function ProgramCard({ 
+  program, 
+  onShowDetail, 
+  onToggleCompare, 
+  onToggleStar,
+  onOpenChat,
+  onShowOnePager,
+  onShowEmail,
+  onShowToast,
+  isCompared,
+  isStarred,
+  onShowChecklist
+}: ProgramCardProps) {
+  const [showOverflow, setShowOverflow] = useState(false);
+  const overflowRef = useRef<HTMLButtonElement>(null);
 
-export interface Program {
-  id: string;
-  name: string;
-  status: Status;
-  teaser: string;
-  zielgruppe: string[];
-  foerderart: ('kurskosten'|'personalkosten'|'beihilfe'|'beratung')[];
-  foerderhoehe: FoerderHoehe[];
-  voraussetzungen: string[];
-  antragsweg: 'eams'|'land_ooe_portal'|'wko_verbund'|'traeger_direkt';
-  frist: Frist;
-  region: string;
-  themen: string[];
-  passt_wenn: string[];
-  passt_nicht_wenn: string[];
-  quelle: { seite: number; stand: string };
-  // Legacy fields for compatibility
-  tags: string[];
-  portal: string;
-  description: string;
-  budget?: string;
-  targetGroup: string[];
-  fundingType: string;
-  requirements: string[];
-  themeField: string;
-  deadline?: string;
-}
-
-export interface FilterState {
-  status: string[];
-  targetGroup: string[];
-  fundingType: string[];
-  requirements: string[];
-  themeField: string[];
-  deadline: string[];
-  region: string[];
-  budget: string[];
-}
-
-export type Provider = 'ChatGPT' | 'Mistral' | 'Claude' | 'Lokal' | 'Custom';
-export type Mode = 'Fakten' | 'Vergleich' | 'Checkliste' | 'E-Mail' | 'Was-wäre-wenn';
-export type ContextType = 'Aktuelle Karte' | 'Vergleichsauswahl' | 'Ergebnisliste' | 'Freie Frage';
-
-export type NavigationTab = 'explorer' | 'wizard' | 'profil-matching' | 'help';
-export type CardDensity = 'comfort' | 'compact';
-export type ContrastMode = 'standard' | 'high';
-export type HelpTab = 'quickstart' | 'tips' | 'shortcuts' | 'changelog' | 'contact';
-
-export interface EndpointConfig {
-  baseUrl: string;
-  model: string;
-  apiKey?: string;
-}
-
-export interface ConnectionStatus {
-  isConnected: boolean;
-  error?: string;
-  lastChecked?: string;
-}
-
-export interface ProviderPreset {
-  style: string;
-  length: string;
-  creativity: string;
-}
-
-export interface Answer {
-  id: string;
-  text: string;
-  meta: {
-    provider: Provider;
-    mode: Mode;
-    context: ContextType;
-    timestamp: string;
+  const getStatusBadge = () => {
+    switch (program.status) {
+      case 'aktiv':
+        return <span className="status-badge status-active"><CheckCircle size={12} className="mr-1" />Aktiv</span>;
+      case 'endet_am':
+        return <span className="status-badge status-ending"><Clock size={12} className="mr-1" />Endet {program.frist.datum}</span>;
+      case 'ausgesetzt':
+        return <span className="status-badge status-paused"><Pause size={12} className="mr-1" />Ausgesetzt</span>;
+      case 'entfallen':
+        return <span className="status-badge status-cancelled"><X size={12} className="mr-1" />Entfallen</span>;
+      default:
+        return null;
+    }
   };
-  sources?: { seite: number; stand: string }[];
-  warning?: string;
-}
 
-export interface NavigationState {
-  activeTab: NavigationTab;
-  showSettingsDrawer: boolean;
-  showHelpModal: boolean;
-  activeHelpTab: HelpTab;
-  showHelpOnStart: boolean;
-}
+  const overflowItems = [
+    {
+      label: 'Vergleichen',
+      icon: <BarChart3 size={14} />,
+      checked: isCompared,
+      onClick: () => onToggleCompare(program.id)
+    },
+    {
+      label: '1-Pager',
+      icon: <FileText size={14} />,
+      onClick: () => onShowOnePager(program)
+    },
+    {
+      label: 'E-Mail-Text',
+      icon: <Mail size={14} />,
+      onClick: () => onShowEmail(program)
+    },
+    {
+      label: 'Merken',
+      icon: isStarred ? <Star size={14} fill="currentColor" /> : <Star size={14} />,
+      checked: isStarred,
+      onClick: () => onToggleStar(program.id)
+    }
+  ];
 
-export interface SettingsState {
-  provider: Provider;
-  onlyBrochure: boolean;
-  attachSources: boolean;
-  noExternalProviders: boolean;
-  adminMode: boolean;
-  cardDensity: CardDensity;
-  contrastMode: ContrastMode;
-  localEndpoint: EndpointConfig;
-  customEndpoint: EndpointConfig;
-  localConnection: ConnectionStatus;
-  customConnection: ConnectionStatus;
-}
+  return (
+    <div className={`program-card ${isCompared ? 'compared' : ''}`}>
+      {/* Header */}
+      <div className="card-header">
+        <div className="flex-1">
+          <h3 className="card-title">{program.name}</h3>
+          <div className="card-meta">
+            {getStatusBadge()}
+            <span className="portal-badge">{program.portal}</span>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <Tooltip content="Weitere Aktionen">
+            <button
+              ref={overflowRef}
+              className="overflow-trigger"
+              onClick={() => setShowOverflow(!showOverflow)}
+            >
+              <MoreHorizontal size={16} />
+            </button>
+          </Tooltip>
+          
+          <OverflowMenu
+            items={overflowItems}
+            isOpen={showOverflow}
+            onClose={() => setShowOverflow(false)}
+            anchorRef={overflowRef}
+          />
+        </div>
+      </div>
 
-export type FacetGroup =
-  | 'status' | 'zielgruppe' | 'foerderart' | 'voraussetzungen'
-  | 'themen' | 'frist' | 'region' | 'budget';
+      {/* Description */}
+      <div className="card-teaser">
+        <p>{program.teaser}</p>
+      </div>
 
-export type FilterState = {
-  status: Array<'aktiv'|'ausgesetzt'|'endet_am'>;
-  zielgruppe: string[];
-  foerderart: Array<'kurskosten'|'personalkosten'|'beihilfe'|'beratung'>;
-  voraussetzungen: Array<'eams'|'min75'|'anbieter'|'vorlauf7'>;
-  themen: string[];
-  frist: Array<'laufend'|'stichtag'>;
-  region: string[];
-  budget: Array<'≤1k'|'1–5k'|'>5k'>;
-};
+      {/* Tags */}
+      <div className="card-tags">
+        {program.themen.slice(0, 4).map((tag) => (
+          <span key={tag} className="tag">
+            {tag}
+          </span>
+        ))}
+        {program.themen.length > 4 && (
+          <span className="tag-more">+{program.themen.length - 4}</span>
+        )}
+      </div>
 
-export interface AppState {
-  selectedProvider: Provider;
-  selectedMode: Mode;
-  onlyBrochure: boolean;
-  attachSources: boolean;
-  leftSidebarOpen: boolean;
-  rightPanelOpen: boolean;
-  selectedPrograms: string[];
-  currentContext: ContextType;
-  showDetailPlaceholder: boolean;
-  detailProgramId?: string;
-}
-export interface HistoryEntry {
-  id: string;
-  type: 'view' | 'checkliste' | 'vergleich' | 'chat' | 'onepager' | 'email';
-  programId: string;
-  programName: string;
-  timestamp: number;
+      {/* Info Row */}
+      <div className="card-info">
+        <span className="info-item">
+          <Euro size={12} className="mr-1" />
+          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
+        </span>
+        <span className="info-item">
+          <MapPin size={12} className="mr-1" />
+          {program.region}
+        </span>
+        <span className="info-item">
+          <Clock size={12} className="mr-1" />
+          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
+        </span>
+      </div>
+
+      {/* Primary Actions */}
+      <div className="card-actions">
+        <Tooltip content="Detailansicht öffnen">
+          <button
+            className="btn btn-primary btn-sm flex-1"
+            onClick={() => onShowDetail(program.id)}
+          >
+            <FileText size={12} className="mr-1" />
+            Detail
+          </button>
+        </Tooltip>
+        <Tooltip content="5-Schritte-Checkliste anzeigen">
+          <button
+            className="btn btn-secondary btn-sm flex-1"
+            onClick={() => onShowChecklist(program)}
+          >
+            <CheckSquare size={12} className="mr-1" />
+            Checkliste
+          </button>
+        </Tooltip>
+        <Tooltip content="An KI-Chat senden">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => onOpenChat(program.id)}
+          >
+            <Bot size={12} />
+          </button>
+        </Tooltip>
+      </div>
+    </div>
+  );
 }

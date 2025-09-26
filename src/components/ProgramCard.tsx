@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Program } from '../types';
-import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star } from 'lucide-react';
+import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
 import OverflowMenu from './OverflowMenu';
 import Tooltip from './Tooltip';
 import { useRef } from 'react';
-
+            className="btn btn-secondary flex-1"
 interface ProgramCardProps {
   program: Program;
   onShowDetail: (programId: string) => void;
@@ -56,11 +56,6 @@ export default function ProgramCard({
       icon: <BarChart3 size={14} />,
       checked: isCompared,
       onClick: () => onToggleCompare(program.id)
-    },
-    {
-      label: 'An Chat',
-      icon: <MessageSquare size={14} />,
-      onClick: () => onOpenChat(program.id)
     },
     {
       label: '1-Pager',
@@ -149,20 +144,36 @@ export default function ProgramCard({
       <div className="card-actions">
         <Tooltip content="Detailansicht öffnen">
           <button
-            className="btn btn-primary flex-1"
+            className="btn btn-primary btn-sm flex-1"
             onClick={() => onShowDetail(program.id)}
           >
-            <FileText size={14} className="mr-1" />
+            <FileText size={12} className="mr-1" />
             Detail
           </button>
         </Tooltip>
         <Tooltip content="5-Schritte-Checkliste anzeigen">
           <button
-            className="btn btn-secondary flex-1"
+            className="btn btn-secondary btn-sm flex-1"
             onClick={() => onShowChecklist(program)}
           >
-            <CheckSquare size={14} className="mr-1" />
+            <CheckSquare size={12} className="mr-1" />
             Checkliste
+          </button>
+        </Tooltip>
+        <Tooltip content="An KI-Chat senden">
+          <button
+            className="btn btn-ghost"
+            onClick={() => onOpenChat(program.id)}
+          >
+            <Bot size={12} />
+          </button>
+        </Tooltip>
+        <Tooltip content="An KI-Chat senden">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => onOpenChat(program.id)}
+          >
+            <Bot size={12} />
           </button>
         </Tooltip>
       </div>

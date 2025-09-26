@@ -1,260 +1,182 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Program } from '../types';
-import { AlertTriangle, Search, Target, Zap } from 'lucide-react';
-import ProgramCard from './ProgramCard';
-import ActiveFiltersBar from './ActiveFiltersBar';
-import EmptyState from './EmptyState';
-import { checkForEntfallenProgram } from '../search/synonyms';
-import { FilterState, FacetGroup } from '../types';
-
-interface ProgramGridProps {
-  programs: Program[];
-  filteredProgramIds?: string[] | null;
-  searchQuery?: string;
-  filters: FilterState;
-  activeFilterCount: number;
-  isWizardResult?: boolean;
-  isProfileMatchResult?: boolean;
-  onResetWizard?: () => void;
-  onResetProfileMatching?: () => void;
-  selectedPrograms: string[];
+import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, CheckSquare, BarChart3, MessageSquare, Mail, Star, Bot } from 'lucide-react';
+import OverflowMenu from './OverflowMenu';
+import Tooltip from './Tooltip';
+import { useRef } from 'react';
+            className="btn btn-secondary flex-1"
+interface ProgramCardProps {
+  program: Program;
   onShowDetail: (programId: string) => void;
   onToggleCompare: (programId: string) => void;
+  onToggleStar: (programId: string) => void;
+  onOpenChat: (programId: string) => void;
+  onShowOnePager: (program: Program) => void;
+  onShowEmail: (program: Program) => void;
   onShowToast: (message: string) => void;
+  isCompared: boolean;
+  isStarred: boolean;
   onShowChecklist: (program: Program) => void;
-  onClearSearch?: () => void;
-  onRemoveFilter: (group: FacetGroup, value: string) => void;
-  onClearAllFilters: () => void;
 }
 
-export default function ProgramGrid({ 
-  programs, 
-  filteredProgramIds,
-  searchQuery,
-  filters,
-  activeFilterCount,
-  isWizardResult = false,
-  isProfileMatchResult = false,
-  onResetWizard,
-  onResetProfileMatching,
-  selectedPrograms, 
+export default function ProgramCard({ 
+  program, 
   onShowDetail, 
   onToggleCompare, 
+  onToggleStar,
+  onOpenChat,
+  onShowOnePager,
+  onShowEmail,
   onShowToast,
-  onShowChecklist,
-  onClearSearch,
-  onRemoveFilter,
-  onClearAllFilters
-}: ProgramGridProps) {
-  // Filter Programme basierend auf Suche
-  const displayPrograms = filteredProgramIds 
-    ? programs.filter(p => filteredProgramIds.includes(p.id))
-    : programs;
+  isCompared,
+  isStarred,
+  onShowChecklist
+}: ProgramCardProps) {
+  const [showOverflow, setShowOverflow] = useState(false);
+  const overflowRef = useRef<HTMLButtonElement>(null);
 
-  // Prüfe auf entfallenes Programm
-  const entfallenProgram = searchQuery ? checkForEntfallenProgram(searchQuery) : null;
-  const showEntfallenHint = entfallenProgram && displayPrograms.length === 0;
+  const getStatusBadge = () => {
+    switch (program.status) {
+      case 'aktiv':
+        return <span className="status-badge status-active"><CheckCircle size={12} className="mr-1" />Aktiv</span>;
+      case 'endet_am':
+        return <span className="status-badge status-ending"><Clock size={12} className="mr-1" />Endet {program.frist.datum}</span>;
+      case 'ausgesetzt':
+        return <span className="status-badge status-paused"><Pause size={12} className="mr-1" />Ausgesetzt</span>;
+      case 'entfallen':
+        return <span className="status-badge status-cancelled"><X size={12} className="mr-1" />Entfallen</span>;
+      default:
+        return null;
+    }
+  };
+
+  const overflowItems = [
+    {
+      label: 'Vergleichen',
+      icon: <BarChart3 size={14} />,
+      checked: isCompared,
+      onClick: () => onToggleCompare(program.id)
+    },
+    {
+      label: '1-Pager',
+      icon: <FileText size={14} />,
+      onClick: () => onShowOnePager(program)
+    },
+    {
+      label: 'E-Mail-Text',
+      icon: <Mail size={14} />,
+      onClick: () => onShowEmail(program)
+    },
+    {
+      label: 'Merken',
+      icon: isStarred ? <Star size={14} fill="currentColor" /> : <Star size={14} />,
+      checked: isStarred,
+      onClick: () => onToggleStar(program.id)
+    }
+  ];
 
   return (
-    <div>
-      {/* Active Filters Bar */}
-      <ActiveFiltersBar
-        filters={filters}
-        searchQuery={searchQuery || ''}
-        onRemoveFilter={onRemoveFilter}
-        onClearAll={() => {
-          onClearAllFilters();
-          if (onClearSearch) onClearSearch();
-        }}
-        onClearSearch={onClearSearch || (() => {})}
-      />
-
-      {/* Wizard Results Banner */}
-      {isWizardResult && (
-        <div className="wizard-results-banner">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Zap size={20} />
-              <div>
-                <div className="font-semibold text-gray-900">
-                  Wizard-Ergebnisse ({displayPrograms.length} Programme)
-                </div>
-                <div className="text-sm text-gray-600">
-                  Basierend auf Ihren Antworten im Förder-Wizard
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  // TODO: Reopen wizard with current answers
-                  onShowToast('Filter können in der Sidebar angepasst werden');
-                }}
-              >
-                Filter anpassen
-              </button>
-              {onResetWizard && (
-                <button
-                  className="btn btn-ghost btn-sm"
-                  onClick={onResetWizard}
-                >
-                  Wizard zurücksetzen
-                </button>
-              )}
-            </div>
+    <div className={`program-card ${isCompared ? 'compared' : ''}`}>
+      {/* Header */}
+      <div className="card-header">
+        <div className="flex-1">
+          <h3 className="card-title">{program.name}</h3>
+          <div className="card-meta">
+            {getStatusBadge()}
+            <span className="portal-badge">{program.portal}</span>
           </div>
         </div>
-      )}
-
-      {/* Profile Matching Results Banner */}
-      {isProfileMatchResult && (
-        <div className="profile-match-results-banner">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Target size={20} />
-              <div>
-                <div className="font-semibold text-gray-900">
-                  Profil-Matching Ergebnisse ({displayPrograms.length} Programme)
-                </div>
-                <div className="text-sm text-gray-600">
-                  Sortiert nach Übereinstimmung mit Ihrem Profil
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => {
-                  // TODO: Reopen profile matching with current answers
-                  onShowToast('Filter können in der Sidebar angepasst werden');
-                }}
-              >
-                Profil anpassen
-              </button>
-              {onResetProfileMatching && (
-                <button
-                  className="btn btn-ghost btn-sm"
-                  onClick={onResetProfileMatching}
-                >
-                  Profil-Matching zurücksetzen
-                </button>
-              )}
-            </div>
-          </div>
+        
+        <div className="relative">
+          <Tooltip content="Weitere Aktionen">
+            <button
+              ref={overflowRef}
+              className="overflow-trigger"
+              onClick={() => setShowOverflow(!showOverflow)}
+            >
+              <MoreHorizontal size={16} />
+            </button>
+          </Tooltip>
+          
+          <OverflowMenu
+            items={overflowItems}
+            isOpen={showOverflow}
+            onClose={() => setShowOverflow(false)}
+            anchorRef={overflowRef}
+          />
         </div>
-      )}
+      </div>
 
-      {/* Trefferanzeige */}
-      {(searchQuery || activeFilterCount > 0) && !isWizardResult && !isProfileMatchResult && (
-        <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-700 font-medium">
-              {displayPrograms.length} Treffer
-            </span>
-            {searchQuery && (
-              <>
-                <span className="text-gray-500">·</span>
-                <span className="text-gray-600">
-                  Suche: „{searchQuery}"
-                </span>
-              </>
-            )}
-            {activeFilterCount > 0 && (
-              <>
-                <span className="text-gray-500">·</span>
-                <span className="text-gray-600">
-                  {activeFilterCount} Filter aktiv
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Description */}
+      <div className="card-teaser">
+        <p>{program.teaser}</p>
+      </div>
 
-      {/* Entfallen-Hinweis */}
-      {showEntfallenHint && (
-        <div className="card p-6 mb-6 border-orange-200 bg-orange-50">
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={24} className="text-orange-600" />
-            <div>
-              <h3 className="font-semibold text-orange-900 mb-2">
-                Programm „{entfallenProgram}" ist entfallen
-              </h3>
-              <p className="text-orange-800 text-sm">
-                Dieses Förderprogramm wird nicht mehr angeboten. Keine aktuellen Anträge möglich.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Tags */}
+      <div className="card-tags">
+        {program.themen.slice(0, 4).map((tag) => (
+          <span key={tag} className="tag">
+            {tag}
+          </span>
+        ))}
+        {program.themen.length > 4 && (
+          <span className="tag-more">+{program.themen.length - 4}</span>
+        )}
+      </div>
 
-      {/* Keine Ergebnisse */}
-      {!showEntfallenHint && displayPrograms.length === 0 && (searchQuery || activeFilterCount > 0 || isWizardResult || isProfileMatchResult) && (
-        <EmptyState
-          icon={<Search size={48} />}
-          title={isWizardResult ? 'Keine passenden Programme gefunden' : 
-                 isProfileMatchResult ? 'Keine passenden Programme für Ihr Profil gefunden' : 
-                 'Keine Ergebnisse gefunden'}
-          description={isWizardResult ? 'Die Wizard-Kombination liefert kein Programm.' :
-                      isProfileMatchResult ? 'Keine ausreichende Übereinstimmung mit Ihrem Profil.' :
-                      'Ihre Suche und Filter ergaben keine Treffer.'}
-          tips={isProfileMatchResult ? [
-            'Weniger spezifische Eigenschaften im Profil wählen',
-            'Profil-Matching mit anderen Angaben wiederholen',
-            'Filter in der Sidebar anpassen',
-            'Status-Filter prüfen („Ausgesetzt/Entfallen")'
-          ] : isWizardResult ? [
-            'Weniger spezifische Antworten im Wizard wählen',
-            'Filter in der Sidebar anpassen',
-            'Wizard mit anderen Antworten wiederholen',
-            'Status-Filter prüfen („Ausgesetzt/Entfallen")'
-          ] : [
-            'Kürzer suchen (1–2 Begriffe)',
-            'Einen Filter entfernen',
-            'Synonym testen (z.B. „QBN" statt „Qualifizierungsförderung")',
-            'Status-Filter prüfen („Ausgesetzt/Entfallen")',
-            'Rechtschreibung überprüfen'
-          ]}
-          action={(onClearSearch || activeFilterCount > 0 || isWizardResult || isProfileMatchResult) ? {
-            label: isWizardResult ? 'Zurück zum Wizard' :
-                   isProfileMatchResult ? 'Profil anpassen' :
-                   'Alle Programme anzeigen',
-            onClick: () => {
-              if (isWizardResult && onResetWizard) {
-                onResetWizard();
-              } else if (isProfileMatchResult && onResetProfileMatching) {
-                onResetProfileMatching();
-              } else {
-                if (onClearSearch) onClearSearch();
-                onClearAllFilters();
-              }
-            }
-          } : undefined}
-        />
-      )}
+      {/* Info Row */}
+      <div className="card-info">
+        <span className="info-item">
+          <Euro size={12} className="mr-1" />
+          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
+        </span>
+        <span className="info-item">
+          <MapPin size={12} className="mr-1" />
+          {program.region}
+        </span>
+        <span className="info-item">
+          <Clock size={12} className="mr-1" />
+          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
+        </span>
+      </div>
 
-      {/* Programm-Grid */}
-      {displayPrograms.length > 0 && (
-        <div className="program-grid">
-          {displayPrograms.map((program) => (
-            <ProgramCard
-              key={program.id}
-              program={program}
-              onShowDetail={onShowDetail}
-              onToggleCompare={() => onToggleCompare(program.id)}
-              onToggleStar={() => onShowToast(`"${program.name}" gemerkt/entfernt`)}
-              onOpenChat={() => onShowToast(`"${program.name}" an Chat gesendet`)}
-              onShowOnePager={() => onShowToast(`1-Pager für "${program.name}" wird geöffnet`)}
-              onShowEmail={() => onShowToast(`E-Mail-Text für "${program.name}" wird geöffnet`)}
-              onShowToast={onShowToast}
-              isCompared={selectedPrograms.includes(program.id)}
-              isStarred={false}
-              onShowChecklist={onShowChecklist}
-            />
-          ))}
-        </div>
-      )}
+      {/* Primary Actions */}
+      <div className="card-actions">
+        <Tooltip content="Detailansicht öffnen">
+          <button
+            className="btn btn-primary btn-sm flex-1"
+            onClick={() => onShowDetail(program.id)}
+          >
+            <FileText size={12} className="mr-1" />
+            Detail
+          </button>
+        </Tooltip>
+        <Tooltip content="5-Schritte-Checkliste anzeigen">
+          <button
+            className="btn btn-secondary btn-sm flex-1"
+            onClick={() => onShowChecklist(program)}
+          >
+            <CheckSquare size={12} className="mr-1" />
+            Checkliste
+          </button>
+        </Tooltip>
+        <Tooltip content="An KI-Chat senden">
+          <button
+            className="btn btn-ghost"
+            onClick={() => onOpenChat(program.id)}
+          >
+            <Bot size={12} />
+          </button>
+        </Tooltip>
+        <Tooltip content="An KI-Chat senden">
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => onOpenChat(program.id)}
+          >
+            <Bot size={12} />
+          </button>
+        </Tooltip>
+      </div>
     </div>
   );
 }
