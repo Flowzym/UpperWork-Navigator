@@ -45,7 +45,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     
     return chunks as DocChunk[];
   } catch (error) {
-    console.warn('[RAG] Verwende simulierte Broschüren-Inhalte (chunks.json nicht gefunden). Für echte Antworten: npm run ingest.');
+    console.warn('[RAG] Simulationsdaten aktiv: /rag/chunks.json nicht gefunden. Für echte RAG-Antworten bitte "npm run ingest" ausführen (erzeugt /public/rag/chunks.json & stats.json).');
     showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
     return [];
   }

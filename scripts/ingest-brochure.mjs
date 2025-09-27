@@ -285,16 +285,16 @@ function generateSimulatedContent(programMeta) {
       
       switch (pageOffset) {
         case 0:
-          content += `ÜBERBLICK\n${data.name} unterstützt die berufliche Weiterbildung.\n\nZIELGRUPPE\nBeschäftigte und Arbeitsuchende in Oberösterreich.`;
+          content += `ÜBERBLICK\n${data.name} unterstützt die berufliche Weiterbildung durch gezielte Fördermaßnahmen.\n\nZIELGRUPPE\nBeschäftigte und Arbeitsuchende in Oberösterreich mit Hauptwohnsitz.`;
           break;
         case 1:
-          content += `FÖRDERHÖHE\nBis zu 75% der Kurskosten, maximal 5.000€ pro Jahr.\n\nVORAUSSETZUNGEN\nHauptwohnsitz in Oberösterreich, Mindestalter 18 Jahre.`;
+          content += `FÖRDERHÖHE\nBis zu 75% der Kurskosten werden übernommen, maximal 5.000€ pro Jahr und Person.\n\nVORAUSSETZUNGEN\nHauptwohnsitz in Oberösterreich, Mindestalter 18 Jahre, anerkannter Bildungsträger erforderlich.`;
           break;
         case 2:
-          content += `ANTRAGSWEG\nAntragstellung über das entsprechende Portal.\n\nFRIST\nLaufende Antragstellung möglich.`;
+          content += `ANTRAGSWEG\nAntragstellung erfolgt über das entsprechende Online-Portal mit digitaler Signatur.\n\nFRIST\nLaufende Antragstellung ist möglich, Bearbeitungszeit beträgt 4-6 Wochen.`;
           break;
         default:
-          content += `PASST WENN\nSie die Voraussetzungen erfüllen.\n\nPASST NICHT WENN\nVoraussetzungen nicht erfüllt sind.`;
+          content += `PASST WENN\nSie alle formalen Voraussetzungen erfüllen und einen anerkannten Kurs besuchen möchten.\n\nPASST NICHT WENN\nVoraussetzungen nicht erfüllt sind oder der Bildungsträger nicht anerkannt ist.`;
       }
       
       pageTexts.set(page, content);

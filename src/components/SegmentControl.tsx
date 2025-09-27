@@ -14,14 +14,19 @@ export default function SegmentControl<T extends string>({
   className = '' 
 }: SegmentControlProps<T>) {
   return (
-    <div className={`segment-control ${className}`}>
+    <div 
+      className={`segment-control ${className}`}
+      role="radiogroup"
+      aria-label="Auswahl"
+    >
       {options.map((option) => (
         <button
           key={option}
-          role="radio"
-          aria-checked={value === option}
           className={`segment-option ${value === option ? 'active' : ''}`}
           onClick={() => onChange(option)}
+          role="radio"
+          aria-checked={value === option}
+          aria-label={option}
         >
           {option}
         </button>
