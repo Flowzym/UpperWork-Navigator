@@ -204,6 +204,31 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
     setState(prev => ({ ...prev, kiAnswers: [answer, ...prev.kiAnswers] }));
   };
 
+  const handleGenerateAnswer = async (prompt: string) => {
+    if (!prompt.trim()) {
+      showToast('Bitte geben Sie eine Frage ein');
+      return;
+    }
+
+    try {
+      const answer = await chatApi.ask(
+        state.kiProvider,
+        prompt,
+        state.kiMode,
+        state.kiContext,
+        state.kiOnlyBrochure,
+        state.kiWithSources,
+        localEndpoint,
+        customEndpoint
+      );
+      
+      handleAddAnswer(answer);
+      showToast('Antwort generiert');
+    } catch (error) {
+      showToast('Fehler beim Generieren der Antwort', 'error');
+    }
+  };
+
   const handleRemoveAnswer = (answerId: string) => {
     setState(prev => ({ 
       ...prev, 
@@ -417,11 +442,14 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           onAddAnswer={handleAddAnswer}
           onRemoveAnswer={handleRemoveAnswer}
           onClearAnswers={handleClearAnswers}
+          onGenerateAnswer={handleGenerateAnswer}
           onExpand={() => setState(prev => ({ ...prev, kiExpanded: true }))}
           onClose={() => setState(prev => ({ ...prev, kiExpanded: false }))}
           onShowToast={showToast}
           chatLoading={chatApi.loading}
           chatApiError={chatApi.error}
+          localConnection={connectionStatus.Lokal}
+          customConnection={connectionStatus.Custom}
         />
       </div>
 

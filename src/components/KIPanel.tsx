@@ -24,6 +24,7 @@ interface KIPanelProps {
   onAddAnswer: (answer: Answer) => void;
   onRemoveAnswer: (answerId: string) => void;
   onClearAnswers: () => void;
+  onGenerateAnswer: (prompt: string) => void;
   onAddProgramCard?: (programId: string) => void;
   onExpand: () => void;
   onClose: () => void;
@@ -80,6 +81,7 @@ export default function KIPanel({
   onAddAnswer,
   onRemoveAnswer,
   onClearAnswers,
+  onGenerateAnswer,
   onAddProgramCard,
   onExpand,
   onClose,
@@ -94,57 +96,11 @@ export default function KIPanel({
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [pendingProgramCard, setPendingProgramCard] = useState<string | null>(null);
 
-  console.log('KIPanel render:', { isOpen, provider, mode });
+  console.log('KIPanel render:', { isOpen, provider, mode, chatLoading });
 
-  const generateRandomPage = () => Math.floor(Math.random() * 36) + 5; // 5-40
-
-  const generateAnswer = (baseText: string, isQuickAction = false) => {
-    let text = baseText;
-    
-    // Add provider preset info for non-quick actions
-    if (!isQuickAction) {
-      text += ` (${providerPreset.style}, ${providerPreset.length}, Kreativität ${providerPreset.creativity})`;
-    }
-    
-    // Add brochure hint if enabled
-    if (onlyBrochure) {
-      text += '\n\n(Hinweis: Nur Inhalte aus der Broschüre berücksichtigt.)';
-    }
-    
-    // Generate sources if enabled
-    const sources = withSources ? [{ 
-      seite: generateRandomPage(), 
-      stand: '09/2025' 
-    }] : undefined;
-    
-    // Generate warning based on context (dummy logic)
-    let warning: string | undefined;
-    if (context === 'Aktuelle Karte' && Math.random() > 0.7) {
-      // 30% chance of warning for demo purposes
-      const warnings = [
-        'Programm derzeit ausgesetzt – keine Anträge möglich',
-        'Programm endet am 31.12.2025 – begrenzte Laufzeit'
-      ];
-      warning = warnings[Math.floor(Math.random() * warnings.length)];
-    }
-    
-    const answer: Answer = {
-      id: `answer-${Date.now()}`,
-      text,
-      sources,
-      warning,
-      meta: {
-        provider,
-        mode,
-        context,
-        timestamp: new Date().toISOString()
-      }
-    };
-    onAddAnswer(answer);
-  };
 
   const handleQuickAction = (action: typeof quickActions[0]) => {
-    generateAnswer(action.template, true);
+    onGenerateAnswer(action.template);
     onShowToast(`${action.label} wird generiert...`);
   };
 
@@ -154,11 +110,9 @@ export default function KIPanel({
       return;
     }
     
-    const dummyText = `Dummy-Antwort im Modus ${mode} mit Provider ${provider}, Kontext ${context}. Frage: "${chatInput}"`;
-    generateAnswer(dummyText, false);
+    onGenerateAnswer(chatInput);
     setChatInput('');
     setPendingProgramCard(null); // Clear pending card after sending
-    onShowToast('Antwort wird generiert...');
   };
 
   const handleCopy = (text: string) => {
