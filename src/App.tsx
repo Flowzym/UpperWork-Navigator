@@ -157,7 +157,7 @@ function App() {
       />
       <ToastHost 
         toasts={state.toasts}
-        onRemove={removeToast}
+        onRemoveToast={removeToast}
       />
     </>
   );
