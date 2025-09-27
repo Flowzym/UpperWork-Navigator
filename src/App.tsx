@@ -3,6 +3,7 @@ import { Program, Answer } from './types';
 import { samplePrograms } from './data/samplePrograms';
 import AppShell from './components/AppShell';
 import ToastHost from './components/ToastHost';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminApp from "./features/admin/AdminApp";
 
 let toastIdCounter = 0;
@@ -147,7 +148,7 @@ function App() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <AppShell 
         state={state}
         setState={setState}
@@ -158,7 +159,7 @@ function App() {
         toasts={state.toasts}
         onRemoveToast={removeToast}
       />
-    </>
+    </ErrorBoundary>
   );
 }
 
