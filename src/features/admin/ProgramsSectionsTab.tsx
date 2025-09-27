@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Copy } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Copy } from 'lucide-react';
 import { RagOverrides, SectionOverride, ProgramMetaOverride, saveOverrides, addHistoryEntry } from '../../lib/rag/overrides';
 import { programMeta } from '../../data/programMeta';
 import { documentStore } from '../../rag/store';
