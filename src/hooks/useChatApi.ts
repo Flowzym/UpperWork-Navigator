@@ -36,6 +36,12 @@ export function useChatApi() {
     
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     
+    // Debug: API-Key Wert zur Laufzeit prüfen
+    console.log('Debug: VITE_OPENAI_API_KEY in useChatApi:', apiKey);
+    console.log('Debug: API-Key type:', typeof apiKey);
+    console.log('Debug: API-Key length:', apiKey?.length || 0);
+    console.log('Debug: Starts with sk-:', apiKey?.startsWith?.('sk-'));
+    
     // Fallback to dummy if no API key
     if (!apiKey || apiKey === 'sk-your-openai-api-key-here') {
       return {
