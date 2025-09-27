@@ -108,11 +108,9 @@ export default function ProfileMatchingPanel({
   onShowToast,
   compareIds
 }: ProfileMatchingPanelProps) {
-  const [activeSection, setActiveSection] = useState('kundenprofil');
   const [profileAnswers, setProfileAnswers] = useState<Record<string, string[]>>({});
   const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
   const handleToggleChip = (sectionKey: string, chip: string) => {
     setProfileAnswers(prev => {
@@ -254,12 +252,6 @@ export default function ProfileMatchingPanel({
     onClose();
   };
 
-  const toggleSection = (sectionKey: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionKey]: !prev[sectionKey]
-    }));
-  };
 
   const getTotalSelectedChips = () => {
     return Object.values(profileAnswers).reduce((total, chips) => total + chips.length, 0);
@@ -277,14 +269,11 @@ export default function ProfileMatchingPanel({
               <Target size={24} className="mr-2" />
               Profil-Matching
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Beschreiben Sie Ihr Profil für personalisierte Förderempfehlungen
-              {getTotalSelectedChips() > 0 && (
-                <span className="ml-2 text-blue-600 font-medium">
-                  ({getTotalSelectedChips()} Eigenschaften ausgewählt)
-                </span>
-              )}
-            </p>
+            {getTotalSelectedChips() > 0 && (
+              <p className="text-sm text-blue-600 font-medium mt-1">
+                {getTotalSelectedChips()} Eigenschaften ausgewählt
+              </p>
+            )}
           </div>
           <button
             className="btn btn-ghost p-2"
@@ -298,76 +287,40 @@ export default function ProfileMatchingPanel({
         <div className="flex-1 overflow-y-auto">
           {!showResults ? (
             <div className="p-6">
-              {/* Section Tabs */}
-              <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
+              {/* All Sections at once */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {profileSections.map((section) => {
-                  const selectedCount = profileAnswers[section.key]?.length || 0;
+                  const selectedChips = profileAnswers[section.key] || [];
+                  
                   return (
-                    <button
-                      key={section.key}
-                      className={`px-4 py-2 border-b-2 font-medium text-sm transition-colors ${
-                        activeSection === section.key
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                      onClick={() => setActiveSection(section.key)}
-                    >
-                      {section.title}
-                      {selectedCount > 0 && (
-                        <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                          {selectedCount}
-                        </span>
-                      )}
-                    </button>
+                    <div key={section.key} className="space-y-3">
+                      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                        {section.title}
+                        {selectedChips.length > 0 && (
+                          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                            {selectedChips.length}
+                          </span>
+                        )}
+                      </h3>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {section.chips.map((chip) => {
+                          const isSelected = selectedChips.includes(chip);
+                          return (
+                            <button
+                              key={chip}
+                              className={`chip ${isSelected ? 'active' : ''}`}
+                              onClick={() => handleToggleChip(section.key, chip)}
+                            >
+                              {chipLabels[chip] || chip}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-
-              {/* Active Section */}
-              {profileSections.map((section) => {
-                if (activeSection !== section.key) return null;
-                
-                const selectedChips = profileAnswers[section.key] || [];
-                const isExpanded = expandedSections[section.key];
-                const visibleChips = isExpanded ? section.chips : section.chips.slice(0, 6);
-                const hasMore = section.chips.length > 6;
-
-                return (
-                  <div key={section.key} className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
-                    
-                    <div className="flex flex-wrap gap-3">
-                      {visibleChips.map((chip) => {
-                        const isSelected = selectedChips.includes(chip);
-                        return (
-                          <button
-                            key={chip}
-                            className={`profile-chip ${isSelected ? 'active' : ''}`}
-                            onClick={() => handleToggleChip(section.key, chip)}
-                          >
-                            {chipLabels[chip] || chip}
-                          </button>
-                        );
-                      })}
-                      
-                      {hasMore && (
-                        <button
-                          className="profile-chip profile-chip-more"
-                          onClick={() => toggleSection(section.key)}
-                        >
-                          {isExpanded ? 'Weniger...' : `Mehr... (+${section.chips.length - 6})`}
-                        </button>
-                      )}
-                    </div>
-
-                    {selectedChips.length > 0 && (
-                      <div className="text-sm text-gray-600">
-                        {selectedChips.length} ausgewählt: {selectedChips.map(chip => chipLabels[chip] || chip).join(', ')}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           ) : (
             <div className="p-6">
@@ -375,9 +328,6 @@ export default function ProfileMatchingPanel({
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Top-Empfehlungen für Ihr Profil
                 </h3>
-                <p className="text-sm text-gray-600">
-                  Basierend auf {getTotalSelectedChips()} ausgewählten Eigenschaften
-                </p>
               </div>
 
               <div className="space-y-4 mb-6">

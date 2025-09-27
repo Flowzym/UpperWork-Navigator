@@ -812,6 +812,40 @@ body {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
+
+/* Profile Chip Styles */
+.profile-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.5rem;
+  background-color: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.profile-chip:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.profile-chip.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.profile-chip-more {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-muted);
+  border-style: dashed;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
