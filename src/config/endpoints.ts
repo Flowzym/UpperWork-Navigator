@@ -21,3 +21,14 @@ export const createAbortController = (timeoutMs = 20000) => {
   c.__timeout = t;
   return c as AbortController & { __timeout?: any };
 };
+
+export const defaultEndpoints = {
+  local: {
+    baseUrl: import.meta.env.VITE_LOCAL_OPENAI_BASEURL || 'http://localhost:1234/v1',
+    apiKey: import.meta.env.VITE_LOCAL_OPENAI_API_KEY || '',
+  },
+  custom: {
+    baseUrl: import.meta.env.VITE_CUSTOM_OPENAI_BASEURL || 'https://api.openai.com/v1',
+    apiKey: import.meta.env.VITE_CUSTOM_OPENAI_API_KEY || '',
+  },
+};
