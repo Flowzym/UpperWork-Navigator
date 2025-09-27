@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavigationTab } from '../types';
-import { History, BarChart3, Settings, HelpCircle, Wrench, Search, Zap, Target, HelpCircle as Help } from 'lucide-react';
+import { History, BarChart3, Settings, HelpCircle, Wrench, Search, Zap, Target, HelpCircle as Help, MoreVertical } from 'lucide-react';
+import OverflowMenu from './OverflowMenu';
 
 interface NavBarProps {
   activeTab: NavigationTab;
@@ -25,20 +26,67 @@ export function NavBar({
   onOpenMetrics,
   onToggleAdminMode
 }: NavBarProps) {
+  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
+
   const tabs: { key: NavigationTab; label: string; icon: React.ReactNode }[] = [
     { key: 'explorer', label: 'Explorer', icon: <Search size={16} /> },
     { key: 'wizard', label: 'Wizard', icon: <Zap size={16} /> },
     { key: 'profil-matching', label: 'Profil-Matching', icon: <Target size={16} /> },
     { key: 'help', label: 'Hilfe', icon: <Help size={16} /> }
   ];
+
+  const overflowMenuItems = [
+    {
+      label: 'Verlauf',
+      icon: <History size={14} />,
+      onClick: onOpenHistory
+    },
+    {
+      label: 'Metriken',
+      icon: <BarChart3 size={14} />,
+      onClick: onOpenMetrics
+    },
+    {
+      label: 'Admin-Modus',
+      icon: <Wrench size={14} />,
+      onClick: onToggleAdminMode
+    },
+    {
+      label: 'Einstellungen',
+      icon: <Settings size={14} />,
+      onClick: onOpenSettings
+    },
+    {
+      label: 'Hilfe',
+      icon: <HelpCircle size={14} />,
+      onClick: onOpenHelp
+    }
+  ];
+
   return (
       <nav className="navbar">
         <div className="navbar-content">
-          <div className="navbar-brand">
+          <div className="navbar-brand flex items-center gap-2">
             <button className="brand-button">
               <Target size={20} className="brand-icon" />
               <span className="brand-text">Förder-Navigator OÖ</span>
             </button>
+            <div className="relative">
+              <button
+                className="nav-action-btn"
+                onClick={() => setShowOverflowMenu(!showOverflowMenu)}
+                title="Weitere Optionen"
+              >
+                <MoreVertical size={16} />
+              </button>
+              
+              <OverflowMenu
+                items={overflowMenuItems}
+                isOpen={showOverflowMenu}
+                onClose={() => setShowOverflowMenu(false)}
+                anchorRef={{ current: null }}
+              />
+            </div>
           </div>
 
           <div className="navbar-tabs">
@@ -60,44 +108,6 @@ export function NavBar({
                 {tab.label}
               </button>
             ))}
-          </div>
-
-          <div className="navbar-actions">
-            <button 
-              className="nav-action-btn"
-              onClick={onOpenHistory}
-              title="Verlauf anzeigen"
-            >
-              <History size={16} />
-            </button>
-            <button 
-              className="nav-action-btn"
-              onClick={onOpenMetrics}
-              title="Metriken anzeigen"
-            >
-              <BarChart3 size={16} />
-            </button>
-            <button 
-              className="nav-action-btn"
-              onClick={onToggleAdminMode}
-              title="Admin-Modus"
-            >
-              <Wrench size={16} />
-            </button>
-            <button 
-              className="nav-action-btn"
-              onClick={onOpenSettings}
-              title="Einstellungen"
-            >
-              <Settings size={16} />
-            </button>
-            <button 
-              className="nav-action-btn"
-              onClick={onOpenHelp}
-              title="Hilfe"
-            >
-              <HelpCircle size={16} />
-            </button>
           </div>
         </div>
       </nav>
