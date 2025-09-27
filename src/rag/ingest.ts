@@ -189,6 +189,7 @@ export async function ingestBrochure(): Promise<{ chunks: DocChunk[]; stats: Ing
 export function validateChunks(chunks: DocChunk[]): { valid: DocChunk[]; invalid: DocChunk[] } {
   const valid: DocChunk[] = [];
   const invalid: DocChunk[] = [];
+  const invalidReasons: string[] = [];
   
   chunks.forEach(chunk => {
     // Qualitätskriterien
@@ -206,12 +207,33 @@ export function validateChunks(chunks: DocChunk[]): { valid: DocChunk[]; invalid
         // Prüfe erneut nach Reparatur
         if (chunk.normalizedText && chunk.normalizedText.length > 0 && hasContent && hasProgram && hasPage) {
           valid.push(chunk);
+          console.log(`[RAG] Chunk repariert: ${chunk.id} (normalizedText ergänzt)`);
           return;
         }
       }
+      
+      // Detaillierte Fehleranalyse
+      const reasons = [];
+      if (!hasContent) reasons.push(`text zu kurz (${chunk.text?.length || 0} < 50)`);
+      if (!hasProgram) reasons.push(`programId/Name fehlt (${chunk.programId}/${chunk.programName})`);
+      if (!hasPage) reasons.push(`page ungültig (${chunk.page})`);
+      if (!hasNormalizedText) reasons.push(`normalizedText fehlt/leer`);
+      
+      const reason = `Chunk ${chunk.id || 'unknown'}: ${reasons.join(', ')}`;
+      invalidReasons.push(reason);
+      console.warn(`[RAG] Ungültiger Chunk: ${reason}`);
+      
       invalid.push(chunk);
     }
   });
+  
+  // Zusammenfassung der Validierung
+  if (invalid.length > 0) {
+    console.warn(`[RAG] Chunk-Validierung: ${valid.length} gültig, ${invalid.length} ungültig`);
+    console.warn(`[RAG] Ungültige Chunks Gründe:`, invalidReasons);
+  } else {
+    console.log(`[RAG] Chunk-Validierung: Alle ${valid.length} Chunks sind gültig`);
+  }
   
   return { valid, invalid };
 }
