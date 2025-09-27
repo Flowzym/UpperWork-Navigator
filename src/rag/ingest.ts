@@ -1,7 +1,7 @@
 import { DocChunk, ProgramMeta, IngestionStats } from './schema';
 import { programMeta } from '../data/programMeta';
 import { showToast } from '../lib/ui/toast';
-import { loadStats, loadChunksCached } from '../lib/cache/ragCache';
+import { loadStats, loadChunksCached, getRagCacheInfo } from '../lib/cache/ragCache';
 
 // Normalisierung für Suche (wie in searchIndex.ts)
 function normalizeText(text: string): string {
@@ -36,6 +36,9 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     if (!chunks.length) {
       console.warn('[RAG] Keine Chunks verfügbar – verwende Fallback-Simulation');
       showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
+      // Status für UI markieren
+      const cacheModule = await import('../lib/cache/ragCache');
+      (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
       return [];
     }
     
@@ -47,6 +50,9 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
   } catch (error) {
     console.warn('[RAG] Simulationsdaten aktiv: /rag/chunks.json nicht gefunden. Für echte RAG-Antworten bitte "npm run ingest" ausführen (erzeugt /public/rag/chunks.json & stats.json).');
     showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
+    // Status für UI markieren
+    const cacheModule = await import('../lib/cache/ragCache');
+    (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
     return [];
   }
 }

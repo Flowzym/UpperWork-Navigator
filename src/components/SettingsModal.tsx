@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Monitor, Bot, FileText, Settings, Eye, EyeOff, TestTube } from 'lucide-react';
+import { X, Monitor, Bot, FileText, Settings, Eye, EyeOff, TestTube, Trash2, RefreshCw } from 'lucide-react';
 import { Provider } from '../types';
 import { EndpointConfig, defaultEndpoints } from '../config/endpoints';
 import { useChatApi } from '../hooks/useChatApi';
+import { getRagCacheInfo, clearRagCache } from '../lib/cache/ragCache';
 import ConnectionBadge from './ConnectionBadge';
 import SegmentControl from './SegmentControl';
 
@@ -96,7 +97,10 @@ export default function SettingsModal({
     loaded: false,
     filename: '',
     chunks: 0,
-    lastUpdate: ''
+    lastUpdate: '',
+    source: 'network' as 'network' | 'idb' | 'simulation',
+    buildId: '',
+    urlBase: ''
   });
 
   const chatApi = useChatApi();
@@ -123,6 +127,9 @@ export default function SettingsModal({
   }, [isOpen, onClose]);
 
   const checkBrochureStatus = async () => {
+    // Hole Cache-Info
+    const cacheInfo = getRagCacheInfo();
+    
     try {
       const statsResponse = await fetch('/rag/stats.json');
       if (statsResponse.ok) {
@@ -131,14 +138,20 @@ export default function SettingsModal({
           loaded: true,
           filename: 'Foerderbroschuere_OOE_2025.pdf',
           chunks: stats.totalChunks || 0,
-          lastUpdate: new Date().toLocaleDateString('de-DE')
+          lastUpdate: new Date().toLocaleDateString('de-DE'),
+          source: cacheInfo.source,
+          buildId: cacheInfo.buildId || 'unbekannt',
+          urlBase: cacheInfo.urlBase
         });
       } else {
         setBrochureStatus({
           loaded: false,
           filename: '',
           chunks: 0,
-          lastUpdate: ''
+          lastUpdate: '',
+          source: cacheInfo.source,
+          buildId: cacheInfo.buildId || 'unbekannt',
+          urlBase: cacheInfo.urlBase
         });
       }
     } catch (error) {
@@ -146,7 +159,10 @@ export default function SettingsModal({
         loaded: false,
         filename: '',
         chunks: 0,
-        lastUpdate: ''
+        lastUpdate: '',
+        source: cacheInfo.source,
+        buildId: cacheInfo.buildId || 'unbekannt',
+        urlBase: cacheInfo.urlBase
       });
     }
   };
@@ -217,6 +233,28 @@ export default function SettingsModal({
     }
   };
 
+  const handleClearCache = async () => {
+    try {
+      await clearRagCache();
+      onShowToast('Cache geleert - Seite wird neu geladen', 'success');
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error) {
+      onShowToast('Cache-Reset fehlgeschlagen', 'error');
+    }
+  };
+
+  const getSourceBadge = (source: string) => {
+    switch (source) {
+      case 'network':
+        return <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">🌐 Network</span>;
+      case 'idb':
+        return <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">💾 Cache</span>;
+      case 'simulation':
+        return <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">🎭 Simulation</span>;
+      default:
+        return <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">❓ Unbekannt</span>;
+    }
+  };
   const renderDisplayTab = () => (
     <div className="settings-tab-content">
       <div className="settings-section">
@@ -384,7 +422,10 @@ export default function SettingsModal({
                 📄 {brochureStatus.filename}
               </div>
               <div className="settings-brochure-meta">
-                {brochureStatus.chunks} Chunks • Geladen am {brochureStatus.lastUpdate}
+                {brochureStatus.chunks} Chunks • {getSourceBadge(brochureStatus.source)}
+              </div>
+              <div className="settings-brochure-meta">
+                Build: <code className="text-xs">{brochureStatus.buildId}</code> • BASE_URL: <code className="text-xs">{brochureStatus.urlBase || '/'}</code>
               </div>
             </div>
             <div className="settings-brochure-actions">
@@ -401,12 +442,59 @@ export default function SettingsModal({
             <div className="settings-empty-icon">📄</div>
             <div className="settings-empty-title">Keine Broschüre geladen</div>
             <div className="settings-empty-text">
-              Simulationsdaten aktiv. Für echte RAG-Antworten bitte Broschüre hochladen.
+              {getSourceBadge(brochureStatus.source)} • Für echte RAG-Antworten bitte Broschüre hochladen.
+            </div>
+            <div className="settings-empty-text">
+              BASE_URL: <code className="text-xs">{brochureStatus.urlBase || '/'}</code>
             </div>
           </div>
         )}
       </div>
 
+      <div className="settings-section">
+        <h3 className="settings-section-title">Cache-Verwaltung</h3>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <div className="space-y-3">
+            <div className="text-sm">
+              <div className="flex items-center justify-between">
+                <span>Datenquelle:</span>
+                {getSourceBadge(brochureStatus.source)}
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span>Build-ID:</span>
+                <code className="text-xs bg-white px-2 py-1 rounded border">
+                  {brochureStatus.buildId || 'unbekannt'}
+                </code>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span>Chunks geladen:</span>
+                <span className="font-medium">{brochureStatus.chunks}</span>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-2 border-t">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={handleClearCache}
+              >
+                <Trash2 size={14} className="mr-1" />
+                Cache leeren
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw size={14} className="mr-1" />
+                Neu laden
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-3 text-xs text-gray-600">
+          💡 Cache leeren hilft bei veralteten Daten oder nach "npm run ingest"
+        </div>
+      </div>
       <div className="settings-section">
         <h3 className="settings-section-title">Neue Broschüre hochladen</h3>
         <div className="settings-upload-area">
