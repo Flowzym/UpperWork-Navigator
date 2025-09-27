@@ -105,6 +105,8 @@ export interface AppState {
   showKI: boolean;
   kiExpanded: boolean;
   showHistory: boolean;
+  showWizard: boolean;
+  showProfileMatching: boolean;
   showMetrics: boolean;
   showAdmin: boolean;
   showCompare?: boolean;

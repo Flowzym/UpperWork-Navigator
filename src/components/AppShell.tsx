@@ -215,6 +215,76 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
     setState(prev => ({ ...prev, kiAnswers: [] }));
   };
 
+  const handleStartWizard = () => {
+    setState(prev => ({ ...prev, showWizard: true }));
+    setActiveTab('wizard');
+  };
+
+  const handleStartProfileMatching = () => {
+    setState(prev => ({ ...prev, showProfileMatching: true }));
+    setActiveTab('profil-matching');
+  };
+
+  const handleWizardComplete = (answers: Record<string, string[]>) => {
+    // Convert wizard answers to filter state
+    const newFilters: FilterState = {
+      status: [],
+      zielgruppe: [],
+      foerderart: [],
+      voraussetzungen: [],
+      themen: [],
+      frist: [],
+      region: [],
+      budget: []
+    };
+
+    // Map wizard answers to filters
+    if (answers.status) {
+      if (answers.status.includes('beschäftigt')) newFilters.zielgruppe.push('beschäftigte');
+      if (answers.status.includes('arbeitsuchend')) newFilters.zielgruppe.push('arbeitsuchende');
+      if (answers.status.includes('frauen')) newFilters.zielgruppe.push('frauen');
+    }
+
+    if (answers.budget) {
+      newFilters.budget = answers.budget.filter(b => ['≤1k', '1–5k', '>5k'].includes(b));
+    }
+
+    if (answers.thema) {
+      if (answers.thema.includes('digitalisierung')) newFilters.themen.push('digitalisierung');
+      if (answers.thema.includes('sprache_deutsch')) newFilters.themen.push('sprache');
+      if (answers.thema.includes('technik_handwerk')) newFilters.themen.push('technik');
+    }
+
+    if (answers.timing) {
+      if (answers.timing.includes('laufend')) newFilters.frist.push('laufend');
+      if (answers.timing.includes('stichtag')) newFilters.frist.push('stichtag');
+    }
+
+    setState(prev => ({
+      ...prev,
+      filters: newFilters,
+      showWizard: false
+    }));
+
+    addToHistory('Wizard-Ergebnisse', state.filteredPrograms, 'wizard');
+    showToast(`Wizard abgeschlossen - ${state.filteredPrograms.length} passende Programme gefunden`);
+  };
+
+  const handleProfileMatchingResults = (matchResults: any[]) => {
+    const matchedPrograms = matchResults
+      .map(result => state.programs.find(p => p.id === result.programId))
+      .filter(Boolean) as Program[];
+
+    setState(prev => ({
+      ...prev,
+      filteredPrograms: matchedPrograms,
+      showProfileMatching: false
+    }));
+
+    addToHistory('Profil-Matching-Ergebnisse', matchedPrograms, 'search');
+    showToast(`Profil-Matching abgeschlossen - ${matchedPrograms.length} passende Programme gefunden`);
+  };
+
   const starredPrograms = state.programs.filter(p => state.starredPrograms.includes(p.id));
   const comparedPrograms = state.programs.filter(p => state.comparedPrograms.includes(p.id));
 
@@ -224,6 +294,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
       <NavBar
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onStartWizard={handleStartWizard}
+        onStartProfileMatching={handleStartProfileMatching}
         onOpenSettings={() => setState(prev => ({ ...prev, showSettings: true }))}
         onOpenHelp={() => setState(prev => ({ ...prev, showHelp: true }))}
         onOpenHistory={() => setState(prev => ({ ...prev, showHistory: true }))}
@@ -366,6 +438,30 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
       />
 
       {/* Modals */}
+      {state.showWizard && (
+        <WizardModal
+          isOpen={state.showWizard}
+          onClose={() => setState(prev => ({ ...prev, showWizard: false }))}
+          onComplete={handleWizardComplete}
+          onShowToast={showToast}
+        />
+      )}
+
+      {state.showProfileMatching && (
+        <ProfileMatchingPanel
+          isOpen={state.showProfileMatching}
+          programs={state.programs}
+          onClose={() => setState(prev => ({ ...prev, showProfileMatching: false }))}
+          onShowDetail={handleShowDetail}
+          onShowChecklist={(program) => setState(prev => ({ ...prev, selectedProgram: program }))}
+          onToggleCompare={handleToggleCompare}
+          onOpenChat={handleOpenChat}
+          onShowAllResults={handleProfileMatchingResults}
+          onShowToast={showToast}
+          compareIds={state.comparedPrograms}
+        />
+      )}
+
       {state.showCompare && comparedPrograms.length > 0 && (
         <CompareModal
           isOpen={state.showCompare}

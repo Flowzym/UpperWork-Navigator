@@ -5,6 +5,8 @@ import { History, BarChart3, Settings, HelpCircle, Wrench, Search, Zap, Target, 
 interface NavBarProps {
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
+  onStartWizard: () => void;
+  onStartProfileMatching: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenHistory: () => void;
@@ -15,6 +17,8 @@ interface NavBarProps {
 export function NavBar({ 
   activeTab,
   onTabChange,
+  onStartWizard,
+  onStartProfileMatching,
   onOpenSettings,
   onOpenHelp,
   onOpenHistory,
@@ -42,7 +46,15 @@ export function NavBar({
               <button
                 key={tab.key}
                 className={`nav-tab ${activeTab === tab.key ? 'active' : ''}`}
-                onClick={() => onTabChange(tab.key)}
+                onClick={() => {
+                  if (tab.key === 'wizard') {
+                    onStartWizard();
+                  } else if (tab.key === 'profil-matching') {
+                    onStartProfileMatching();
+                  } else {
+                    onTabChange(tab.key);
+                  }
+                }}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}

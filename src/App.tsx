@@ -86,6 +86,8 @@ function App() {
     showKI: true,
     kiExpanded: false,
     showHistory: false,
+    showWizard: false,
+    showProfileMatching: false,
     showMetrics: false,
     showAdmin: false,
     showCompare: false,
