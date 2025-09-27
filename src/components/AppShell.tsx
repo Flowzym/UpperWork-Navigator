@@ -52,6 +52,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
   const { track } = useMetrics();
   const [localEndpoint, setLocalEndpoint] = useState(defaultEndpoints.local);
   const [customEndpoint, setCustomEndpoint] = useState(defaultEndpoints.custom);
+  const [localConnectionStatus, setLocalConnectionStatus] = useState({ isConnected: false });
+  const [customConnectionStatus, setCustomConnectionStatus] = useState({ isConnected: false });
 
   // Initialize RAG on mount
   useEffect(() => {
@@ -448,8 +450,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           onShowToast={showToast}
           chatLoading={chatApi.loading}
           chatApiError={chatApi.error}
-          localConnection={connectionStatus.Lokal}
-          customConnection={connectionStatus.Custom}
+          localConnection={localConnectionStatus}
+          customConnection={customConnectionStatus}
         />
       </div>
 
