@@ -83,6 +83,7 @@ function App() {
     showHelp: false,
     showSettings: false,
     showKI: false,
+    showKI: true,
     showHistory: false,
     showMetrics: false,
     showAdmin: false,

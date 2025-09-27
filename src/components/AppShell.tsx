@@ -349,6 +349,30 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           chatLoading={chatApi.loading}
           chatApiError={chatApi.error}
         />
+
+        {/* KI Panel */}
+        <KIPanel
+          isOpen={state.showKI}
+          provider={state.kiProvider}
+          mode={state.kiMode}
+          context={state.kiContext}
+          onlyBrochure={state.kiOnlyBrochure}
+          withSources={state.kiWithSources}
+          providerPreset={providerPresets[state.kiProvider]}
+          answers={state.kiAnswers}
+          onProviderChange={handleKIProviderChange}
+          onModeChange={handleKIModeChange}
+          onContextChange={handleKIContextChange}
+          onToggleOnlyBrochure={handleToggleOnlyBrochure}
+          onToggleWithSources={handleToggleWithSources}
+          onAddAnswer={handleAddAnswer}
+          onRemoveAnswer={handleRemoveAnswer}
+          onClearAnswers={handleClearAnswers}
+          onClose={() => setState(prev => ({ ...prev, showKI: false }))}
+          onShowToast={showToast}
+          chatLoading={chatApi.loading}
+          chatApiError={chatApi.error}
+        />
       </div>
 
       {/* Footer */}
