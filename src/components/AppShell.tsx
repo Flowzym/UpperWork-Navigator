@@ -345,6 +345,7 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           onAddAnswer={handleAddAnswer}
           onRemoveAnswer={handleRemoveAnswer}
           onClearAnswers={handleClearAnswers}
+          onExpand={() => setState(prev => ({ ...prev, kiExpanded: true }))}
           onClose={() => setState(prev => ({ ...prev, kiExpanded: false }))}
           onShowToast={showToast}
           chatLoading={chatApi.loading}

@@ -25,6 +25,7 @@ interface KIPanelProps {
   onRemoveAnswer: (answerId: string) => void;
   onClearAnswers: () => void;
   onAddProgramCard?: (programId: string) => void;
+  onExpand: () => void;
   onClose: () => void;
   onShowToast: (message: string) => void;
   chatLoading?: boolean;
@@ -80,6 +81,7 @@ export default function KIPanel({
   onRemoveAnswer,
   onClearAnswers,
   onAddProgramCard,
+  onExpand,
   onClose,
   onShowToast,
   chatLoading = false,
@@ -222,10 +224,7 @@ export default function KIPanel({
           {/* Expand Button */}
           <button
             className="btn btn-ghost p-2 w-full"
-            onClick={() => {
-              // Trigger expand via parent
-              setState(prev => ({ ...prev, kiExpanded: true }));
-            }}
+            onClick={onExpand}
             title="KI-Panel erweitern"
           >
             🤖
@@ -295,16 +294,14 @@ export default function KIPanel({
               </button>
               <button 
                 className="btn btn-ghost btn-sm p-1"
-                onClick={() => setState(prev => ({ ...prev, kiExpanded: false }))}
+                onClick={onClose}
                 title="KI-Panel einklappen"
               >
                 ←
               </button>
               <button 
                 className="btn btn-ghost btn-sm p-1"
-                onClick={() => {
-                  onClose();
-                }}
+                onClick={onClose}
               >
                 <X size={14} />
               </button>
