@@ -1,26 +1,26 @@
 {
   "totalPages": 48,
-  "totalChunks": 1,
+  "totalChunks": 11,
   "programsFound": 6,
-  "processingTime": 6,
+  "processingTime": 26,
   "byProgram": {
-    "oe_bildungskonto": 0,
-    "ams_qbn": 0,
-    "innovative_skills_ooe": 0,
-    "qualifizierungsverbund_digi_nachhaltigkeit": 1,
-    "aqua": 0,
-    "fit": 0
+    "oe_bildungskonto": 1,
+    "ams_qbn": 2,
+    "innovative_skills_ooe": 2,
+    "qualifizierungsverbund_digi_nachhaltigkeit": 2,
+    "aqua": 2,
+    "fit": 2
   },
   "bySections": {
     "allgemein": 0,
-    "überblick": 1,
+    "überblick": 5,
     "zielgruppe": 0,
     "förderhöhe": 0,
-    "voraussetzungen": 0,
+    "voraussetzungen": 6,
     "antragsweg": 0,
     "frist": 0,
     "passt_wenn": 0,
     "passt_nicht_wenn": 0
   },
-  "avgChunkLength": 112
+  "avgChunkLength": 117.72727272727273
 }
