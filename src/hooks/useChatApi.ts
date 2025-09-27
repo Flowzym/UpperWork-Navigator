@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Provider, Mode, ContextType, Answer } from '../types';
-import { EndpointConfig, buildChatCompletionsUrl, buildModelsUrl, buildRequestHeaders, createAbortController } from '../config/endpoints';
+import { EndpointConfig, buildChatCompletionsUrl, buildModelsUrl, createRequestHeaders, createAbortController } from '../config/endpoints';
 import { useRag } from './useRag';
 import { useMetrics } from '../metrics/useMetrics';
 import { detectInjection } from '../lib/rag/guardrails';
