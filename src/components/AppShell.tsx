@@ -24,7 +24,7 @@ import KIPanel from './KIPanel';
 import WizardModal from './WizardModal';
 import ProfileMatchingPanel from './ProfileMatchingPanel';
 import HelpModal from './HelpModal';
-import SettingsDrawer from './SettingsDrawer';
+import SettingsModal from './SettingsModal';
 import HistoryPanel from './HistoryPanel';
 import MetricsPanel from './MetricsPanel';
 import BookmarkBar from './BookmarkBar';
