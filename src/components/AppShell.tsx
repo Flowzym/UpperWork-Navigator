@@ -171,7 +171,7 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
   };
 
   const handleOpenChat = (programId: string) => {
-    setState(prev => ({ ...prev, showKI: true }));
+    setState(prev => ({ ...prev, kiExpanded: true }));
     const program = state.programs.find(p => p.id === programId);
     if (program) {
       addToHistory(program.name, [program], 'chat');
@@ -328,7 +328,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
 
         {/* KI Panel */}
         <KIPanel
-          isOpen={state.showKI}
+          isOpen={true}
+          isExpanded={state.kiExpanded}
           provider={state.kiProvider}
           mode={state.kiMode}
           context={state.kiContext}
@@ -344,7 +345,7 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           onAddAnswer={handleAddAnswer}
           onRemoveAnswer={handleRemoveAnswer}
           onClearAnswers={handleClearAnswers}
-          onClose={() => setState(prev => ({ ...prev, showKI: false }))}
+          onClose={() => setState(prev => ({ ...prev, kiExpanded: false }))}
           onShowToast={showToast}
           chatLoading={chatApi.loading}
           chatApiError={chatApi.error}

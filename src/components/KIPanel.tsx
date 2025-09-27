@@ -8,6 +8,7 @@ import OverflowMenu from './OverflowMenu';
 
 interface KIPanelProps {
   isOpen: boolean;
+  isExpanded?: boolean;
   provider: Provider;
   mode: Mode;
   context: ContextType;
@@ -62,6 +63,7 @@ const quickActions = [
 
 export default function KIPanel({ 
   isOpen, 
+  isExpanded = false,
   provider,
   mode,
   context,
@@ -89,7 +91,6 @@ export default function KIPanel({
   const [chatInput, setChatInput] = useState('');
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [pendingProgramCard, setPendingProgramCard] = useState<string | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   console.log('KIPanel render:', { isOpen, provider, mode });
 
@@ -221,7 +222,10 @@ export default function KIPanel({
           {/* Expand Button */}
           <button
             className="btn btn-ghost p-2 w-full"
-            onClick={() => setIsExpanded(true)}
+            onClick={() => {
+              // Trigger expand via parent
+              setState(prev => ({ ...prev, kiExpanded: true }));
+            }}
             title="KI-Panel erweitern"
           >
             🤖
@@ -291,7 +295,7 @@ export default function KIPanel({
               </button>
               <button 
                 className="btn btn-ghost btn-sm p-1"
-                onClick={() => setIsExpanded(false)}
+                onClick={() => setState(prev => ({ ...prev, kiExpanded: false }))}
                 title="KI-Panel einklappen"
               >
                 ←
@@ -299,10 +303,8 @@ export default function KIPanel({
               <button 
                 className="btn btn-ghost btn-sm p-1"
                 onClick={() => {
-                  setIsExpanded(false);
                   onClose();
                 }}
-                title="KI-Panel schließen"
               >
                 <X size={14} />
               </button>
