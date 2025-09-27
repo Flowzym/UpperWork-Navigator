@@ -14,12 +14,14 @@ export function useRag() {
   const buildIndex = async (): Promise<void> => {
     if (isReady) return; // Bereits aufgebaut
     
+    console.log('[useRag] Starte Index-Aufbau...');
     setLoading(true);
     setError(null);
     
     try {
       const { chunks, stats: ingestionStats } = await ingestBrochure();
       
+      console.log(`[useRag] Ingestion abgeschlossen: ${chunks.length} Chunks`);
       // Chunks in Store laden
       documentStore.add(chunks);
       
@@ -31,7 +33,7 @@ export function useRag() {
     } catch (err: any) {
       const errorMessage = err.message || 'Unbekannter Fehler beim Index-Aufbau';
       setError(errorMessage);
-      console.error('RAG-Index Fehler:', err);
+      console.error('[useRag] RAG-Index Fehler:', err);
     } finally {
       setLoading(false);
     }

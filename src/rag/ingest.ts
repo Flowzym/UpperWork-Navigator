@@ -24,6 +24,7 @@ function normalizeText(text: string): string {
 // Lade Chunks aus Build-Time Ingestion
 async function loadChunksFromJSON(): Promise<DocChunk[]> {
   try {
+    console.log('[RAG] Versuche Chunks zu laden...');
     // Try to load with cache
     const stats = await loadStats();
     if (!stats) {
@@ -32,6 +33,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
       return [];
     }
     
+    console.log('[RAG] Stats geladen:', stats);
     const { chunks, source } = await loadChunksCached(stats);
     if (!chunks.length) {
       console.warn('[RAG] Keine Chunks verfügbar – verwende Fallback-Simulation');
@@ -42,6 +44,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
       return [];
     }
     
+    console.log(`[RAG] ${chunks.length} Chunks erfolgreich geladen (Quelle: ${source})`);
     // Validate chunks before returning
     const { valid, invalid } = validateChunks(chunks as DocChunk[]);
     if (invalid.length > 0) {
@@ -50,10 +53,13 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     
     if (source === 'idb') {
       showToast(`Offline – verwende Cache (build ${stats.buildId})`, 'info');
+    } else {
+      showToast(`RAG-System geladen: ${valid.length} Chunks aus Broschüre`, 'success');
     }
     
     return valid;
   } catch (error) {
+    console.error('[RAG] Fehler beim Laden der Chunks:', error);
     console.warn('[RAG] Simulationsdaten aktiv: /rag/chunks.json nicht gefunden. Für echte RAG-Antworten bitte "npm run ingest" ausführen (erzeugt /public/rag/chunks.json & stats.json).');
     showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
     // Status für UI markieren
