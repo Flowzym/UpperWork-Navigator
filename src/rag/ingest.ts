@@ -189,11 +189,20 @@ export function validateChunks(chunks: DocChunk[]): { valid: DocChunk[]; invalid
     const hasContent = chunk.text.length >= 50;
     const hasProgram = chunk.programId && chunk.programName;
     const hasPage = chunk.page > 0;
-    const hasNormalizedText = typeof chunk.normalizedText === 'string' && chunk.normalizedText.length > 0;
+    const hasNormalizedText = chunk.normalizedText && typeof chunk.normalizedText === 'string' && chunk.normalizedText.length > 0;
     
     if (hasContent && hasProgram && hasPage && hasNormalizedText) {
       valid.push(chunk);
     } else {
+      // Repariere fehlende normalizedText
+      if (!hasNormalizedText && chunk.text) {
+        chunk.normalizedText = normalizeText(chunk.text);
+        // Prüfe erneut nach Reparatur
+        if (chunk.normalizedText && chunk.normalizedText.length > 0 && hasContent && hasProgram && hasPage) {
+          valid.push(chunk);
+          return;
+        }
+      }
       invalid.push(chunk);
     }
   });
