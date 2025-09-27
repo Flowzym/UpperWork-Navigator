@@ -84,6 +84,7 @@ function App() {
     showSettings: false,
     showKI: false,
     showKI: true,
+    kiExpanded: false,
     showHistory: false,
     showMetrics: false,
     showAdmin: false,

@@ -103,6 +103,7 @@ export interface AppState {
   showHelp: boolean;
   showSettings: boolean;
   showKI: boolean;
+  kiExpanded: boolean;
   showHistory: boolean;
   showMetrics: boolean;
   showAdmin: boolean;
