@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Program, Answer } from './types';
-import { samplePrograms } from './data/chunks';
+import { samplePrograms } from './data/samplePrograms';
 import AppShell from './components/AppShell';
 import ToastHost from './components/ToastHost';
 import ErrorBoundary from './components/ErrorBoundary';
