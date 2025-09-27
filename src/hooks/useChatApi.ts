@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Provider, Mode, ContextType, Answer } from '../types';
-import { EndpointConfig, buildChatCompletionsUrl, buildModelsUrl, createRequestHeaders, createAbortController } from '../config/endpoints';
+import { EndpointConfig, buildChatCompletionsUrl, buildModelsUrl, buildRequestHeaders, createAbortController } from '../config/endpoints';
 import { useRag } from './useRag';
 import { useMetrics } from '../metrics/useMetrics';
 import { detectInjection } from '../lib/rag/guardrails';
@@ -540,7 +540,7 @@ export function useChatApi() {
       }
 
       const url = buildChatCompletionsUrl(endpoint.baseUrl);
-      const headers = createRequestHeaders(endpoint.apiKey);
+      const headers = buildRequestHeaders(endpoint.apiKey);
       const controller = createAbortController(12000);
 
       const response = await fetch(url, {
@@ -699,7 +699,7 @@ export function useChatApi() {
       }
 
       const url = buildChatCompletionsUrl(endpoint.baseUrl);
-      const headers = createRequestHeaders(endpoint.apiKey);
+      const headers = buildRequestHeaders(endpoint.apiKey);
       const controller = createAbortController(12000);
 
       const response = await fetch(url, {
