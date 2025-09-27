@@ -89,6 +89,7 @@ export default function KIPanel({
   const [chatInput, setChatInput] = useState('');
   const [showProviderMenu, setShowProviderMenu] = useState(false);
   const [pendingProgramCard, setPendingProgramCard] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   console.log('KIPanel render:', { isOpen, provider, mode });
 
@@ -212,8 +213,50 @@ export default function KIPanel({
 
   if (!isOpen) return null;
 
+  // Collapsed view
+  if (!isExpanded) {
+    return (
+      <div className="right-panel collapsed">
+        <div className="flex flex-col h-full p-2 gap-2">
+          {/* Expand Button */}
+          <button
+            className="btn btn-ghost p-2 w-full"
+            onClick={() => setIsExpanded(true)}
+            title="KI-Panel erweitern"
+          >
+            🤖
+          </button>
+          
+          {/* Quick Actions - Vertical */}
+          <div className="flex flex-col gap-1">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                className="btn btn-ghost p-2 w-full text-xs"
+                onClick={() => handleQuickAction(action)}
+                title={action.label}
+              >
+                {action.icon}
+              </button>
+            ))}
+          </div>
+          
+          {/* Answer Count */}
+          {answers.length > 0 && (
+            <div className="mt-auto">
+              <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mx-auto">
+                {answers.length}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Expanded view
   return (
-    <div className="right-panel w-96 h-full overflow-y-auto">
+    <div className="right-panel expanded">
       <div className="ki-panel-content">
         {/* Header */}
         <div className="ki-panel-header">
@@ -248,7 +291,17 @@ export default function KIPanel({
               </button>
               <button 
                 className="btn btn-ghost btn-sm p-1"
-                onClick={onClose}
+                onClick={() => setIsExpanded(false)}
+                title="KI-Panel einklappen"
+              >
+                ←
+              </button>
+              <button 
+                className="btn btn-ghost btn-sm p-1"
+                onClick={() => {
+                  setIsExpanded(false);
+                  onClose();
+                }}
                 title="KI-Panel schließen"
               >
                 <X size={14} />

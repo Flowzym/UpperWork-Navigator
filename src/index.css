@@ -440,6 +440,15 @@ body {
   border-left: 1px solid var(--color-border);
   overflow-y: auto;
   flex-shrink: 0;
+  transition: width 0.3s ease-in-out;
+}
+
+.right-panel.collapsed {
+  width: 60px;
+}
+
+.right-panel.expanded {
+  width: 384px;
 }
 
 .ki-panel-content {

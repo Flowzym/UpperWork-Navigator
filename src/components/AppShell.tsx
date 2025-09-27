@@ -327,42 +327,29 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
         </div>
 
         {/* KI Panel */}
-        {state.showKI && (
-          <KIPanel
-            isOpen={state.showKI}
-            provider={state.kiProvider}
-            mode={state.kiMode}
-            context={state.kiContext}
-            onlyBrochure={state.kiOnlyBrochure}
-            withSources={state.kiWithSources}
-            providerPreset={providerPresets[state.kiProvider]}
-            answers={state.kiAnswers}
-            onProviderChange={handleKIProviderChange}
-            onModeChange={handleKIModeChange}
-            onContextChange={handleKIContextChange}
-            onToggleOnlyBrochure={handleToggleOnlyBrochure}
-            onToggleWithSources={handleToggleWithSources}
-            onAddAnswer={handleAddAnswer}
-            onRemoveAnswer={handleRemoveAnswer}
-            onClearAnswers={handleClearAnswers}
-            onClose={() => setState(prev => ({ ...prev, showKI: false }))}
-            onShowToast={showToast}
-            chatLoading={chatApi.loading}
-            chatApiError={chatApi.error}
-          />
-        )}
+        <KIPanel
+          isOpen={state.showKI}
+          provider={state.kiProvider}
+          mode={state.kiMode}
+          context={state.kiContext}
+          onlyBrochure={state.kiOnlyBrochure}
+          withSources={state.kiWithSources}
+          providerPreset={providerPresets[state.kiProvider]}
+          answers={state.kiAnswers}
+          onProviderChange={handleKIProviderChange}
+          onModeChange={handleKIModeChange}
+          onContextChange={handleKIContextChange}
+          onToggleOnlyBrochure={handleToggleOnlyBrochure}
+          onToggleWithSources={handleToggleWithSources}
+          onAddAnswer={handleAddAnswer}
+          onRemoveAnswer={handleRemoveAnswer}
+          onClearAnswers={handleClearAnswers}
+          onClose={() => setState(prev => ({ ...prev, showKI: false }))}
+          onShowToast={showToast}
+          chatLoading={chatApi.loading}
+          chatApiError={chatApi.error}
+        />
       </div>
-
-      {/* KI Panel Toggle Button */}
-      {!state.showKI && (
-        <button
-          className="fixed right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-3 rounded-l-lg shadow-lg z-40 hover:bg-blue-600 transition-colors"
-          onClick={() => setState(prev => ({ ...prev, showKI: true }))}
-          title="KI-Panel öffnen"
-        >
-          🤖
-        </button>
-      )}
 
       {/* Footer */}
       <FooterBar
