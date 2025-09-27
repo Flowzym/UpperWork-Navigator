@@ -82,7 +82,7 @@ function createChunks(text, programId, programData, page, section, chunkSize = 8
 async function extractTextFromPDF(pdfPath) {
   try {
     const data = await fs.readFile(pdfPath);
-    const pdf = await pdfjsLib.getDocument({ data }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(data) }).promise;
     const pageTexts = new Map();
     
     console.log(`📖 PDF geladen: ${pdf.numPages} Seiten`);
