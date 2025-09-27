@@ -289,7 +289,8 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
   const comparedPrograms = state.programs.filter(p => state.comparedPrograms.includes(p.id));
 
   return (
-    <div className="app-shell">
+    <ErrorBoundary>
+      <div className="app-shell">
       {/* Navigation */}
       <NavBar
         activeTab={activeTab}
@@ -516,7 +517,7 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
         }))}
         onShowToast={showToast}
       />
-      </div>
+    </div>
     </ErrorBoundary>
   );
 }
