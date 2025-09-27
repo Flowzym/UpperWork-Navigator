@@ -42,11 +42,17 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
       return [];
     }
     
+    // Validate chunks before returning
+    const { valid, invalid } = validateChunks(chunks as DocChunk[]);
+    if (invalid.length > 0) {
+      console.warn(`[RAG] ${invalid.length} ungültige Chunks gefiltert (fehlende normalizedText oder andere Probleme)`);
+    }
+    
     if (source === 'idb') {
       showToast(`Offline – verwende Cache (build ${stats.buildId})`, 'info');
     }
     
-    return chunks as DocChunk[];
+    return valid;
   } catch (error) {
     console.warn('[RAG] Simulationsdaten aktiv: /rag/chunks.json nicht gefunden. Für echte RAG-Antworten bitte "npm run ingest" ausführen (erzeugt /public/rag/chunks.json & stats.json).');
     showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
@@ -183,8 +189,9 @@ export function validateChunks(chunks: DocChunk[]): { valid: DocChunk[]; invalid
     const hasContent = chunk.text.length >= 50;
     const hasProgram = chunk.programId && chunk.programName;
     const hasPage = chunk.page > 0;
+    const hasNormalizedText = typeof chunk.normalizedText === 'string' && chunk.normalizedText.length > 0;
     
-    if (hasContent && hasProgram && hasPage) {
+    if (hasContent && hasProgram && hasPage && hasNormalizedText) {
       valid.push(chunk);
     } else {
       invalid.push(chunk);
