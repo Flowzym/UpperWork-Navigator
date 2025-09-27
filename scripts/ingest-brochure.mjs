@@ -81,7 +81,26 @@ function createChunks(text, programId, programData, page, section, chunkSize = 8
 
 async function extractTextFromPDF(pdfPath) {
   try {
+    // Check if file exists and get basic info
+    const stats = await fs.stat(pdfPath);
+    console.log(`📄 PDF gefunden: ${path.basename(pdfPath)} (${Math.round(stats.size / 1024)}KB)`);
+    
+    // Read file as Buffer first, then convert
     const data = await fs.readFile(pdfPath);
+    
+    // Basic PDF validation
+    if (data.length < 1024) {
+      throw new Error('PDF-Datei zu klein (< 1KB) - möglicherweise beschädigt');
+    }
+    
+    // Check PDF header
+    const header = new TextDecoder().decode(data.slice(0, 8));
+    if (!header.startsWith('%PDF-')) {
+      throw new Error(`Ungültiger PDF-Header: "${header}" - Datei ist kein gültiges PDF`);
+    }
+    
+    console.log(`📖 PDF-Header validiert: ${header}`);
+    
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(data) }).promise;
     const pageTexts = new Map();
     
@@ -133,7 +152,23 @@ async function extractTextFromPDF(pdfPath) {
     return { pageTexts, totalPages: pdf.numPages };
     
   } catch (error) {
-    console.error('❌ PDF-Extraktion fehlgeschlagen:', error);
+    console.error('❌ PDF-Extraktion fehlgeschlagen:', error.message);
+    
+    // Specific error handling
+    if (error.name === 'InvalidPDFException') {
+      console.error('💡 Mögliche Ursachen:');
+      console.error('   - PDF ist beschädigt oder unvollständig');
+      console.error('   - PDF ist passwortgeschützt');
+      console.error('   - PDF verwendet ein ungewöhnliches Format');
+      console.error('   - Datei ist kein echtes PDF (falscher MIME-Type)');
+    } else if (error.message.includes('PDF-Header')) {
+      console.error('💡 Die Datei ist kein gültiges PDF-Format');
+    } else if (error.code === 'ENOENT') {
+      console.error('💡 PDF-Datei nicht gefunden unter:', pdfPath);
+    } else {
+      console.error('💡 Unerwarteter Fehler:', error.stack);
+    }
+    
     throw error;
   }
 }
@@ -162,7 +197,8 @@ async function ingestBrochure() {
       totalPages = result.totalPages;
       console.log(`📄 PDF erfolgreich extrahiert: ${totalPages} Seiten`);
     } catch (pdfError) {
-      console.log('⚠️ PDF nicht gefunden, verwende simulierte Inhalte');
+      console.log(`⚠️ PDF-Verarbeitung fehlgeschlagen: ${pdfError.message}`);
+      console.log('🎭 Verwende simulierte Inhalte als Fallback');
       // Fallback: Simulierte Inhalte (wie in ursprünglichem ingest.ts)
       const { pageTexts: simPageTexts, totalPages: simTotalPages } = generateSimulatedContent(programMeta);
       pageTexts = simPageTexts;
