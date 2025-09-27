@@ -1,38 +1,302 @@
-{
-  "oe_bildungskonto": {
-    "name": "Bildungskonto OÖ",
-    "pages": [12, 15],
-    "stand": "09/2025",
-    "status": "aktiv"
+[
+  {
+    "programId": "weiterbildungsfoerderungenfoerderbroschuere-2025",
+    "programName": "WeiterbildungsförderungenFörderbroschüre 2025",
+    "pages": [
+      1,
+      2
+    ],
+    "stand": null,
+    "status": null
   },
-  "ams_qbn": {
-    "name": "QBN – Qualifizierungsförderung für Beschäftigte", 
-    "pages": [8, 11],
-    "stand": "10/2025",
-    "status": "aktiv"
+  {
+    "programId": "weiterbildungsfoerderungen3",
+    "programName": "Weiterbildungsförderungen3",
+    "pages": [
+      3,
+      3
+    ],
+    "stand": null,
+    "status": null
   },
-  "innovative_skills_ooe": {
-    "name": "Innovative Skills - Land OÖ",
-    "pages": [24, 27],
-    "stand": "11/2025", 
-    "status": "endet_am"
+  {
+    "programId": "inhaltsverzeichnis4",
+    "programName": "Inhaltsverzeichnis4",
+    "pages": [
+      4,
+      5
+    ],
+    "stand": null,
+    "status": null
   },
-  "qualifizierungsverbund_digi_nachhaltigkeit": {
-    "name": "Qualifizierungsverbund - Digitale Kompetenz & Nachhaltigkeit",
-    "pages": [18, 21],
-    "stand": "09/2025",
-    "status": "aktiv"
+  {
+    "programId": "landeshauptmann-von-oberoesterreich-wirtschafts-landesrat-vo",
+    "programName": "Landeshauptmann von Oberösterreich  Wirtschafts-Landesrat Vorwörter6",
+    "pages": [
+      6,
+      6
+    ],
+    "stand": null,
+    "status": null
   },
-  "aqua": {
-    "name": "AQUA - Arbeitsplatznahe Qualifizierung",
-    "pages": [32, 35],
-    "stand": "10/2025",
-    "status": "aktiv"
+  {
+    "programId": "wettbewerbs-und-leistungsfaehigkeit-am-wirtschaftsstandort-s",
+    "programName": "Wettbewerbs- und Leistungsfähigkeit am Wirtschaftsstandort sichern",
+    "pages": [
+      7,
+      7
+    ],
+    "stand": null,
+    "status": null
   },
-  "fit": {
-    "name": "FiT - Frauen in Handwerk und Technik",
-    "pages": [45, 48],
-    "stand": "11/2025",
-    "status": "aktiv"
+  {
+    "programId": "ak-oberoesterreich-unterstuetzt-aktiv-bei-weiterbildung",
+    "programName": "AK Oberösterreich unterstützt aktiv bei Weiterbildung",
+    "pages": [
+      8,
+      8
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "daniel-muehlboeck",
+    "programName": "Daniel Mühlböck",
+    "pages": [
+      9,
+      10
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "programm-partnern-koennen-sie-sich-zudem-ueber-die-umfangrei",
+    "programName": "Programm-Partnern können Sie sich zudem über die umfangreichen Beratungs- und Beschäftigungsangebote",
+    "pages": [
+      11,
+      11
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "scanne-den-link12",
+    "programName": "Scanne den Link12",
+    "pages": [
+      12,
+      12
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "scanne-den-link13",
+    "programName": "Scanne den Link13",
+    "pages": [
+      13,
+      13
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "lehrvertragsanmeldungen-aenderungen-und-aufloesungen",
+    "programName": "Lehrvertragsanmeldungen, -änderungen und -auflösungen",
+    "pages": [
+      14,
+      14
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "regionale-lehrlings-und-berufsinformationsmessen-veranstaltu",
+    "programName": "Regionale Lehrlings- und Berufsinformationsmessen, Veranstaltungen zum Thema Berufsorientierung",
+    "pages": [
+      15,
+      15
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "ak-bildungsberatung",
+    "programName": "AK-Bildungsberatung",
+    "pages": [
+      16,
+      16
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "information-via-smartphone",
+    "programName": "Information via Smartphone",
+    "pages": [
+      17,
+      17
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "business-upper-austria",
+    "programName": "Business Upper Austria",
+    "pages": [
+      18,
+      18
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "unterstuetzung-beim-ankommen-und-integrieren",
+    "programName": "Unterstützung beim Ankommen und Integrieren",
+    "pages": [
+      19,
+      19
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "auswahl-des-richtigen-aufenthaltstitels",
+    "programName": "Auswahl des richtigen Aufenthaltstitels",
+    "pages": [
+      20,
+      20
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "scanne-den-link21",
+    "programName": "Scanne den Link21",
+    "pages": [
+      21,
+      21
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "scanne-den-link22",
+    "programName": "Scanne den Link22",
+    "pages": [
+      22,
+      23
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "frauen-und",
+    "programName": "Frauen und",
+    "pages": [
+      24,
+      42
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "lehrlinge-und",
+    "programName": "Lehrlinge und",
+    "pages": [
+      43,
+      65
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "behinderung",
+    "programName": "Behinderung",
+    "pages": [
+      66,
+      75
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "behinderung67",
+    "programName": "Behinderung67",
+    "pages": [
+      67,
+      67
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "behinderung69",
+    "programName": "Behinderung69",
+    "pages": [
+      69,
+      69
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "behinderung71",
+    "programName": "Behinderung71",
+    "pages": [
+      71,
+      71
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "behinderung73",
+    "programName": "Behinderung73",
+    "pages": [
+      73,
+      73
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "unternehmen",
+    "programName": "Unternehmen",
+    "pages": [
+      76,
+      97
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "notizen",
+    "programName": "Notizen",
+    "pages": [
+      98,
+      98
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "foerdergebende-stellen",
+    "programName": "Fördergebende Stellen",
+    "pages": [
+      99,
+      99
+    ],
+    "stand": null,
+    "status": null
+  },
+  {
+    "programId": "business-upper-austria-ooe-wirtschaftsagentur-gmbh",
+    "programName": "Business Upper Austria – OÖ Wirtschaftsagentur GmbH",
+    "pages": [
+      100,
+      100
+    ],
+    "stand": null,
+    "status": null
   }
-}
+]
