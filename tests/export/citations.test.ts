@@ -37,3 +37,4 @@ describe('citations', () => {
     expect(notes).toHaveLength(2);
   });
 });
+});

@@ -800,7 +800,7 @@ export function useChatApi() {
   const checkConnection = async (endpoint: EndpointConfig): Promise<{ ok: boolean; detail: string }> => {
     try {
       const url = buildModelsUrl(endpoint.baseUrl);
-      const headers = createRequestHeaders(endpoint.apiKey);
+      const headers = buildRequestHeaders(endpoint.apiKey);
       const controller = createAbortController(8000);
 
       const response = await fetch(url, {
