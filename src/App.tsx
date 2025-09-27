@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Program } from './types';
+import { Program, Answer } from './types';
 import { samplePrograms } from './data/samplePrograms';
 import AppShell from './components/AppShell';
 import ToastHost from './components/ToastHost';
-import { documentRetriever } from "./rag/retriever";
 import AdminApp from "./features/admin/AdminApp";
 
 let toastIdCounter = 0;
@@ -58,7 +57,7 @@ export interface AppState {
   kiContext: 'Aktuelle Karte' | 'Vergleichsauswahl' | 'Ergebnisliste' | 'Freie Frage';
   kiOnlyBrochure: boolean;
   kiWithSources: boolean;
-  kiAnswers: any[];
+  kiAnswers: Answer[];
 }
 
 function App() {
@@ -82,11 +81,9 @@ function App() {
     showWizard: false,
     showHelp: false,
     showSettings: false,
-    showKI: false,
     showKI: true,
     kiExpanded: false,
     showHistory: false,
-    showWizard: false,
     showProfileMatching: false,
     showMetrics: false,
     showAdmin: false,

@@ -16,7 +16,7 @@ export default function AnswerCard({ answer, onCopy, onDelete, onShowToast }: An
     try {
       await navigator.clipboard.writeText(answer.text);
       onShowToast('Antwort kopiert');
-    } catch (err) {
+    } catch (_err) {
       onCopy(answer.text);
       onShowToast('Antwort kopiert');
     }
