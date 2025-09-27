@@ -3,6 +3,7 @@ import { Program } from '../types';
 import { FileText, BarChart3, Mail } from 'lucide-react';
 import Modal from './Modal';
 import CopyButton from './CopyButton';
+import { extractCitations } from '../features/export/hooks/useCitations';
 
 interface ExportPreviewModalProps {
   isOpen: boolean;
@@ -139,6 +140,7 @@ Quelle: Broschüre OÖ 2025 (Dummy Export)`;
   };
 
   const content = getContent();
+  const { cleanedHtml, notes } = extractCitations(content);
 
   const handleExportPDF = () => {
     const exportType = type === 'onepager' ? '1-Pager' : 

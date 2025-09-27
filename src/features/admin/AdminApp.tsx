@@ -3,38 +3,26 @@ import AdminLayout from './AdminLayout';
 import { RagOverrides, loadOverrides } from '../../lib/rag/overrides';
 
 interface AdminAppProps {
-  isAdminMode: boolean;
-  onToggleAdminMode: () => void;
-  onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
+  onClose: () => void;
 }
 
-export default function AdminApp({ isAdminMode, onToggleAdminMode, onShowToast }: AdminAppProps) {
+export default function AdminApp({ onClose }: AdminAppProps) {
   const [overrides, setOverrides] = useState<RagOverrides>({ version: 1 });
   const [loading, setLoading] = useState(true);
 
-  // Check if admin mode should be enabled
-  const shouldShowAdmin = isAdminMode || new URLSearchParams(window.location.search).get('admin') === '1';
-
   useEffect(() => {
-    if (shouldShowAdmin) {
-      loadOverrides().then(data => {
-        setOverrides(data);
-        setLoading(false);
-      }).catch(error => {
-        console.error('Failed to load overrides:', error);
-        onShowToast('Fehler beim Laden der Admin-Daten', 'error');
-        setLoading(false);
-      });
-    }
-  }, [shouldShowAdmin, onShowToast]);
+    loadOverrides().then(data => {
+      setOverrides(data);
+      setLoading(false);
+    }).catch(error => {
+      console.error('Failed to load overrides:', error);
+      setLoading(false);
+    });
+  }, []);
 
   const handleOverridesChange = (newOverrides: RagOverrides) => {
     setOverrides(newOverrides);
   };
-
-  if (!shouldShowAdmin) {
-    return null;
-  }
 
   if (loading) {
     return (
@@ -52,11 +40,8 @@ export default function AdminApp({ isAdminMode, onToggleAdminMode, onShowToast }
       <AdminLayout
         overrides={overrides}
         onOverridesChange={handleOverridesChange}
-        onClose={() => {
-          onToggleAdminMode();
-          window.history.replaceState({}, '', window.location.pathname);
-        }}
-        onShowToast={onShowToast}
+        onClose={onClose}
+        onShowToast={(msg, type) => console.log(`[${type}] ${msg}`)}
       />
     </div>
   );

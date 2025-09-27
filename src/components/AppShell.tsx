@@ -516,6 +516,7 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
         }))}
         onShowToast={showToast}
       />
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

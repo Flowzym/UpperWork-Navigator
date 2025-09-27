@@ -33,7 +33,9 @@ const sectionPatterns = [
   { name: 'antragsweg', pattern: /^(antragsweg|antrag)/i },
   { name: 'passt_wenn', pattern: /^passt,?\s+wenn/i },
   { name: 'passt_nicht_wenn', pattern: /^passt\s+nicht,?\s+wenn/i },
-  { name: 'überblick', pattern: /^(überblick|beschreibung)/i }
+  { name: 'überblick', pattern: /^(überblick|beschreibung)/i },
+  { name: 'region', pattern: /^region/i },
+  { name: 'quelle', pattern: /^(quelle|stand)/i }
 ];
 
 function detectSection(line) {
