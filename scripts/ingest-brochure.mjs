@@ -6,6 +6,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/legacy/build/pdf.worker.mjs',
+  import.meta.url
+).toString();
+
 // Normalisierung für Suche (wie in searchIndex.ts)
 function normalizeText(text) {
   return text
@@ -101,7 +107,18 @@ async function extractTextFromPDF(pdfPath) {
     
     console.log(`📖 PDF-Header validiert: ${header}`);
     
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(data) }).promise;
+    // Enhanced PDF loading with detailed error handling
+    const loadingTask = pdfjsLib.getDocument({
+      data: new Uint8Array(data),
+      verbosity: pdfjsLib.VerbosityLevel.WARNINGS,
+      cMapUrl: null, // Disable CMap loading in WebContainer
+      cMapPacked: false,
+      standardFontDataUrl: null // Disable standard font loading
+    });
+    
+    console.log(`📖 PDF-Loading-Task erstellt, starte Verarbeitung...`);
+    
+    const pdf = await loadingTask.promise;
     const pageTexts = new Map();
     
     console.log(`📖 PDF geladen: ${pdf.numPages} Seiten`);
@@ -153,6 +170,10 @@ async function extractTextFromPDF(pdfPath) {
     
   } catch (error) {
     console.error('❌ PDF-Extraktion fehlgeschlagen:', error.message);
+    console.error('❌ Vollständiger Fehler:', error);
+    console.error('❌ Fehler-Stack:', error.stack);
+    console.error('❌ Fehler-Name:', error.name);
+    console.error('❌ Fehler-Code:', error.code);
     
     // Specific error handling
     if (error.name === 'InvalidPDFException') {
@@ -161,10 +182,25 @@ async function extractTextFromPDF(pdfPath) {
       console.error('   - PDF ist passwortgeschützt');
       console.error('   - PDF verwendet ein ungewöhnliches Format');
       console.error('   - Datei ist kein echtes PDF (falscher MIME-Type)');
+    } else if (error.name === 'PasswordException') {
+      console.error('💡 PDF ist passwortgeschützt - Passwort erforderlich');
+    } else if (error.name === 'MissingPDFException') {
+      console.error('💡 PDF-Datei ist leer oder beschädigt');
+    } else if (error.name === 'UnexpectedResponseException') {
+      console.error('💡 Unerwartete Antwort beim PDF-Laden');
+    } else if (error.message.includes('Invalid PDF structure')) {
+      console.error('💡 PDF-Struktur-Probleme:');
+      console.error('   - PDF könnte eine ungewöhnliche Version verwenden');
+      console.error('   - PDF könnte linearisiert/optimiert sein');
+      console.error('   - PDF könnte beschädigte Objekte enthalten');
+      console.error('   - Versuchen Sie die PDF neu zu speichern/exportieren');
     } else if (error.message.includes('PDF-Header')) {
       console.error('💡 Die Datei ist kein gültiges PDF-Format');
     } else if (error.code === 'ENOENT') {
       console.error('💡 PDF-Datei nicht gefunden unter:', pdfPath);
+    } else if (error.message.includes('Worker')) {
+      console.error('💡 PDF.js Worker-Problem (WebContainer-Limitation)');
+      console.error('   - Versuche alternative PDF-Verarbeitung...');
     } else {
       console.error('💡 Unerwarteter Fehler:', error.stack);
     }
@@ -197,7 +233,8 @@ async function ingestBrochure() {
       totalPages = result.totalPages;
       console.log(`📄 PDF erfolgreich extrahiert: ${totalPages} Seiten`);
     } catch (pdfError) {
-      console.log(`⚠️ PDF-Verarbeitung fehlgeschlagen: ${pdfError.message}`);
+      console.log(`⚠️ PDF-Verarbeitung fehlgeschlagen: ${pdfError.name}: ${pdfError.message}`);
+      console.log(`⚠️ PDF-Fehler-Details:`, pdfError);
       console.log('🎭 Verwende simulierte Inhalte als Fallback');
       // Fallback: Simulierte Inhalte (wie in ursprünglichem ingest.ts)
       const { pageTexts: simPageTexts, totalPages: simTotalPages } = generateSimulatedContent(programMeta);
@@ -298,11 +335,16 @@ async function ingestBrochure() {
     console.log('\n📁 Output:');
     console.log(`   public/rag/chunks.json (${stats.totalChunks} Chunks)`);
     console.log(`   public/rag/stats.json (Statistiken)`);
+    console.log('\n💡 Nächste Schritte:');
+    console.log('   1. Seite neu laden (Ctrl+R)');
+    console.log('   2. Cache leeren falls nötig (Settings → Broschüren → Cache leeren)');
+    console.log('   3. Bei PDF-Problemen: Datei neu exportieren/speichern');
     
     return { chunks: allChunks, stats };
     
   } catch (error) {
-    console.error('❌ Ingestion fehlgeschlagen:', error);
+    console.error('❌ Ingestion fehlgeschlagen:', error.name, error.message);
+    console.error('❌ Vollständiger Fehler:', error);
     process.exit(1);
   }
 }
