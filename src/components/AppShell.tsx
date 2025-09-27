@@ -500,18 +500,21 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
       />
 
       {/* Settings Drawer */}
-      <SettingsDrawer
+      <SettingsModal
         isOpen={state.showSettings}
         onClose={() => setState(prev => ({ ...prev, showSettings: false }))}
         settings={{
           themeMode: state.theme === 'dark' ? 'dark' : 'light',
-          viewMode: state.viewMode === 'compact' ? 'list' : 'grid'
+          viewMode: state.viewMode === 'compact' ? 'list' : 'grid',
+          cardDensity: state.viewMode,
+          noExternalProviders: false
         }}
         onSettingsChange={(settings) => setState(prev => ({ 
           ...prev, 
           theme: settings.themeMode === 'dark' ? 'dark' : 'light',
           viewMode: settings.viewMode === 'list' ? 'compact' : 'comfort'
         }))}
+        onShowToast={showToast}
       />
     </div>
   );
