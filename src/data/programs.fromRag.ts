@@ -33,10 +33,10 @@ const RX = {
   frist: /\b(fr(i|í)st|einreichfrist|endet am\s+\d{1,2}\.\d{1,2}\.\d{2,4}|laufend)\b/i,
   region: /\b(ober(ö|oe)sterreich|bezirk|region|landesweit|ooe|land o(ö|oe))\b/i,
   foerderart: /\b(f(ö|oe)rder(art|typ)|zuschuss|beihilfe|bonus|pr(ä|ae)mie|darlehen|stipendium|gutschein|beratung)\b/i,
-  betrag: /\b((bis\s*)?(€|eur)\s?\d[\d.\s]*|\d{1,3}\s?%|max\.?\s*(€|eur)?\s?\d[\d.\s]*)\b/i,
+  betrag: /\b((bis\s*)?(€|eur)\s?\d[\d.\s]*\s*(?:pro\s*(kurs|jahr|monat))?|\d{1,3}\s?%|max\.?\s*(€|eur)?\s?\d[\d.\s]*)\b/i,
   ziel: /\b(zielgruppe|unternehmen|betrieb(e)?|mitarbeiter(:innen)?|beschäftigte|arbeitssuchende|lehrling(e)?|kmu|frauen|wiedereinsteiger(:innen)?)\b/i,
-  vrs: /\b(voraussetzungen?|erforderlich|nur wenn|mindestens|nachweis|mitgliedschaft|anwes(enheit|endheit)|anerk(annt|annte)r?\s+anbieter)\b/i,
-  antrag: /\b(antragsweg|beantragung|online\-?formular|einreichung|antrag|portal|eams|e-?ams)\b/i,
+  vrs: /\b(voraussetzungen?|bedingungen|erforderlich|nur wenn|mindestens|nachweis|mitgliedschaft|anwes(enheit|endheit)|anerk(annt|annte)r?\s+anbieter)\b/i,
+  antrag: /\b(antragsweg|beantragung|wo\s*(beantragen|einreichen)|wie\s*(beantragen|einreichen)|portal|e-?ams|eams)\b/i,
 };
 
 const K_PROG = /(f(ö|oe)rder(ung|programm)|zuschuss|beihilfe|bonus|pr(ä|ae)mie|altersteilzeit|bildungsteilzeit|bildungskarenz|qualifizierungs|aq(u|ü)a|qbn|impuls|ibb|ibg)/i;
@@ -44,10 +44,23 @@ const K_SECT = /(zielgruppe|voraussetzungen|antragsweg|f(ö|oe)rderh(ö|oe)he|be
 const K_NOISE = /(scanne den link|kontakt|adresse|telefon|e-?mail|www\.|europaplatz|straße\s+\d|str\.)/i;
 const SKIP_TITLE = /^(vorw(ö|oe)rter|inhaltsverzeichnis|gesch(ä|ae)ftsabteilung|kontakt|impressum|service|notizen)$/i;
 
+// Überschrifts-Synonyme für robuste Extraktion
+const HEADS = {
+  zielgruppe: /(zielgruppe|wer\s+wird\s+gef(ö|oe)rdert)/i,
+  foerderart: /(f(ö|oe)rderart|was\s+wird\s+gef(ö|oe)rdert|wofür|wobei)/i,
+  foerderhoehe: /(f(ö|oe)rderh(ö|oe)he|wie\s+(hoch|viel)|betrag|umfang)/i,
+  voraussetzungen: /(voraussetzungen?|bedingungen|erforderlich|wer\s+darf)/i,
+  antragsweg: /(antragsweg|beantragung|wo\s+(beantragen|einreichen)|wie\s+(beantragen|einreichen)|portal|e-?ams|eams)/i,
+  frist: /(frist|einreichfrist|endet am|laufend|bis\s+\d{1,2}\.\d{1,2}\.\d{2,4})/i,
+  region: /(region|ober(ö|oe)sterreich|ooe|bezirk|landesweit)/i,
+};
+
+const ANY_HEAD = new RegExp(Object.values(HEADS).map(r => r.source).join('|'), 'i');
+
 function dedupe(a: string[]) {
   const seen = new Set<string>(); 
   const out: string[] = [];
-  for (const s of a.map(x => x.trim()).filter(Boolean)) {
+  for (const s of a.map(x => x.replace(/\s+/g,' ').trim()).filter(Boolean)) {
     const k = s.toLowerCase();
     if (!seen.has(k)) { 
       seen.add(k); 
@@ -57,13 +70,30 @@ function dedupe(a: string[]) {
   return out;
 }
 
-function push(arr: string[], s: string, rx: RegExp, max = 4) {
+function push(arr: string[], s: string, rx: RegExp, max = 6) {
   if (arr.length >= max) return;
   if (!rx.test(s)) return;
   const t = s.replace(/\s+/g,' ').trim();
   if (!t) return;
   const v = t.length > 180 ? t.slice(0,180)+' …' : t;
   if (!arr.some(x => x.toLowerCase() === v.toLowerCase())) arr.push(v);
+}
+
+function splitToItems(segment: string): string[] {
+  return segment
+    .split(/\n|[•\u2022]|[\u2013-]/g)
+    .map(s => s.replace(/\s+/g,' ').trim())
+    .filter(s => s.length >= 6);
+}
+
+function extractBlock(text: string, head: RegExp): string[] {
+  const m = head.exec(text); 
+  if (!m) return [];
+  const start = m.index + m[0].length;
+  const rest = text.slice(start);
+  const stop = ANY_HEAD.exec(rest);
+  const seg = stop ? rest.slice(0, stop.index) : rest;
+  return splitToItems(seg);
 }
 
 function buildPageIndex(meta: RagMeta[]) {
@@ -128,6 +158,8 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     const cs = chunksForRange(chunks, m.start, m.end);
     if (!isLikelyProgram(cs, m.name)) continue; // Container/Adressen raus
 
+    const full = cs.map(c => (c.text || '').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');
+
     const p: Program = {
       id: m.id,
       name: m.name,
@@ -157,68 +189,109 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
       deadline: '',
     };
 
-    // Temporäre Arrays für Heuristik
-    const tempZielgruppe: string[] = [];
-    const tempFoerderart: string[] = [];
-    const tempFoerderhoehe: string[] = [];
-    const tempVoraussetzungen: string[] = [];
-    const tempAntragsweg: string[] = [];
-    const tempRegion: string[] = [];
-    const tempThemen: string[] = [];
+    // 1) Abschnittsweise extrahieren
+    const zielgruppeItems = extractBlock(full, HEADS.zielgruppe);
+    const foerderartItems = extractBlock(full, HEADS.foerderart);
+    const voraussetzungenItems = extractBlock(full, HEADS.voraussetzungen);
+    const antragswegItems = extractBlock(full, HEADS.antragsweg);
 
-    for (const c of cs) {
-      const s = c.text || '';
-      if (p.frist.typ === 'laufend' && RX.frist.test(s)) {
-        const match = s.match(RX.frist)![0];
-        p.frist = { typ: 'stichtag', datum: match };
-        p.deadline = match;
-      }
-
-      // Section-gesteuert + Fallback
-      const sec = (c.section || '').toLowerCase();
-      if (sec === 'zielgruppe')         push(tempZielgruppe, s, RX.ziel, 6);
-      else if (sec === 'foerderart')    push(tempFoerderart, s, RX.foerderart, 6);
-      else if (sec === 'foerderhoehe')  push(tempFoerderhoehe, s, RX.betrag, 6);
-      else if (sec === 'voraussetzungen') push(tempVoraussetzungen, s, RX.vrs, 6);
-      else if (sec === 'antragsweg')    push(tempAntragsweg, s, RX.antrag, 4);
-      else if (sec === 'region')        push(tempRegion, s, RX.region, 4);
-      else {
-        // Fallback: alle Patterns testen
-        push(tempFoerderhoehe, s, RX.betrag, 6);
-        push(tempFoerderart, s, RX.foerderart, 6);
-        push(tempZielgruppe, s, RX.ziel, 6);
-        push(tempVoraussetzungen, s, RX.vrs, 6);
-        push(tempAntragsweg, s, RX.antrag, 4);
-        push(tempRegion, s, RX.region, 4);
-        push(tempThemen, s, /\b(bildung|qualifizierung|innovation|digitalisierung|nachhaltigkeit)\b/i, 6);
-      }
-    }
-
-    // Konvertiere zu finalen Strukturen
-    p.zielgruppe = dedupe(tempZielgruppe);
-    p.foerderart = dedupe(tempFoerderart).map(art => {
+    p.zielgruppe = dedupe(zielgruppeItems).slice(0, 6);
+    p.foerderart = dedupe(foerderartItems).slice(0, 6).map(art => {
       if (art.toLowerCase().includes('kurs')) return 'kurskosten';
       if (art.toLowerCase().includes('personal')) return 'personalkosten';
       if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
       if (art.toLowerCase().includes('beratung')) return 'beratung';
       return 'kurskosten'; // default
     }) as any;
-    
-    p.foerderhoehe = dedupe(tempFoerderhoehe).map(hoehe => ({
-      label: hoehe
-    }));
-    
-    p.voraussetzungen = dedupe(tempVoraussetzungen);
-    p.themen = dedupe(tempThemen);
-    
+    p.voraussetzungen = dedupe(voraussetzungenItems).slice(0, 6);
+
     // Antragsweg normalisieren
-    if (tempAntragsweg.length > 0) {
-      const antrag = tempAntragsweg[0].toLowerCase();
+    if (antragswegItems.length > 0) {
+      const antrag = antragswegItems[0].toLowerCase();
       if (antrag.includes('eams')) p.antragsweg = 'eams';
       else if (antrag.includes('land') || antrag.includes('oö')) p.antragsweg = 'land_ooe_portal';
       else if (antrag.includes('wko')) p.antragsweg = 'wko_verbund';
       else if (antrag.includes('träger')) p.antragsweg = 'traeger_direkt';
     }
+
+    // 2) Förderhöhe: zuerst Abschnitt, sonst Beträge/Prozente im gesamten Text
+    const fh = extractBlock(full, HEADS.foerderhoehe);
+    if (fh.length) {
+      p.foerderhoehe = dedupe(fh).slice(0, 6).map(hoehe => ({
+        label: hoehe
+      }));
+    } else {
+      const amounts = full.match(new RegExp(RX.betrag.source, 'gi')) || [];
+      p.foerderhoehe = dedupe(amounts.map(s => s.replace(/\s+/g,' ').trim())).slice(0, 4).map(hoehe => ({
+        label: hoehe
+      }));
+    }
+
+    // Frist direkt als kurze Info
+    const frMatch = full.match(RX.frist);
+    if (frMatch) {
+      const fristText = frMatch[0];
+      if (fristText.toLowerCase().includes('laufend')) {
+        p.frist = { typ: 'laufend' };
+      } else {
+        p.frist = { typ: 'stichtag', datum: fristText };
+      }
+    }
+
+    // 3) Falls in den Chunks etwas markiert war, ergänzend aufnehmen
+    const tempZielgruppe: string[] = [...p.zielgruppe];
+    const tempFoerderart: string[] = [];
+    const tempFoerderhoehe: string[] = [];
+    const tempVoraussetzungen: string[] = [...p.voraussetzungen];
+    const tempAntragsweg: string[] = [];
+    const tempRegion: string[] = [];
+    const tempThemen: string[] = [];
+
+    for (const c of cs) {
+      const s = c.text || '';
+      
+      switch ((c.section || '').toLowerCase()) {
+        case 'region':          push(tempRegion, s, RX.region); break;
+        case 'foerderart':      push(tempFoerderart, s, RX.foerderart); break;
+        case 'foerderhoehe':    push(tempFoerderhoehe, s, RX.betrag); break;
+        case 'zielgruppe':      push(tempZielgruppe, s, RX.ziel); break;
+        case 'voraussetzungen': push(tempVoraussetzungen, s, RX.vrs); break;
+        case 'antragsweg':      push(tempAntragsweg, s, RX.antrag); break;
+        default:
+          // opportunistisch
+          push(tempFoerderhoehe, s, RX.betrag);
+          push(tempFoerderart, s, RX.foerderart);
+          push(tempZielgruppe, s, RX.ziel);
+          push(tempVoraussetzungen, s, RX.vrs);
+          push(tempAntragsweg, s, RX.antrag);
+          push(tempRegion, s, RX.region);
+          push(tempThemen, s, /\b(bildung|qualifizierung|innovation|digitalisierung|nachhaltigkeit)\b/i, 6);
+      }
+    }
+
+    // 4) Finales Dedupe/Trim und Ergänzung
+    p.zielgruppe = dedupe([...p.zielgruppe, ...tempZielgruppe]);
+    
+    // Ergänze Förderart falls noch leer
+    if (p.foerderart.length === 0) {
+      p.foerderart = dedupe(tempFoerderart).map(art => {
+        if (art.toLowerCase().includes('kurs')) return 'kurskosten';
+        if (art.toLowerCase().includes('personal')) return 'personalkosten';
+        if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
+        if (art.toLowerCase().includes('beratung')) return 'beratung';
+        return 'kurskosten'; // default
+      }) as any;
+    }
+    
+    // Ergänze Förderhöhe falls noch leer
+    if (p.foerderhoehe.length === 0) {
+      p.foerderhoehe = dedupe(tempFoerderhoehe).map(hoehe => ({
+        label: hoehe
+      }));
+    }
+    
+    p.voraussetzungen = dedupe([...p.voraussetzungen, ...tempVoraussetzungen]);
+    p.themen = dedupe(tempThemen);
     
     // Region normalisieren
     if (tempRegion.length > 0) {
@@ -232,10 +305,37 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.fundingType = p.foerderart.length > 0 ? p.foerderart[0] : '';
     p.budget = p.foerderhoehe.length > 0 ? p.foerderhoehe[0].label : '';
     p.themeField = p.themen.length > 0 ? p.themen[0] : '';
+    p.deadline = p.frist.typ === 'laufend' ? 'laufend' : p.frist.datum || '';
 
     byId.set(p.id, p);
   }
 
   console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
   return [...byId.values()];
+}
+
+function push(arr: string[], s: string, rx: RegExp, max = 6) {
+  if (arr.length >= max) return;
+  if (!rx.test(s)) return;
+  const t = s.replace(/\s+/g,' ').trim();
+  if (!t) return;
+  const v = t.length > 180 ? t.slice(0,180)+' …' : t;
+  if (!arr.some(x => x.toLowerCase() === v.toLowerCase())) arr.push(v);
+}
+
+function splitToItems(segment: string): string[] {
+  return segment
+    .split(/\n|[•\u2022]|[\u2013-]/g)
+    .map(s => s.replace(/\s+/g,' ').trim())
+    .filter(s => s.length >= 6);
+}
+
+function extractBlock(text: string, head: RegExp): string[] {
+  const m = head.exec(text); 
+  if (!m) return [];
+  const start = m.index + m[0].length;
+  const rest = text.slice(start);
+  const stop = ANY_HEAD.exec(rest);
+  const seg = stop ? rest.slice(0, stop.index) : rest;
+  return splitToItems(seg);
 }
