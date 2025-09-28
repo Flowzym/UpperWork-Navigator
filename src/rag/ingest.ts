@@ -3,6 +3,13 @@ import { programMeta } from '../data/programMeta';
 import { showToast } from '../lib/ui/toast';
 import { loadStats, loadChunksCached, getRagCacheInfo } from '../lib/cache/ragCache';
 
+// URL-Helper: respektiert <base href> und import.meta.env.BASE_URL
+const BASE = new URL(
+  (document.querySelector('base')?.getAttribute('href') ?? import.meta.env.BASE_URL ?? '/'),
+  location.href
+);
+const url = (p: string) => new URL(p.replace(/^\//, ''), BASE).toString();
+
 // Normalisierung für Suche (wie in searchIndex.ts)
 function normalizeText(text: string): string {
   return text
@@ -38,10 +45,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     if (!chunks.length) {
       console.warn('[RAG] Keine Chunks verfügbar – verwende Fallback-Simulation');
       showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
-      // Status für UI markieren
-      const cacheModule = await import('../lib/cache/ragCache');
-      (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
-      return [];
+      throw new Error('Keine RAG-Chunks verfügbar - public/rag/chunks.json fehlt');
     }
     
     console.log(`[RAG] ${chunks.length} Chunks erfolgreich geladen (Quelle: ${source})`);
@@ -60,131 +64,34 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     return valid;
   } catch (error) {
     console.error('[RAG] Fehler beim Laden der Chunks:', error);
-    console.warn('[RAG] Simulationsdaten aktiv: <BASE_URL>/rag/{stats.json,chunks.json} nicht gefunden. ' +
-                 'Bitte die Dateien in public/rag/ ablegen und committen. Danach neu laden.');
-    showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
-    showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
-    // Status für UI markieren
-    const cacheModule = await import('../lib/cache/ragCache');
-    (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
-    return [];
+    console.error('[RAG] Kritischer Fehler: RAG-Dateien nicht verfügbar');
+    showToast('RAG-System nicht verfügbar: public/rag/*.json Dateien fehlen', 'error');
+    throw error;
   }
-}
-
-// Simulierte Inhalte als Fallback (falls PDF nicht vorhanden)
-function generateSimulatedContent(programMeta: Record<string, any>): { chunks: DocChunk[]; stats: IngestionStats } {
-  const chunks: DocChunk[] = [];
-  let chunkId = 0;
-  
-  Object.entries(programMeta).forEach(([programId, data]) => {
-    const [startPage, endPage] = data.pages;
-    
-    for (let page = startPage; page <= endPage; page++) {
-      const pageOffset = page - startPage;
-      
-      let content = `${data.name}\n\n`;
-      let section = 'allgemein';
-      
-      switch (pageOffset) {
-        case 0:
-          content += `ÜBERBLICK\n${data.name} unterstützt die berufliche Weiterbildung.\n\nZIELGRUPPE\nBeschäftigte und Arbeitsuchende in Oberösterreich.`;
-          section = 'zielgruppe';
-          break;
-        case 1:
-          content += `FÖRDERHÖHE\nBis zu 75% der Kurskosten, maximal 5.000€ pro Jahr.\n\nVORAUSSETZUNGEN\nHauptwohnsitz in Oberösterreich, Mindestalter 18 Jahre.`;
-          section = 'förderhöhe';
-          break;
-        case 2:
-          content += `ANTRAGSWEG\nAntragstellung über das entsprechende Portal.\n\nFRIST\nLaufende Antragstellung möglich.`;
-          section = 'antragsweg';
-          break;
-        default:
-          content += `PASST WENN\nSie die Voraussetzungen erfüllen.\n\nPASST NICHT WENN\nVoraussetzungen nicht erfüllt sind.`;
-          section = 'passt_wenn';
-      }
-      
-      // Chunk erstellen
-      chunks.push({
-        id: `${programId}-chunk-${++chunkId}`,
-        text: content,
-        normalizedText: normalizeText(content),
-        programId,
-        programName: data.name,
-        page,
-        section,
-        stand: data.stand,
-        status: data.status,
-        startChar: 0,
-        endChar: content.length
-      });
-    }
-  });
-  
-  const stats: IngestionStats = {
-    totalPages: Math.max(...Object.values(programMeta).map((d: any) => d.pages[1])),
-    totalChunks: chunks.length,
-    programsFound: Object.keys(programMeta).length,
-    processingTime: 0
-  };
-  
-  return { chunks, stats };
 }
 
 // Hauptfunktion für Ingestion
 export async function ingestBrochure(): Promise<{ chunks: DocChunk[]; stats: IngestionStats }> {
   const startTime = Date.now();
   
-  try {
-    // Lade Chunks aus Build-Time Ingestion
-    const chunks = await loadChunksFromJSON();
-    
-    // Fallback auf simulierte Inhalte wenn keine Chunks geladen werden konnten
-    if (chunks.length === 0) {
-      console.log('Verwende simulierte Broschüren-Inhalte (chunks.json nicht verfügbar)');
-      const { chunks: simChunks, stats: simStats } = generateSimulatedContent(programMeta);
-      return { 
-        chunks: simChunks, 
-        stats: { 
-          ...simStats, 
-          processingTime: Date.now() - startTime 
-        } 
-      };
-    }
-    
-    // Lade Statistiken (optional)
-    let statsData;
-    try {
-      const statsResponse = await fetch('/rag/stats.json');
-      if (statsResponse.ok) {
-        statsData = await statsResponse.json();
-      }
-    } catch (e) {
-      // Statistiken sind optional
-    }
-    
-    const stats: IngestionStats = {
-      totalPages: statsData?.totalPages || 48,
-      totalChunks: chunks.length,
-      programsFound: statsData?.programsFound || 6,
-      processingTime: Date.now() - startTime
-    };
-    
-    return { chunks, stats };
-    
-  } catch (error) {
-    console.error('Fehler bei PDF-Ingestion:', error);
-    
-    // Fallback auf simulierte Inhalte
-    console.log('Verwende simulierte Broschüren-Inhalte als Fallback');
-    const { chunks: simChunks, stats: simStats } = generateSimulatedContent(programMeta);
-    return { 
-      chunks: simChunks, 
-      stats: { 
-        ...simStats, 
-        processingTime: Date.now() - startTime 
-      } 
-    };
+  // Lade Chunks aus Build-Time Ingestion (harte Abhängigkeit)
+  const chunks = await loadChunksFromJSON();
+  
+  // Lade Statistiken
+  const statsResponse = await fetch(url('rag/stats.json'));
+  if (!statsResponse.ok) {
+    throw new Error(`stats.json nicht verfügbar: ${statsResponse.status}`);
   }
+  const statsData = await statsResponse.json();
+  
+  const stats: IngestionStats = {
+    totalPages: statsData.totalPages,
+    totalChunks: chunks.length,
+    programsFound: statsData.programsFound,
+    processingTime: Date.now() - startTime
+  };
+  
+  return { chunks, stats };
 }
 
 // Hilfsfunktion: Chunk-Qualität prüfen

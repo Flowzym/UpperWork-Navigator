@@ -98,7 +98,7 @@ export default function SettingsModal({
     filename: '',
     chunks: 0,
     lastUpdate: '',
-    source: 'network' as 'network' | 'idb' | 'simulation',
+    source: 'network' as 'network' | 'idb',
     buildId: '',
     urlBase: ''
   });
@@ -262,8 +262,6 @@ export default function SettingsModal({
         return <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">🌐 Network</span>;
       case 'idb':
         return <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">💾 Cache</span>;
-      case 'simulation':
-        return <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">🎭 Simulation</span>;
       default:
         return <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">❓ Unbekannt</span>;
     }
@@ -455,7 +453,7 @@ export default function SettingsModal({
             <div className="settings-empty-icon">📄</div>
             <div className="settings-empty-title">Keine Broschüre geladen</div>
             <div className="settings-empty-text">
-              {getSourceBadge(brochureStatus.source)} • Für echte RAG-Antworten bitte Broschüre hochladen.
+              {getSourceBadge(brochureStatus.source)} • RAG-Dateien nicht verfügbar.
             </div>
             <div className="settings-empty-text">
               BASE_URL: <code className="text-xs">{brochureStatus.urlBase || '/'}</code>

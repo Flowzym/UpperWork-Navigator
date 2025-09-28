@@ -28,7 +28,7 @@ export type RagStats = {
 };
 
 export type RagCacheInfo = {
-  source: 'network' | 'idb' | 'simulation';
+  source: 'network' | 'idb';
   buildId?: string;
   chunks: number;
   urlBase: string;
