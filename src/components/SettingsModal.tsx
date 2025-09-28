@@ -137,7 +137,7 @@ export default function SettingsModal({
         const stats = await statsResponse.json();
         setBrochureStatus({
           loaded: true,
-          filename: stats?.source || 'Broschüre',
+          filename: stats?.source || 'brochure.pdf',
           chunks: stats.totalChunks || 0,
           lastUpdate: new Date().toLocaleDateString('de-DE'),
           source: cacheInfo.source,

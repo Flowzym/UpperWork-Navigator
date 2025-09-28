@@ -1,26 +1,36 @@
-import { Program } from '../types';
+// src/data/programs.fromRag.ts
+export type Program = {
+  id: string;
+  name: string;
+  status?: string | null;
+  frist?: string | null;
+  region?: string[];
+  foerderart?: string[];
+  foerderhoehe?: string[];
+  zielgruppe?: string[];
+  voraussetzungen?: string[];
+  antragsweg?: string[];
+  quelle?: { seite?: number; stand?: string | null };
+  pages?: { start: number; end: number };
+  // optional für Karten-Teaser:
+  summary?: string;
+};
 
-export interface RagProgramMeta {
+export type RagMeta = {
   programId: string;
   programName: string;
   pages: [number, number];
-  stand: string | null;
-  status: 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen' | null;
-}
+  stand?: string | null;
+  status?: string | null;
+};
 
-export interface RagChunk {
-  id: string;
-  text: string;
-  normalizedText: string;
-  programId: string;
-  programName: string;
+export type RagChunk = {
   page: number;
   section: string;
-  stand: string;
-  status: 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen';
-  startChar: number;
-  endChar: number;
-}
+  text: string;
+  status?: string | null;
+  stand?: string | null;
+};
 
 type ProgramStatus = 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen';
 
@@ -30,21 +40,33 @@ function normalizeStatus(raw?: string | null): ProgramStatus {
   if (t.includes('endet')) return 'endet_am';
   if (t.includes('ausgesetzt') || t.includes('paus')) return 'ausgesetzt';
   if (t.includes('eingestellt') || t.includes('entfallen') || t.includes('beendet')) return 'entfallen';
-  return ['aktiv','ausgesetzt','endet_am','entfallen'].includes(t as any) ? (t as ProgramStatus) : 'aktiv';
+  return (['aktiv','ausgesetzt','endet_am','entfallen'] as const).includes(t as any) ? (t as ProgramStatus) : 'aktiv';
 }
 
-// Kompaktes Seiten-Index für binary search
-function indexMetaByPage(meta: RagProgramMeta[]) {
+// Heuristik-Regex
+const RX = {
+  frist: /\b(fr(i|í)st|einreichfrist|endet am\s+\d{1,2}\.\d{1,2}\.\d{2,4})\b/i,
+  region: /\b(ober(ö|oe)sterreich|bezirk|region|landesweit)\b/i,
+  foerderart: /\bf(ö|oe)rder(art|typ)|(zuschuss|bonus|darlehen|beihilfe|prämie)\b/i,
+  betrag: /\b(€|\beur\w*|\bbetrag\b|%|max\.)/i,
+  ziel: /\b(zielgruppe|unternehmen|lehrling|kmu|startup|betrieb|mitarbeiter)\b/i,
+  vrs: /\bvoraussetzungen?\b/i,
+  antrag: /\b(antragsweg|beantragung|online\-?formular|einreichung|antrag)\b/i,
+};
+
+// Programm-Evidenz + Teaser
+const K_PROG = /(förder(ung|programm)|zuschuss|beihilfe|bonus|prämie|altersteilzeit|bildungsteilzeit|bildungskarenz|qualifizierungs|aq(u|ü)a|qbn|impuls|ibb|ibg)/i;
+const K_SECT = /(zielgruppe|voraussetzungen|antragsweg|förderh(ö|oe)he|betrag|%|max\.)/i;
+const K_NOISE = /(scanne den link|kontakt|adresse|telefon|e-?mail|www\.|europaplatz|straße\s+\d|str\.)/i;
+
+function push(arr: string[], s: string, rx: RegExp, max = 4) {
+  if (arr.length < max && rx.test(s)) arr.push(s.length > 180 ? s.slice(0, 180) + ' …' : s);
+}
+
+function buildPageIndex(meta: RagMeta[]) {
   const arr = meta
     .filter(m => Array.isArray(m.pages) && typeof m.pages[0] === 'number' && typeof m.pages[1] === 'number')
-    .map(m => ({ 
-      start: m.pages[0], 
-      end: m.pages[1], 
-      id: m.programId, 
-      name: m.programName, 
-      stand: m.stand ?? null, 
-      status: m.status ?? null 
-    }))
+    .map(m => ({ start: m.pages[0], end: m.pages[1], id: m.programId, name: m.programName, stand: m.stand ?? null, status: m.status ?? null }))
     .sort((a, b) => a.start - b.start);
 
   function find(page: number) {
@@ -60,338 +82,79 @@ function indexMetaByPage(meta: RagProgramMeta[]) {
   return { arr, find };
 }
 
-// Extrahiere Zielgruppe aus Chunks
-function extractZielgruppe(chunks: RagChunk[]): string[] {
-  const zielgruppeChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('zielgruppe') ||
-    c.text.toLowerCase().includes('zielgruppe')
-  );
-  
-  const zielgruppen = new Set<string>();
-  
-  zielgruppeChunks.forEach(chunk => {
-    const text = chunk.text.toLowerCase();
-    if (text.includes('beschäftigte')) zielgruppen.add('Beschäftigte');
-    if (text.includes('arbeitsuchende')) zielgruppen.add('Arbeitsuchende');
-    if (text.includes('unternehmen')) zielgruppen.add('Unternehmen');
-    if (text.includes('kmu')) zielgruppen.add('KMU');
-    if (text.includes('frauen')) zielgruppen.add('Frauen');
-    if (text.includes('lehrling')) zielgruppen.add('Lehrlinge');
-    if (text.includes('wiedereinstieg')) zielgruppen.add('Wiedereinsteigerinnen');
-    if (text.includes('50+') || text.includes('älter')) zielgruppen.add('50+');
-  });
-  
-  return Array.from(zielgruppen);
+function chunksForRange(chunks: RagChunk[], start: number, end: number) {
+  return chunks.filter(c => c.page >= start && c.page <= end);
 }
 
-// Extrahiere Förderart aus Chunks
-function extractFoerderart(chunks: RagChunk[]): ('kurskosten' | 'personalkosten' | 'beihilfe' | 'beratung')[] {
-  const foerderartChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('förderhöhe') ||
-    c.section.toLowerCase().includes('förderart') ||
-    c.text.toLowerCase().includes('förder')
-  );
-  
-  const foerderarten = new Set<'kurskosten' | 'personalkosten' | 'beihilfe' | 'beratung'>();
-  
-  foerderartChunks.forEach(chunk => {
-    const text = chunk.text.toLowerCase();
-    if (text.includes('kurskosten') || text.includes('kurs')) foerderarten.add('kurskosten');
-    if (text.includes('personalkosten') || text.includes('personal')) foerderarten.add('personalkosten');
-    if (text.includes('beihilfe') || text.includes('lebensunterhalt')) foerderarten.add('beihilfe');
-    if (text.includes('beratung') || text.includes('coaching')) foerderarten.add('beratung');
-  });
-  
-  return Array.from(foerderarten);
+function isLikelyProgram(cs: RagChunk[]) {
+  if (!cs.length) return false;
+  const head = cs.slice(0, 8).map(c => c.text).join(' ');
+  return K_PROG.test(head) && cs.some(c => K_SECT.test(c.text));
 }
 
-// Extrahiere Förderhöhe aus Chunks
-function extractFoerderhoehe(chunks: RagChunk[]) {
-  const foerderhoeheChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('förderhöhe') ||
-    c.text.toLowerCase().includes('förder')
-  );
-  
-  const foerderhoehe = [];
-  
-  foerderhoeheChunks.forEach(chunk => {
-    const text = chunk.text;
-    
-    // Suche nach Prozentangaben
-    const percentMatch = text.match(/(\d+)%/);
-    const euroMatch = text.match(/(\d+\.?\d*)\s*€/);
-    const maxMatch = text.match(/max(?:imal)?\s*(\d+\.?\d*)/i);
-    
-    if (percentMatch || euroMatch || maxMatch) {
-      foerderhoehe.push({
-        label: 'Förderung',
-        quote: percentMatch ? parseInt(percentMatch[1]) : undefined,
-        max: maxMatch ? parseInt(maxMatch[1]) : euroMatch ? parseInt(euroMatch[1]) : undefined,
-        note: 'aus Broschüre extrahiert'
-      });
-    }
-  });
-  
-  // Fallback wenn nichts gefunden
-  if (foerderhoehe.length === 0) {
-    foerderhoehe.push({
-      label: 'Förderung',
-      quote: 50,
-      note: 'Details siehe Broschüre'
-    });
+function deriveTeaser(cs: RagChunk[]) {
+  for (const c of cs) {
+    const t = (c.text || '').trim();
+    if (!t) continue;
+    if (K_NOISE.test(t)) continue;
+    const s = t.replace(/\s+/g, ' ').trim();
+    if (s.length <= 220) return s;
+    const cut = s.slice(0, 220);
+    return cut.slice(0, cut.lastIndexOf(' ')) + ' …';
   }
-  
-  return foerderhoehe;
+  return undefined;
 }
 
-// Extrahiere Voraussetzungen aus Chunks
-function extractVoraussetzungen(chunks: RagChunk[]): string[] {
-  const voraussetzungenChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('voraussetzung') ||
-    c.text.toLowerCase().includes('voraussetzung')
-  );
-  
-  const voraussetzungen = new Set<string>();
-  
-  voraussetzungenChunks.forEach(chunk => {
-    const lines = chunk.text.split('\n').filter(line => line.trim());
-    lines.forEach(line => {
-      if (line.includes('•') || line.includes('-') || line.includes('*')) {
-        const cleaned = line.replace(/^[•\-*\s]+/, '').trim();
-        if (cleaned.length > 10 && cleaned.length < 100) {
-          voraussetzungen.add(cleaned);
-        }
-      }
-    });
-  });
-  
-  return Array.from(voraussetzungen).slice(0, 5); // Max 5 Voraussetzungen
-}
+// Hauptfunktion
+export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Program[] {
+  const idx = buildPageIndex(meta);
+  const byId = new Map<string, Program>();
 
-// Extrahiere Themen aus Chunks
-function extractThemen(chunks: RagChunk[]): string[] {
-  const themen = new Set<string>();
-  
-  chunks.forEach(chunk => {
-    const text = chunk.text.toLowerCase();
-    if (text.includes('digital')) themen.add('Digitalisierung');
-    if (text.includes('sprach') || text.includes('deutsch')) themen.add('Sprachen');
-    if (text.includes('technik') || text.includes('handwerk')) themen.add('Technik & Handwerk');
-    if (text.includes('management') || text.includes('führung')) themen.add('Management');
-    if (text.includes('nachhaltig')) themen.add('Nachhaltigkeit');
-    if (text.includes('innovation')) themen.add('Innovation');
-    if (text.includes('pflege') || text.includes('gesundheit')) themen.add('Pflege & Gesundheit');
-    if (text.includes('qualifizierung') || text.includes('weiterbildung')) themen.add('Berufliche Weiterbildung');
-  });
-  
-  return Array.from(themen);
-}
-
-// Extrahiere Antragsweg aus Chunks
-function extractAntragsweg(chunks: RagChunk[]): 'eams' | 'land_ooe_portal' | 'wko_verbund' | 'traeger_direkt' {
-  const antragswegChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('antragsweg') ||
-    c.text.toLowerCase().includes('antrag')
-  );
-  
-  for (const chunk of antragswegChunks) {
-    const text = chunk.text.toLowerCase();
-    if (text.includes('eams')) return 'eams';
-    if (text.includes('land') && text.includes('oö')) return 'land_ooe_portal';
-    if (text.includes('wko') || text.includes('verbund')) return 'wko_verbund';
-    if (text.includes('träger') || text.includes('direkt')) return 'traeger_direkt';
-  }
-  
-  return 'land_ooe_portal'; // Default
-}
-
-// Extrahiere Frist aus Chunks
-function extractFrist(chunks: RagChunk[]) {
-  const fristChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('frist') ||
-    c.text.toLowerCase().includes('frist') ||
-    c.text.toLowerCase().includes('stichtag')
-  );
-  
-  for (const chunk of fristChunks) {
-    const text = chunk.text;
-    const dateMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-    if (dateMatch) {
-      return { typ: 'stichtag' as const, datum: dateMatch[0] };
-    }
-    if (text.toLowerCase().includes('laufend')) {
-      return { typ: 'laufend' as const };
-    }
-  }
-  
-  return { typ: 'laufend' as const };
-}
-
-// Extrahiere Region aus Chunks
-function extractRegion(chunks: RagChunk[]): string {
-  const regionChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('region') ||
-    c.text.toLowerCase().includes('oberösterreich') ||
-    c.text.toLowerCase().includes('oö')
-  );
-  
-  for (const chunk of regionChunks) {
-    const text = chunk.text.toLowerCase();
-    if (text.includes('oberösterreich') || text.includes('oö')) return 'Oberösterreich';
-    if (text.includes('österreich')) return 'Österreich';
-    if (text.includes('linz')) return 'Linz';
-    if (text.includes('wels')) return 'Wels';
-  }
-  
-  return 'Oberösterreich'; // Default
-}
-
-// Generiere Teaser aus ersten Chunks
-function generateTeaser(chunks: RagChunk[]): string {
-  const overviewChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('überblick') ||
-    c.section.toLowerCase().includes('allgemein') ||
-    c.section.toLowerCase().includes('beschreibung')
-  );
-  
-  if (overviewChunks.length > 0) {
-    const text = overviewChunks[0].text;
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
-    if (sentences.length > 0) {
-      return sentences[0].trim() + '.';
-    }
-  }
-  
-  // Fallback: Erste Zeilen des ersten Chunks
-  if (chunks.length > 0) {
-    const firstLines = chunks[0].text.split('\n').slice(0, 2).join(' ').trim();
-    return firstLines.length > 50 ? firstLines.substring(0, 150) + '...' : firstLines;
-  }
-  
-  return 'Förderung für berufliche Weiterbildung in Oberösterreich.';
-}
-
-// Generiere "Passt wenn" aus Chunks
-function extractPasstWenn(chunks: RagChunk[]): string[] {
-  const passtChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('passt') ||
-    c.text.toLowerCase().includes('passt wenn')
-  );
-  
-  const items = new Set<string>();
-  
-  passtChunks.forEach(chunk => {
-    const lines = chunk.text.split('\n');
-    lines.forEach(line => {
-      if (line.includes('•') || line.includes('-') || line.includes('*')) {
-        const cleaned = line.replace(/^[•\-*\s]+/, '').trim();
-        if (cleaned.length > 10 && cleaned.length < 80) {
-          items.add(cleaned);
-        }
-      }
-    });
-  });
-  
-  return Array.from(items).slice(0, 4);
-}
-
-// Generiere "Passt nicht wenn" aus Chunks
-function extractPasstNichtWenn(chunks: RagChunk[]): string[] {
-  const passtNichtChunks = chunks.filter(c => 
-    c.section.toLowerCase().includes('passt nicht') ||
-    c.text.toLowerCase().includes('passt nicht wenn')
-  );
-  
-  const items = new Set<string>();
-  
-  passtNichtChunks.forEach(chunk => {
-    const lines = chunk.text.split('\n');
-    lines.forEach(line => {
-      if (line.includes('•') || line.includes('-') || line.includes('*')) {
-        const cleaned = line.replace(/^[•\-*\s]+/, '').trim();
-        if (cleaned.length > 10 && cleaned.length < 80) {
-          items.add(cleaned);
-        }
-      }
-    });
-  });
-  
-  return Array.from(items).slice(0, 4);
-}
-
-// Hauptfunktion: Baue Program[] aus RAG-Daten
-export function buildProgramsFromRag(
-  programMeta: RagProgramMeta[],
-  chunks: RagChunk[]
-): Program[] {
-  const idx = indexMetaByPage(programMeta);
-  const programs: Program[] = [];
-  
-  // Grundgerüst für alle Programme, nur „entfallen" ausblenden
   for (const m of idx.arr) {
     const status = normalizeStatus(m.status);
-    if (status === 'entfallen') continue; // nur wirklich entfallene Programme ausblenden
-    
-    // Sammle alle Chunks für dieses Programm (per Seitenbereich)
-    const programChunks = chunks.filter(c => {
-      const page = Number(c.page) || 0;
-      return page >= m.start && page <= m.end;
-    });
-    
-    if (programChunks.length === 0) continue; // Programme ohne Chunks überspringen
-    
-    const zielgruppe = extractZielgruppe(programChunks);
-    const foerderart = extractFoerderart(programChunks);
-    const foerderhoehe = extractFoerderhoehe(programChunks);
-    const voraussetzungen = extractVoraussetzungen(programChunks);
-    const themen = extractThemen(programChunks);
-    const antragsweg = extractAntragsweg(programChunks);
-    const frist = extractFrist(programChunks);
-    const region = extractRegion(programChunks);
-    const teaser = generateTeaser(programChunks);
-    const passt_wenn = extractPasstWenn(programChunks);
-    const passt_nicht_wenn = extractPasstNichtWenn(programChunks);
-    
-    // Bestimme Portal basierend auf Antragsweg
-    const portal = antragsweg === 'eams' ? 'AMS' :
-                  antragsweg === 'land_ooe_portal' ? 'Land OÖ' :
-                  antragsweg === 'wko_verbund' ? 'WKO' : 'Träger';
-    
-    const program: Program = {
+    if (status === 'entfallen') continue;
+
+    const cs = chunksForRange(chunks, m.start, m.end);
+    if (!isLikelyProgram(cs)) continue; // Container/Adressen raus
+
+    const p: Program = {
       id: m.id,
       name: m.name,
       status,
-      teaser,
-      zielgruppe,
-      foerderart,
-      foerderhoehe,
-      voraussetzungen,
-      antragsweg,
-      frist,
-      region,
-      themen,
-      passt_wenn,
-      passt_nicht_wenn,
-      quelle: { 
-        seite: m.start, 
-        stand: m.stand || '09/2025' 
-      },
-      
-      // Legacy compatibility
-      tags: themen,
-      portal,
-      description: teaser,
-      budget: foerderhoehe[0]?.max ? `bis ${foerderhoehe[0].max.toLocaleString()}€` : 
-              foerderhoehe[0]?.quote ? `${foerderhoehe[0].quote}%` : 'siehe Details',
-      targetGroup: zielgruppe,
-      fundingType: foerderart.join(', '),
-      requirements: voraussetzungen,
-      themeField: themen[0] || 'Weiterbildung',
-      deadline: frist.typ === 'laufend' ? 'laufend' : frist.datum || 'siehe Details'
+      frist: null,
+      region: [],
+      foerderart: [],
+      foerderhoehe: [],
+      zielgruppe: [],
+      voraussetzungen: [],
+      antragsweg: [],
+      quelle: { seite: m.start, stand: m.stand },
+      pages: { start: m.start, end: m.end },
+      summary: deriveTeaser(cs),
     };
-    
-    programs.push(program);
+
+    for (const c of cs) {
+      const s = c.text || '';
+      if (!p.frist && RX.frist.test(s)) p.frist = s.match(RX.frist)![0];
+      switch (c.section) {
+        case 'region':          push(p.region!, s, RX.region); break;
+        case 'foerderart':      push(p.foerderart!, s, RX.foerderart); break;
+        case 'foerderhoehe':    push(p.foerderhoehe!, s, RX.betrag); break;
+        case 'zielgruppe':      push(p.zielgruppe!, s, RX.ziel); break;
+        case 'voraussetzungen': push(p.voraussetzungen!, s, RX.vrs); break;
+        case 'antragsweg':      push(p.antragsweg!, s, RX.antrag); break;
+        default:
+          push(p.foerderart!, s, RX.foerderart);
+          push(p.foerderhoehe!, s, RX.betrag);
+          push(p.zielgruppe!, s, RX.ziel);
+          push(p.voraussetzungen!, s, RX.vrs);
+          push(p.antragsweg!, s, RX.antrag);
+          push(p.region!, s, RX.region);
+      }
+    }
+    byId.set(p.id, p);
   }
-  
-  return programs;
+
+  console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
+  return [...byId.values()];
 }

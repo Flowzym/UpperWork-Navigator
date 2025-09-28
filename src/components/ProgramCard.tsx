@@ -108,7 +108,7 @@ export default function ProgramCard({
 
       {/* Description */}
       <div className="card-teaser">
-        <p>{program.teaser}</p>
+        <p>{program.summary || program.teaser || ''}</p>
       </div>
 
       {/* Tags */}
@@ -127,7 +127,7 @@ export default function ProgramCard({
       <div className="card-info">
         <span className="info-item">
           <Euro size={12} className="mr-1" />
-          {program.foerderhoehe[0]?.max ? `bis ${program.foerderhoehe[0].max.toLocaleString()}€` : `${program.foerderhoehe[0]?.quote || 0}%`}
+          {program.foerderhoehe && program.foerderhoehe.length > 0 ? program.foerderhoehe[0] : 'Siehe Details'}
         </span>
         <span className="info-item">
           <MapPin size={12} className="mr-1" />
