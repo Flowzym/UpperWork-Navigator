@@ -4,6 +4,9 @@ import { CheckCircle, Clock, Pause, X, MapPin, Euro, MoreHorizontal, FileText, C
 import OverflowMenu from './OverflowMenu';
 import Tooltip from './Tooltip';
 import { useRef } from 'react';
+
+const has = (v?: string | any[]) => (Array.isArray(v) ? v.length > 0 : !!v);
+
 interface ProgramCardProps {
   program: Program;
   onShowDetail: (programId: string) => void;
