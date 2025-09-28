@@ -272,8 +272,8 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
         if (art.toLowerCase().includes('personal')) return 'personalkosten';
         if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
         if (art.toLowerCase().includes('beratung')) return 'beratung';
-        return 'kurskosten'; // default
-      }) as any;
+        return undefined; // kein Default mehr
+      }).filter(Boolean) as any;
     }
     
     // Ergänze Förderhöhe falls noch leer
