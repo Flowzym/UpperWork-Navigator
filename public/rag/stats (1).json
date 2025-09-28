@@ -1,0 +1,11 @@
+{
+  "buildId": "20250928T124406Z-595beec814-8ada66",
+  "createdAt": "2025-09-28T12:44:06.730698Z",
+  "totalChunks": 353,
+  "totalPages": 100,
+  "programsFound": 30,
+  "avgChunkLen": 662,
+  "chunkSize": 800,
+  "overlap": 120,
+  "source": "brochure.pdf"
+}
