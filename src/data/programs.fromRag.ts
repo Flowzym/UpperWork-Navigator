@@ -33,6 +33,33 @@ function normalizeStatus(raw?: string | null): ProgramStatus {
   return ['aktiv','ausgesetzt','endet_am','entfallen'].includes(t as any) ? (t as ProgramStatus) : 'aktiv';
 }
 
+// Kompaktes Seiten-Index für binary search
+function indexMetaByPage(meta: RagProgramMeta[]) {
+  const arr = meta
+    .filter(m => Array.isArray(m.pages) && typeof m.pages[0] === 'number' && typeof m.pages[1] === 'number')
+    .map(m => ({ 
+      start: m.pages[0], 
+      end: m.pages[1], 
+      id: m.programId, 
+      name: m.programName, 
+      stand: m.stand ?? null, 
+      status: m.status ?? null 
+    }))
+    .sort((a, b) => a.start - b.start);
+
+  function find(page: number) {
+    let lo = 0, hi = arr.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1, it = arr[mid];
+      if (page < it.start) hi = mid - 1;
+      else if (page > it.end) lo = mid + 1;
+      else return it;
+    }
+    return null;
+  }
+  return { arr, find };
+}
+
 // Extrahiere Zielgruppe aus Chunks
 function extractZielgruppe(chunks: RagChunk[]): string[] {
   const zielgruppeChunks = chunks.filter(c => 
@@ -292,20 +319,53 @@ function extractPasstNichtWenn(chunks: RagChunk[]): string[] {
   return Array.from(items).slice(0, 4);
 }
 
+// Kompaktes Seiten-Index für binary search
+function indexMetaByPage(meta: RagProgramMeta[]) {
+  const arr = meta
+    .filter(m => Array.isArray(m.pages) && typeof m.pages[0] === 'number' && typeof m.pages[1] === 'number')
+    .map(m => ({ 
+      start: m.pages[0], 
+      end: m.pages[1], 
+      id: m.programId, 
+      name: m.programName, 
+      stand: m.stand ?? null, 
+      status: m.status ?? null 
+    }))
+    .sort((a, b) => a.start - b.start);
+
+  function find(page: number) {
+    let lo = 0, hi = arr.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1, it = arr[mid];
+      if (page < it.start) hi = mid - 1;
+      else if (page > it.end) lo = mid + 1;
+      else return it;
+    }
+    return null;
+  }
+  return { arr, find };
+}
+
 // Hauptfunktion: Baue Program[] aus RAG-Daten
 export function buildProgramsFromRag(
   programMeta: RagProgramMeta[],
   chunks: RagChunk[]
 ): Program[] {
+  const idx = indexMetaByPage(programMeta);
   const programs: Program[] = [];
   
-  programMeta.forEach(meta => {
-    // Status normalisieren und nur wirklich entfallene Programme ausblenden
-    const status = normalizeStatus(meta.status);
-    if (status === 'entfallen') return;
+  // Grundgerüst für alle Programme, nur „entfallen" ausblenden
+  for (const m of idx.arr) {
+    const status = normalizeStatus(m.status);
+    if (status === 'entfallen') continue; // nur wirklich entfallene Programme ausblenden
     
-    const programChunks = chunks.filter(c => c.programId === meta.programId);
-    if (programChunks.length === 0) return;
+    // Sammle alle Chunks für dieses Programm (per Seitenbereich)
+    const programChunks = chunks.filter(c => {
+      const page = Number(c.page) || 0;
+      return page >= m.start && page <= m.end;
+    });
+    
+    if (programChunks.length === 0) continue; // Programme ohne Chunks überspringen
     
     const zielgruppe = extractZielgruppe(programChunks);
     const foerderart = extractFoerderart(programChunks);
@@ -325,8 +385,8 @@ export function buildProgramsFromRag(
                   antragsweg === 'wko_verbund' ? 'WKO' : 'Träger';
     
     const program: Program = {
-      id: meta.programId,
-      name: meta.programName,
+      id: m.id,
+      name: m.name,
       status,
       teaser,
       zielgruppe,
@@ -340,8 +400,8 @@ export function buildProgramsFromRag(
       passt_wenn,
       passt_nicht_wenn,
       quelle: { 
-        seite: meta.pages[0], 
-        stand: meta.stand || '09/2025' 
+        seite: m.start, 
+        stand: m.stand || '09/2025' 
       },
       
       // Legacy compatibility
@@ -358,7 +418,7 @@ export function buildProgramsFromRag(
     };
     
     programs.push(program);
-  });
+  }
   
   return programs;
 }
