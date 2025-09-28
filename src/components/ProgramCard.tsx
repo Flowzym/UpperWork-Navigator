@@ -131,14 +131,18 @@ export default function ProgramCard({
             {program.foerderhoehe[0].label}
           </span>
         )}
-        <span className="info-item">
-          <MapPin size={12} className="mr-1" />
-          {program.region}
-        </span>
-        <span className="info-item">
-          <Clock size={12} className="mr-1" />
-          {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum || '—'}
-        </span>
+        {program.region && (
+          <span className="info-item">
+            <MapPin size={12} className="mr-1" />
+            {program.region}
+          </span>
+        )}
+        {program.frist && (
+          <span className="info-item">
+            <Clock size={12} className="mr-1" />
+            {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum || program.frist.typ}
+          </span>
+        )}
       </div>
 
       {/* Primary Actions */}

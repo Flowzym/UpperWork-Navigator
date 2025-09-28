@@ -71,7 +71,7 @@ export default function ProgramDetail({
   };
 
   const getAntragswegLabel = () => {
-    if (!program.antragsweg) return '—';
+    if (!program.antragsweg) return '';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
@@ -172,107 +172,130 @@ export default function ProgramDetail({
         </div>
 
         {/* 2. Zielgruppe */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Zielgruppe</h2>
-          <div className="flex flex-wrap gap-2">
-            {program.zielgruppe.map((target) => (
-              <span key={target} className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                {target}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. Förderart & -höhe */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Förderart & -höhe</h2>
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 mb-3">
-              {program.foerderart.map((art) => (
-                <span key={art} className="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full">
-                  {art === 'kurskosten' ? 'Kurskosten' : 
-                   art === 'personalkosten' ? 'Personalkosten' :
-                   art === 'beihilfe' ? 'Beihilfe' : 'Beratung'}
+        {Array.isArray(program.zielgruppe) && program.zielgruppe.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Zielgruppe</h2>
+            <div className="flex flex-wrap gap-2">
+              {program.zielgruppe.map((target) => (
+                <span key={target} className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                  {target}
                 </span>
               ))}
             </div>
-            {program.foerderhoehe.map((foerder, index) => (
-              <div key={index} className="bg-gray-50 p-3 rounded-lg">
-                <div className="font-medium text-gray-900 mb-1">{foerder.label}</div>
-                <div className="text-gray-700">
-                  {foerder.quote && `bis ${foerder.quote}%`}
-                  {foerder.min && ` (min. ${foerder.min}€)`}
-                  {foerder.max && ` (max. ${foerder.max}€)`}
-                  {foerder.deckel && ` (Deckel: ${foerder.deckel}€)`}
-                  {foerder.note && ` - ${foerder.note}`}
-                </div>
-              </div>
-            ))}
           </div>
-        </div>
+        )}
+
+        {/* 3. Förderart & -höhe */}
+        {((Array.isArray(program.foerderart) && program.foerderart.length > 0) || 
+          (Array.isArray(program.foerderhoehe) && program.foerderhoehe.length > 0)) && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Förderart & -höhe</h2>
+            <div className="space-y-3">
+              {Array.isArray(program.foerderart) && program.foerderart.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {program.foerderart.map((art) => (
+                    <span key={art} className="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full">
+                      {art === 'kurskosten' ? 'Kurskosten' : 
+                       art === 'personalkosten' ? 'Personalkosten' :
+                       art === 'beihilfe' ? 'Beihilfe' : 'Beratung'}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {Array.isArray(program.foerderhoehe) && program.foerderhoehe.length > 0 && (
+                <div className="space-y-3">
+                  {program.foerderhoehe.map((foerder, index) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-1">{foerder.label}</div>
+                      <div className="text-gray-700">
+                        {foerder.quote && `bis ${foerder.quote}%`}
+                        {foerder.min && ` (min. ${foerder.min}€)`}
+                        {foerder.max && ` (max. ${foerder.max}€)`}
+                        {foerder.deckel && ` (Deckel: ${foerder.deckel}€)`}
+                        {foerder.note && ` - ${foerder.note}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* 4. Voraussetzungen */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Voraussetzungen</h2>
-          <ul className="space-y-2">
-            {program.voraussetzungen.map((req, index) => (
-              <li key={index} className="text-gray-700 flex items-start gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                {req}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {Array.isArray(program.voraussetzungen) && program.voraussetzungen.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Voraussetzungen</h2>
+            <ul className="space-y-2">
+              {program.voraussetzungen.map((req, index) => (
+                <li key={index} className="text-gray-700 flex items-start gap-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  {req}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* 5. Frist/Status */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Frist/Status</h2>
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <div className="font-medium text-gray-900 mb-1">
-              {!program.frist ? '—'
-               : program.frist.typ === 'laufend' ? 'Laufende Antragstellung'
-               : program.frist.typ === 'stichtag' ? 'Stichtag'
-               : '—'}
+        {program.frist && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Frist/Status</h2>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="font-medium text-gray-900 mb-1">
+                {program.frist.typ === 'laufend' ? 'Laufende Antragstellung'
+                 : program.frist.typ === 'stichtag' ? 'Stichtag'
+                 : program.frist.typ}
+              </div>
+              {program.frist.datum && (
+                <div className="text-gray-700">Bis: {program.frist.datum}</div>
+              )}
             </div>
-            {program.frist?.datum && (
-              <div className="text-gray-700">Bis: {program.frist.datum}</div>
-            )}
           </div>
-        </div>
+        )}
 
         {/* 6. Antragsweg */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Antragsweg</h2>
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <div className="font-medium text-blue-900">{getAntragswegLabel()}</div>
+        {program.antragsweg && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Antragsweg</h2>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="font-medium text-blue-900">{getAntragswegLabel()}</div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 7. Passt wenn / Passt nicht wenn */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Passt, wenn...</h3>
-            <ul className="space-y-2">
-              {program.passt_wenn.map((item, index) => (
-                <li key={index} className="text-gray-700 flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
+        {((Array.isArray(program.passt_wenn) && program.passt_wenn.length > 0) || 
+          (Array.isArray(program.passt_nicht_wenn) && program.passt_nicht_wenn.length > 0)) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {Array.isArray(program.passt_wenn) && program.passt_wenn.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Passt, wenn...</h3>
+                <ul className="space-y-2">
+                  {program.passt_wenn.map((item, index) => (
+                    <li key={index} className="text-gray-700 flex items-start gap-2">
+                      <span className="text-green-500 mt-1">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {Array.isArray(program.passt_nicht_wenn) && program.passt_nicht_wenn.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Passt nicht, wenn...</h3>
+                <ul className="space-y-2">
+                  {program.passt_nicht_wenn.map((item, index) => (
+                    <li key={index} className="text-gray-700 flex items-start gap-2">
+                      <span className="text-red-500 mt-1">✗</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Passt nicht, wenn...</h3>
-            <ul className="space-y-2">
-              {program.passt_nicht_wenn.map((item, index) => (
-                <li key={index} className="text-gray-700 flex items-start gap-2">
-                  <span className="text-red-500 mt-1">✗</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        )}
 
         {/* 8. Quelle */}
         <div className="border-t pt-4">
