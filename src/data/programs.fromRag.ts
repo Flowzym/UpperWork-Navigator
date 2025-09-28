@@ -306,7 +306,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.themeField = p.themen.length > 0 ? p.themen[0] : '';
     p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
 
-    return undefined;
+    byId.set(p.id, p);
   }
 
   console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
