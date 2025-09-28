@@ -1,20 +1,5 @@
 // src/data/programs.fromRag.ts
-export type Program = {
-  id: string;
-  name: string;
-  status?: string | null;
-  frist?: string | null;
-  region?: string[];
-  foerderart?: string[];
-  foerderhoehe?: string[];
-  zielgruppe?: string[];
-  voraussetzungen?: string[];
-  antragsweg?: string[];
-  quelle?: { seite?: number; stand?: string | null };
-  pages?: { start: number; end: number };
-  // optional für Karten-Teaser:
-  summary?: string;
-};
+import { Program, Frist, Quelle, FoerderHoehe } from '../types';
 
 export type RagMeta = {
   programId: string;
@@ -121,35 +106,88 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
       id: m.id,
       name: m.name,
       status,
-      frist: null,
-      region: [],
+      teaser: deriveTeaser(cs) || '',
+      zielgruppe: [],
       foerderart: [],
       foerderhoehe: [],
-      zielgruppe: [],
       voraussetzungen: [],
-      antragsweg: [],
-      quelle: { seite: m.start, stand: m.stand },
-      pages: { start: m.start, end: m.end },
-      summary: deriveTeaser(cs),
+      antragsweg: 'eams',
+      frist: { typ: 'laufend' },
+      region: 'Oberösterreich',
+      themen: [],
+      passt_wenn: [],
+      passt_nicht_wenn: [],
+      quelle: { seite: m.start, stand: m.stand || '' },
+      
+      // Legacy compatibility
+      tags: [],
+      portal: 'Land OÖ',
+      description: deriveTeaser(cs) || '',
+      budget: '',
+      targetGroup: [],
+      fundingType: '',
+      requirements: [],
+      themeField: '',
+      deadline: '',
     };
 
     for (const c of cs) {
       const s = c.text || '';
-      if (!p.frist && RX.frist.test(s)) p.frist = s.match(RX.frist)![0];
+      if (p.frist.typ === 'laufend' && RX.frist.test(s)) {
+        const match = s.match(RX.frist)![0];
+        p.frist = { typ: 'stichtag', datum: match };
+        p.deadline = match;
+      }
       switch (c.section) {
-        case 'region':          push(p.region!, s, RX.region); break;
-        case 'foerderart':      push(p.foerderart!, s, RX.foerderart); break;
-        case 'foerderhoehe':    push(p.foerderhoehe!, s, RX.betrag); break;
-        case 'zielgruppe':      push(p.zielgruppe!, s, RX.ziel); break;
-        case 'voraussetzungen': push(p.voraussetzungen!, s, RX.vrs); break;
-        case 'antragsweg':      push(p.antragsweg!, s, RX.antrag); break;
+        case 'region':          
+          if (!p.region || p.region === 'Oberösterreich') {
+            const regionMatch = s.match(RX.region);
+            if (regionMatch) p.region = regionMatch[0];
+          }
+          break;
+        case 'foerderart':      
+          push(p.foerderart, s, RX.foerderart); 
+          if (p.foerderart.length > 0 && !p.fundingType) {
+            p.fundingType = p.foerderart[0];
+          }
+          break;
+        case 'foerderhoehe':    
+          const tempArr: string[] = [];
+          push(tempArr, s, RX.betrag);
+          if (tempArr.length > 0) {
+            p.foerderhoehe.push({ label: tempArr[0] });
+            if (!p.budget) p.budget = tempArr[0];
+          }
+          break;
+        case 'zielgruppe':      
+          push(p.zielgruppe, s, RX.ziel); 
+          push(p.targetGroup, s, RX.ziel);
+          break;
+        case 'voraussetzungen': 
+          push(p.voraussetzungen, s, RX.vrs); 
+          push(p.requirements, s, RX.vrs);
+          break;
+        case 'antragsweg':      
+          if (p.antragsweg === 'eams' && RX.antrag.test(s)) {
+            if (s.toLowerCase().includes('online')) p.antragsweg = 'land_ooe_portal';
+            else if (s.toLowerCase().includes('wko')) p.antragsweg = 'wko_verbund';
+            else if (s.toLowerCase().includes('träger')) p.antragsweg = 'traeger_direkt';
+          }
+          break;
         default:
-          push(p.foerderart!, s, RX.foerderart);
-          push(p.foerderhoehe!, s, RX.betrag);
-          push(p.zielgruppe!, s, RX.ziel);
-          push(p.voraussetzungen!, s, RX.vrs);
-          push(p.antragsweg!, s, RX.antrag);
-          push(p.region!, s, RX.region);
+          push(p.foerderart, s, RX.foerderart);
+          const tempArr2: string[] = [];
+          push(tempArr2, s, RX.betrag);
+          if (tempArr2.length > 0) {
+            p.foerderhoehe.push({ label: tempArr2[0] });
+            if (!p.budget) p.budget = tempArr2[0];
+          }
+          push(p.zielgruppe, s, RX.ziel);
+          push(p.targetGroup, s, RX.ziel);
+          push(p.voraussetzungen, s, RX.vrs);
+          push(p.requirements, s, RX.vrs);
+          push(p.themen, s, /\b(bildung|qualifizierung|innovation|digitalisierung|nachhaltigkeit)\b/i);
+          push(p.tags, s, /\b(bildung|qualifizierung|innovation|digitalisierung|nachhaltigkeit)\b/i);
       }
     }
     byId.set(p.id, p);
