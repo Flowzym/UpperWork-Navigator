@@ -32,15 +32,21 @@ function normalizeText(text) {
 
 // Section-Erkennung per Regex
 const sectionPatterns = [
-  { name: 'zielgruppe', pattern: /^zielgruppe/i },
+  { 
+    name: 'zielgruppe', 
+    pattern: /^zielgruppe|wer\s+wird\s+gef(ö|oe)rdert|f(ü|ue)r\s+wen\s+(ist|gilt)|adressat(en)?|zielpersona|ziel-?adressat/i 
+  },
+  { 
+    name: 'voraussetzungen', 
+    pattern: /^voraussetzungen|bedingungen|erforderlich|erfordernis|nachweis(e)?|nur\s+wenn|sofern|vorausgesetzt|(teilnahme|aufnahme)\s*bedingungen/i 
+  },
   { name: 'förderhöhe', pattern: /^(förderhöhe|foerderhoehe|foerderung|förderung)/i },
-  { name: 'voraussetzungen', pattern: /^voraussetzungen/i },
   { name: 'frist', pattern: /^(frist|status)/i },
   { name: 'antragsweg', pattern: /^(antragsweg|antrag)/i },
   { name: 'passt_wenn', pattern: /^passt,?\s+wenn/i },
   { name: 'passt_nicht_wenn', pattern: /^passt\s+nicht,?\s+wenn/i },
   { name: 'überblick', pattern: /^(überblick|beschreibung)/i },
-  { name: 'region', pattern: /^region/i },
+  { name: 'region', pattern: /^region|(gilt|verf(ü|ue)gbar)\s+in\s+(obero(ö|oe)sterreich|o(ö|oe))/i },
   { name: 'quelle', pattern: /^(quelle|stand)/i }
 ];
 
