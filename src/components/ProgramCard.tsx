@@ -137,7 +137,7 @@ export default function ProgramCard({
         </span>
         <span className="info-item">
           <Clock size={12} className="mr-1" />
-          {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
+          {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum || '—'}
         </span>
       </div>
 

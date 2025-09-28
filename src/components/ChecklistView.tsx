@@ -15,6 +15,7 @@ export default function ChecklistView({ program, isOpen, onClose, onShowToast }:
   const [showExportPreview, setShowExportPreview] = React.useState(false);
 
   const getAntragswegLabel = () => {
+    if (!program.antragsweg) return '—';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
@@ -145,7 +146,7 @@ Quelle: ${program.name} · S. ${program.quelle.seite} · Stand ${program.quelle.
               <p className="text-gray-700 mb-3">Antrag rechtzeitig über das richtige Portal stellen:</p>
               <div className="bg-blue-50 p-3 rounded">
                 <div className="text-sm"><strong>Antragsweg:</strong> {getAntragswegLabel()}</div>
-                <div className="text-sm"><strong>Frist:</strong> {program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : `Bis ${program.frist.datum}`}</div>
+                <div className="text-sm"><strong>Frist:</strong> {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : `Bis ${program.frist.datum || '—'}`}</div>
               </div>
               <p className="text-sm text-gray-600 mt-2">
                 Tipp: Bei laufender Antragstellung mindestens 4-6 Wochen vor Kursbeginn beantragen.

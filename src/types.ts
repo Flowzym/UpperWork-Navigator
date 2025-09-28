@@ -7,8 +7,8 @@ export interface Program {
   foerderart: ('kurskosten' | 'personalkosten' | 'beihilfe' | 'beratung')[];
   foerderhoehe: FoerderHoehe[];
   voraussetzungen: string[];
-  antragsweg: 'eams' | 'land_ooe_portal' | 'wko_verbund' | 'traeger_direkt';
-  frist: Frist;
+  antragsweg?: 'eams' | 'land_ooe_portal' | 'wko_verbund' | 'traeger_direkt';
+  frist?: Frist;
   region: string;
   themen: string[];
   passt_wenn: string[];

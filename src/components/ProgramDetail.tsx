@@ -71,12 +71,13 @@ export default function ProgramDetail({
   };
 
   const getAntragswegLabel = () => {
+    if (!program.antragsweg) return '—';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
       case 'wko_verbund': return 'WKO Verbund';
       case 'traeger_direkt': return 'Direkt beim Träger';
-      default: return program.antragsweg;
+      default: return String(program.antragsweg || '—');
     }
   };
 
@@ -228,10 +229,12 @@ export default function ProgramDetail({
           <h2 className="text-lg font-semibold text-gray-900 mb-3">Frist/Status</h2>
           <div className="bg-gray-50 p-3 rounded-lg">
             <div className="font-medium text-gray-900 mb-1">
-              {program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : 
-               program.frist.typ === 'stichtag' ? 'Stichtag' : 'Entfallen'}
+              {!program.frist ? '—'
+               : program.frist.typ === 'laufend' ? 'Laufende Antragstellung'
+               : program.frist.typ === 'stichtag' ? 'Stichtag'
+               : '—'}
             </div>
-            {program.frist.datum && (
+            {program.frist?.datum && (
               <div className="text-gray-700">Bis: {program.frist.datum}</div>
             )}
           </div>

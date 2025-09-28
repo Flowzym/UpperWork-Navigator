@@ -15,6 +15,7 @@ export default function OnePagerPreview({ program, isOpen, onClose, onShowToast 
   const [showExportPreview, setShowExportPreview] = React.useState(false);
 
   const getAntragswegLabel = () => {
+    if (!program.antragsweg) return '—';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
@@ -122,7 +123,7 @@ Förder-Navigator OÖ 2025 · Alle Angaben ohne Gewähr`;
               
               <h4 className="font-semibold text-gray-900 mb-1 text-sm mt-2">⏰ Frist</h4>
               <p className="text-sm text-gray-700">
-                {program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum}
+                {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum || '—'}
               </p>
             </div>
           </div>

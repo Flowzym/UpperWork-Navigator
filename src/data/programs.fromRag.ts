@@ -169,8 +169,8 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
       foerderart: [],
       foerderhoehe: [],
       voraussetzungen: [],
-      antragsweg: 'eams',
-      frist: { typ: 'laufend' },
+      antragsweg: undefined,
+      frist: undefined,
       region: 'Oberösterreich',
       themen: [],
       passt_wenn: [],
@@ -206,13 +206,12 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.voraussetzungen = dedupe(voraussetzungenItems).slice(0, 6);
 
     // Antragsweg normalisieren
-    if (antragswegItems.length > 0) {
-      const antrag = antragswegItems[0].toLowerCase();
-      if (antrag.includes('eams')) p.antragsweg = 'eams';
-      else if (antrag.includes('land') || antrag.includes('oö')) p.antragsweg = 'land_ooe_portal';
-      else if (antrag.includes('wko')) p.antragsweg = 'wko_verbund';
-      else if (antrag.includes('träger')) p.antragsweg = 'traeger_direkt';
-    }
+    // Antragsweg aus Text ableiten (nur wenn vorhanden)
+    const full = cs.map(c => c.text || '').join('\n').toLowerCase();
+    if (/(e-?ams|eams)/i.test(full)) p.antragsweg = 'eams';
+    else if (/(land\s*(oö|ooe)|amt\s*der\s*oö)/i.test(full)) p.antragsweg = 'land_ooe_portal';
+    else if (/\bwko\b|\bwirtschaftskammer/i.test(full)) p.antragsweg = 'wko_verbund';
+    else if (/(tr(ä|ae)ger|direkt\s+einreichen)/i.test(full)) p.antragsweg = 'traeger_direkt';
 
     // 2) Förderhöhe: zuerst Abschnitt, sonst Beträge/Prozente im gesamten Text
     const fh = extractBlock(full, HEADS.foerderhoehe);
@@ -228,15 +227,9 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     }
 
     // Frist direkt als kurze Info
-    const frMatch = full.match(RX.frist);
-    if (frMatch) {
-      const fristText = frMatch[0];
-      if (fristText.toLowerCase().includes('laufend')) {
-        p.frist = { typ: 'laufend' };
-      } else {
-        p.frist = { typ: 'stichtag', datum: fristText };
-      }
-    }
+    const date = full.match(/\b(\d{1,2}\.\d{1,2}\.\d{2,4})\b/);
+    if (/\blaufend(e)?\b/i.test(full)) p.frist = { typ: 'laufend' };
+    else if (date) p.frist = { typ: 'stichtag', datum: date[1] };
 
     // 3) Falls in den Chunks etwas markiert war, ergänzend aufnehmen
     const tempZielgruppe: string[] = [...p.zielgruppe];
@@ -305,7 +298,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.fundingType = p.foerderart.length > 0 ? p.foerderart[0] : '';
     p.budget = p.foerderhoehe.length > 0 ? p.foerderhoehe[0].label : '';
     p.themeField = p.themen.length > 0 ? p.themen[0] : '';
-    p.deadline = p.frist.typ === 'laufend' ? 'laufend' : p.frist.datum || '';
+    p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
 
     byId.set(p.id, p);
   }
