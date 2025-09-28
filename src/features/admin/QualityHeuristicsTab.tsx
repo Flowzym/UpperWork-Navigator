@@ -3,7 +3,6 @@ import { BarChart3, AlertTriangle, CheckCircle } from 'lucide-react';
 import { RagOverrides } from '../../lib/rag/overrides';
 import { validateDataset, AdminIssue, getIssuesByLevel } from '../../lib/rag/validate';
 import { documentStore } from '../../rag/store';
-import { programMeta } from '../../data/programMeta';
 
 interface QualityHeuristicsTabProps {
   overrides: RagOverrides;
@@ -28,6 +27,7 @@ export default function QualityHeuristicsTab({
   onOverridesChange, 
   onShowToast 
 }: QualityHeuristicsTabProps) {
+  const [programMeta, setProgramMeta] = useState<Record<string, any>>({});
   const [metrics, setMetrics] = useState<QualityMetrics | null>(null);
   const [issues, setIssues] = useState<AdminIssue[]>([]);
   const [selectedProgramId, setSelectedProgramId] = useState<string>('');
@@ -36,6 +36,28 @@ export default function QualityHeuristicsTab({
     overlap: 120,
     minSectionLen: 50
   });
+
+  // Load programMeta from runtime source
+  useEffect(() => {
+    const loadProgramMeta = async () => {
+      try {
+        const BASE = (import.meta.env.BASE_URL || '').replace(/\/$/, '');
+        const response = await fetch(`${BASE}/rag/programMeta.json`);
+        if (response.ok) {
+          const data = await response.json();
+          // Convert array to object if needed
+          const metaObj = Array.isArray(data) ? 
+            data.reduce((acc, item) => ({ ...acc, [item.programId]: item }), {}) : 
+            data;
+          setProgramMeta(metaObj);
+        }
+      } catch (error) {
+        console.warn('Failed to load programMeta:', error);
+      }
+    };
+    
+    loadProgramMeta();
+  }, []);
 
   // Calculate metrics
   useEffect(() => {

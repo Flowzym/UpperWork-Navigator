@@ -3,7 +3,6 @@ import { Search, Filter, Volume2, VolumeX, TrendingUp, TrendingDown } from 'luci
 import { RagOverrides, ChunkOverride, saveOverrides, addHistoryEntry } from '../../lib/rag/overrides';
 import { documentStore } from '../../rag/store';
 import { DocChunk } from '../../rag/schema';
-import { programMeta } from '../../data/programMeta';
 
 interface ChunkInspectorTabProps {
   overrides: RagOverrides;
@@ -25,6 +24,7 @@ export default function ChunkInspectorTab({
   onOverridesChange, 
   onShowToast 
 }: ChunkInspectorTabProps) {
+  const [programMeta, setProgramMeta] = useState<Record<string, any>>({});
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<ChunkFilters>({
     programId: '',
@@ -37,6 +37,28 @@ export default function ChunkInspectorTab({
   const [selectedChunk, setSelectedChunk] = useState<DocChunk | null>(null);
   const [chunks, setChunks] = useState<DocChunk[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  // Load programMeta from runtime source
+  useEffect(() => {
+    const loadProgramMeta = async () => {
+      try {
+        const BASE = (import.meta.env.BASE_URL || '').replace(/\/$/, '');
+        const response = await fetch(`${BASE}/rag/programMeta.json`);
+        if (response.ok) {
+          const data = await response.json();
+          // Convert array to object if needed
+          const metaObj = Array.isArray(data) ? 
+            data.reduce((acc, item) => ({ ...acc, [item.programId]: item }), {}) : 
+            data;
+          setProgramMeta(metaObj);
+        }
+      } catch (error) {
+        console.warn('Failed to load programMeta:', error);
+      }
+    };
+    
+    loadProgramMeta();
+  }, []);
 
   // Load chunks on mount
   useEffect(() => {
