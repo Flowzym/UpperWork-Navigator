@@ -61,6 +61,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
   } catch (error) {
     console.error('[RAG] Fehler beim Laden der Chunks:', error);
     console.warn('[RAG] Simulationsdaten aktiv: <BASE_URL>/rag/{stats.json,chunks.json} nicht gefunden. ' +
+    )
     showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
     showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
     // Status für UI markieren
