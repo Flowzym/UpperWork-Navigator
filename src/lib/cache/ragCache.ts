@@ -11,6 +11,14 @@ const u = (p: string) => {
   return fullUrl;
 };
 
+// Debug-Log beim ersten Laden (hilft in Previews/Subpfaden)
+function logUrlsOnce() {
+  if (typeof window !== 'undefined' && !(window as any).__RAG_URL_LOGGED__) {
+    (window as any).__RAG_URL_LOGGED__ = true;
+    console.info('[RAG] URLs:', u('/rag/stats.json'), u('/rag/chunks.json'));
+  }
+}
+
 export type RagStats = {
   buildId: string;
   lastModified?: string;
@@ -31,6 +39,7 @@ export function getRagCacheInfo(): RagCacheInfo { return _lastInfo; }
 
 export async function loadStats(): Promise<RagStats | undefined> {
   try {
+    logUrlsOnce();
     const url = u('/rag/stats.json');
     console.log(`[ragCache] Lade Stats von: ${url}`);
     const r = await fetch(url, { cache: 'no-store' });
@@ -70,6 +79,7 @@ export async function loadChunksCached(stats: RagStats): Promise<{
     _lastInfo = { ..._lastInfo, source: 'idb', chunks: Array.isArray(parsed) ? parsed.length : 0 };
     return { chunks: parsed, source: 'idb', key };
   }
+  logUrlsOnce();
   const url = u('/rag/chunks.json');
   console.log(`[ragCache] Lade Chunks von: ${url}`);
   const r = await fetch(url, { cache: 'no-store' });

@@ -243,6 +243,18 @@ export default function SettingsModal({
     }
   };
 
+  const handleClearCacheAndReload = () => {
+    try {
+      // Lösche IndexedDB komplett
+      indexedDB.deleteDatabase('foerder-nav');
+      indexedDB.deleteDatabase('rag-admin');
+      onShowToast('Cache geleert - Seite wird neu geladen', 'success');
+      setTimeout(() => window.location.reload(), 500);
+    } catch (error) {
+      onShowToast('Cache-Reset fehlgeschlagen', 'error');
+    }
+  };
+
   const getSourceBadge = (source: string) => {
     switch (source) {
       case 'network':
@@ -482,6 +494,13 @@ export default function SettingsModal({
               </button>
               <button
                 className="btn btn-secondary btn-sm"
+                onClick={handleClearCacheAndReload}
+              >
+                <RefreshCw size={14} className="mr-1" />
+                Cache leeren & neu laden
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
                 onClick={() => window.location.reload()}
               >
                 <RefreshCw size={14} className="mr-1" />
@@ -492,7 +511,7 @@ export default function SettingsModal({
         </div>
         
         <div className="mt-3 text-xs text-gray-600">
-          💡 Cache leeren hilft bei veralteten Daten oder nach "npm run ingest"
+          💡 "Cache leeren & neu laden" hilft bei veralteten Daten oder nach Hinzufügen neuer JSON-Dateien
         </div>
       </div>
       <div className="settings-section">

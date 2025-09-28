@@ -22,4 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Broschüren-Daten müssen mit ins Repo
+!public/rag/
+!public/rag/*.json
 .env

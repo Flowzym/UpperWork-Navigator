@@ -441,13 +441,22 @@ Die App hat jetzt vollständige API-Integration für alle 5 Provider-Typen! 🚀
 
 ## Echte Broschüre laden
 
-Für echte RAG-Antworten mit Quellenangaben:
+### Echte Broschüre laden (statt Simulation)
 
-1. PDF-Broschüre in `src/data/` ablegen (z.B. `Foerderbroschuere_OOE_2025.pdf`)
-2. `npm run ingest` ausführen (erstellt `public/rag/chunks.json` & `stats.json`)
-3. App neu laden - "Nur Broschüre"-Modus nutzt jetzt echte Inhalte
+1. Lege die generierten Dateien unter **`public/rag/`** ab:
+   - `public/rag/chunks.json`
+   - `public/rag/stats.json`
+   - `public/rag/programMeta.json`
 
-Ohne diese Dateien laufen Simulationsdaten (gelber Toast in der App).
+2. Commit & Build. Im Browser müssen diese URLs **200** liefern:
+   - `<BASE_URL>/rag/stats.json`
+   - `<BASE_URL>/rag/chunks.json`
+
+3. Falls bereits Daten im Browser-Cache: In **Settings → Broschüren** „Cache leeren & neu laden" klicken.
+
+> **Hinweis:** Bei Deploy unter Subpfad wird `BASE_URL` automatisch berücksichtigt. Die App lädt immer über `<BASE_URL>/rag/*`.
+
+**Ohne diese Dateien:** Simulationsdaten mit rotem Error-Toast "Broschürendaten fehlen".
 
 ## Offline/Cache
 

@@ -29,7 +29,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     const stats = await loadStats();
     if (!stats) {
       console.warn('[RAG] Stats nicht verfügbar – verwende Fallback-Simulation');
-      showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
+      showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
       return [];
     }
     
@@ -37,7 +37,7 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     const { chunks, source } = await loadChunksCached(stats);
     if (!chunks.length) {
       console.warn('[RAG] Keine Chunks verfügbar – verwende Fallback-Simulation');
-      showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
+      showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
       // Status für UI markieren
       const cacheModule = await import('../lib/cache/ragCache');
       (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
@@ -60,8 +60,9 @@ async function loadChunksFromJSON(): Promise<DocChunk[]> {
     return valid;
   } catch (error) {
     console.error('[RAG] Fehler beim Laden der Chunks:', error);
-    console.warn('[RAG] Simulationsdaten aktiv: /rag/chunks.json nicht gefunden. Für echte RAG-Antworten bitte "npm run ingest" ausführen (erzeugt /public/rag/chunks.json & stats.json).');
-    showToast('Simulationsdaten aktiv – bitte "npm run ingest" ausführen für echte Broschüre.', 'warn');
+    console.warn('[RAG] Simulationsdaten aktiv: <BASE_URL>/rag/{stats.json,chunks.json} nicht gefunden. ' +
+    showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
+    showToast('Broschürendaten fehlen: Lege stats.json & chunks.json unter public/rag/ ab.', 'error');
     // Status für UI markieren
     const cacheModule = await import('../lib/cache/ragCache');
     (cacheModule as any)._lastInfo = { ...(cacheModule as any)._lastInfo, source: 'simulation', chunks: 0 };
