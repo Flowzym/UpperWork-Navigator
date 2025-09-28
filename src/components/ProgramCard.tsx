@@ -125,7 +125,7 @@ export default function ProgramCard({
 
       {/* Info Row */}
       <div className="card-info">
-        {program.foerderhoehe && program.foerderhoehe.length > 0 && (
+        {has(program.foerderhoehe) && (
           <span className="info-item">
             <Euro size={12} className="mr-1" />
             {program.foerderhoehe[0].label}

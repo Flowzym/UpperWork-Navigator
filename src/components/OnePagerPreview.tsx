@@ -14,8 +14,10 @@ interface OnePagerPreviewProps {
 export default function OnePagerPreview({ program, isOpen, onClose, onShowToast }: OnePagerPreviewProps) {
   const [showExportPreview, setShowExportPreview] = React.useState(false);
 
+  const has = (v?: string | any[]) => (Array.isArray(v) ? v.length > 0 : !!v);
+  
   const getAntragswegLabel = () => {
-    if (!program.antragsweg) return '—';
+    if (!program.antragsweg) return '';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
@@ -97,11 +99,19 @@ Förder-Navigator OÖ 2025 · Alle Angaben ohne Gewähr`;
               <h3 className="font-bold text-gray-900 mb-2 text-sm">📋 ÜBERBLICK</h3>
               <p className="text-sm text-gray-700 mb-3">{program.teaser}</p>
               
-              <h4 className="font-semibold text-gray-900 mb-1 text-sm">🎯 Zielgruppe</h4>
-              <p className="text-sm text-gray-700 mb-3">{program.zielgruppe.join(', ')}</p>
+              {has(program.zielgruppe) && (
+                <>
+                  <h4 className="font-semibold text-gray-900 mb-1 text-sm">🎯 Zielgruppe</h4>
+                  <p className="text-sm text-gray-700 mb-3">{program.zielgruppe!.join(', ')}</p>
+                </>
+              )}
               
-              <h4 className="font-semibold text-gray-900 mb-1 text-sm">📍 Region</h4>
-              <p className="text-sm text-gray-700">{program.region}</p>
+              {program.region && (
+                <>
+                  <h4 className="font-semibold text-gray-900 mb-1 text-sm">📍 Region</h4>
+                  <p className="text-sm text-gray-700">{program.region}</p>
+                </>
+              )}
             </div>
             
             <div>
@@ -118,13 +128,21 @@ Förder-Navigator OÖ 2025 · Alle Angaben ohne Gewähr`;
                 </div>
               ))}
               
-              <h4 className="font-semibold text-gray-900 mb-1 text-sm mt-3">📝 Antragsweg</h4>
-              <p className="text-sm text-gray-700">{getAntragswegLabel()}</p>
+              {program.antragsweg && (
+                <>
+                  <h4 className="font-semibold text-gray-900 mb-1 text-sm mt-3">📝 Antragsweg</h4>
+                  <p className="text-sm text-gray-700">{getAntragswegLabel()}</p>
+                </>
+              )}
               
-              <h4 className="font-semibold text-gray-900 mb-1 text-sm mt-2">⏰ Frist</h4>
-              <p className="text-sm text-gray-700">
-                {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufend' : program.frist.datum || '—'}
-              </p>
+              {program.frist && (
+                <>
+                  <h4 className="font-semibold text-gray-900 mb-1 text-sm mt-2">⏰ Frist</h4>
+                  <p className="text-sm text-gray-700">
+                    {program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : program.frist.datum}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
@@ -142,7 +160,7 @@ Förder-Navigator OÖ 2025 · Alle Angaben ohne Gewähr`;
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-blue-600 text-sm">3.</span>
-                <span className="text-sm text-gray-700">Antrag über {getAntragswegLabel()} stellen</span>
+                <span className="text-sm text-gray-700">Antrag {program.antragsweg ? `über ${getAntragswegLabel()}` : ''} stellen</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-blue-600 text-sm">4.</span>
@@ -156,31 +174,37 @@ Förder-Navigator OÖ 2025 · Alle Angaben ohne Gewähr`;
           </div>
 
           {/* Voraussetzungen */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="font-bold text-gray-900 mb-2 text-sm">✅ PASST, WENN...</h3>
-              <ul className="space-y-1">
-                {program.passt_wenn.slice(0, 4).map((item, index) => (
-                  <li key={index} className="text-sm text-gray-700 flex items-start gap-1">
-                    <span className="text-green-600">•</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
+          {(has(program.passt_wenn) || has(program.passt_nicht_wenn)) && (
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              {has(program.passt_wenn) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-2 text-sm">✅ PASST, WENN...</h3>
+                  <ul className="space-y-1">
+                    {program.passt_wenn!.slice(0, 4).map((item, index) => (
+                      <li key={index} className="text-sm text-gray-700 flex items-start gap-1">
+                        <span className="text-green-600">•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {has(program.passt_nicht_wenn) && (
+                <div>
+                  <h3 className="font-bold text-gray-900 mb-2 text-sm">❌ PASST NICHT, WENN...</h3>
+                  <ul className="space-y-1">
+                    {program.passt_nicht_wenn!.slice(0, 4).map((item, index) => (
+                      <li key={index} className="text-sm text-gray-700 flex items-start gap-1">
+                        <span className="text-red-600">•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            
-            <div>
-              <h3 className="font-bold text-gray-900 mb-2 text-sm">❌ PASST NICHT, WENN...</h3>
-              <ul className="space-y-1">
-                {program.passt_nicht_wenn.slice(0, 4).map((item, index) => (
-                  <li key={index} className="text-sm text-gray-700 flex items-start gap-1">
-                    <span className="text-red-600">•</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          )}
 
           {/* Footer */}
           <div className="border-t pt-4 text-center">
