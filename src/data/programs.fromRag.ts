@@ -146,6 +146,12 @@ function deriveTeaser(cs: RagChunk[]) {
   return undefined;
 }
 
+function deriveSummary(r: any): string | undefined {
+  const pick = [r.beschreibung, r.foerderhoehe, r.allgemein].find(x => typeof x === 'string' && x.trim());
+  if (!pick) return undefined;
+  return pick.trim().slice(0, 240);
+}
+
 // Hauptfunktion
 export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Program[] {
   const idx = buildPageIndex(meta);
@@ -291,7 +297,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
       p.region = tempRegion[0];
     }
 
-    // Legacy fields befüllen
+    // Legacy fields befüllen - nur wenn Daten vorhanden
     p.targetGroup = [...p.zielgruppe];
     p.requirements = [...p.voraussetzungen];
     p.tags = [...p.themen];
@@ -300,7 +306,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.themeField = p.themen.length > 0 ? p.themen[0] : '';
     p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
 
-    byId.set(p.id, p);
+    return undefined;
   }
 
   console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
