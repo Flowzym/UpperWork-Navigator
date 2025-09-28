@@ -22,6 +22,17 @@ export interface RagChunk {
   endChar: number;
 }
 
+type ProgramStatus = 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen';
+
+function normalizeStatus(raw?: string | null): ProgramStatus {
+  const t = (raw ?? '').toLowerCase();
+  if (!t) return 'aktiv';
+  if (t.includes('endet')) return 'endet_am';
+  if (t.includes('ausgesetzt') || t.includes('paus')) return 'ausgesetzt';
+  if (t.includes('eingestellt') || t.includes('entfallen') || t.includes('beendet')) return 'entfallen';
+  return ['aktiv','ausgesetzt','endet_am','entfallen'].includes(t as any) ? (t as ProgramStatus) : 'aktiv';
+}
+
 // Extrahiere Zielgruppe aus Chunks
 function extractZielgruppe(chunks: RagChunk[]): string[] {
   const zielgruppeChunks = chunks.filter(c => 
@@ -289,8 +300,9 @@ export function buildProgramsFromRag(
   const programs: Program[] = [];
   
   programMeta.forEach(meta => {
-    // Nur Programme mit gültigem Status verarbeiten
-    if (!meta.status || meta.status === 'entfallen') return;
+    // Status normalisieren und nur wirklich entfallene Programme ausblenden
+    const status = normalizeStatus(meta.status);
+    if (status === 'entfallen') return;
     
     const programChunks = chunks.filter(c => c.programId === meta.programId);
     if (programChunks.length === 0) return;
@@ -315,7 +327,7 @@ export function buildProgramsFromRag(
     const program: Program = {
       id: meta.programId,
       name: meta.programName,
-      status: meta.status,
+      status,
       teaser,
       zielgruppe,
       foerderart,

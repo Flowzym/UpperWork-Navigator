@@ -131,12 +131,13 @@ export default function SettingsModal({
     const cacheInfo = getRagCacheInfo();
     
     try {
-      const statsResponse = await fetch('/rag/stats.json');
+      const BASE = (import.meta.env.BASE_URL || '').replace(/\/$/, '');
+      const statsResponse = await fetch(`${BASE}/rag/stats.json`, { cache: 'no-store' });
       if (statsResponse.ok) {
         const stats = await statsResponse.json();
         setBrochureStatus({
           loaded: true,
-          filename: 'Foerderbroschuere_OOE_2025.pdf',
+          filename: stats?.source || 'Broschüre',
           chunks: stats.totalChunks || 0,
           lastUpdate: new Date().toLocaleDateString('de-DE'),
           source: cacheInfo.source,
@@ -146,7 +147,7 @@ export default function SettingsModal({
       } else {
         setBrochureStatus({
           loaded: false,
-          filename: '',
+          filename: 'Broschüre nicht gefunden',
           chunks: 0,
           lastUpdate: '',
           source: cacheInfo.source,
@@ -157,7 +158,7 @@ export default function SettingsModal({
     } catch (error) {
       setBrochureStatus({
         loaded: false,
-        filename: '',
+        filename: 'Broschüre nicht verfügbar',
         chunks: 0,
         lastUpdate: '',
         source: cacheInfo.source,
