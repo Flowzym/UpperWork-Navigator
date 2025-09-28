@@ -1,10 +1,20 @@
 import { Program } from '../../types/program';
 
 export function BadgeList({p}:{p:Program}) {
+  const formatValue = (v: any): string => {
+    if (typeof v === 'string') return v;
+    if (typeof v === 'object' && v !== null) {
+      // Handle objects like {typ: "something"} by extracting meaningful value
+      if ('typ' in v) return v.typ;
+      return JSON.stringify(v);
+    }
+    return String(v);
+  };
+
   const items = [
-    p.foerderart && { k:'Art', v:p.foerderart },
-    p.antragsweg && { k:'Antrag', v:p.antragsweg },
-    p.frist && { k:'Frist', v:p.frist },
+    p.foerderart && { k:'Art', v:formatValue(p.foerderart) },
+    p.antragsweg && { k:'Antrag', v:formatValue(p.antragsweg) },
+    p.frist && { k:'Frist', v:formatValue(p.frist) },
   ].filter(Boolean) as {k:string; v:string}[];
   
   if (items.length === 0) return null;
