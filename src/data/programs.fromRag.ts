@@ -319,33 +319,6 @@ function extractPasstNichtWenn(chunks: RagChunk[]): string[] {
   return Array.from(items).slice(0, 4);
 }
 
-// Kompaktes Seiten-Index für binary search
-function indexMetaByPage(meta: RagProgramMeta[]) {
-  const arr = meta
-    .filter(m => Array.isArray(m.pages) && typeof m.pages[0] === 'number' && typeof m.pages[1] === 'number')
-    .map(m => ({ 
-      start: m.pages[0], 
-      end: m.pages[1], 
-      id: m.programId, 
-      name: m.programName, 
-      stand: m.stand ?? null, 
-      status: m.status ?? null 
-    }))
-    .sort((a, b) => a.start - b.start);
-
-  function find(page: number) {
-    let lo = 0, hi = arr.length - 1;
-    while (lo <= hi) {
-      const mid = (lo + hi) >> 1, it = arr[mid];
-      if (page < it.start) hi = mid - 1;
-      else if (page > it.end) lo = mid + 1;
-      else return it;
-    }
-    return null;
-  }
-  return { arr, find };
-}
-
 // Hauptfunktion: Baue Program[] aus RAG-Daten
 export function buildProgramsFromRag(
   programMeta: RagProgramMeta[],
