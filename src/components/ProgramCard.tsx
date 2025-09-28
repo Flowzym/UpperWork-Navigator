@@ -127,7 +127,7 @@ export default function ProgramCard({
       <div className="card-info">
         <span className="info-item">
           <Euro size={12} className="mr-1" />
-          {program.foerderhoehe && program.foerderhoehe.length > 0 ? program.foerderhoehe[0] : 'Siehe Details'}
+          {program.foerderhoehe && program.foerderhoehe.length > 0 ? program.foerderhoehe[0].label : 'Siehe Details'}
         </span>
         <span className="info-item">
           <MapPin size={12} className="mr-1" />
