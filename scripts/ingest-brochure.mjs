@@ -34,7 +34,7 @@ function normalizeText(text) {
 const sectionPatterns = [
   { 
     name: 'zielgruppe', 
-    pattern: /^zielgruppe|wer\s+wird\s+gef(ö|oe)rdert|f(ü|ue)r\s+wen\s+(ist|gilt)|adressat(en)?|zielpersona|ziel-?adressat/i 
+    pattern: /^zielgruppe|wer\s+wird\s+gef(ö|oe)rdert|f(ü|ue)r\s+wen(\s+ist|\s+gilt)?|adressat(en)?|ziel-?adressat|zielpersona/i 
   },
   { 
     name: 'voraussetzungen', 
