@@ -15,7 +15,7 @@ export default function ChecklistView({ program, isOpen, onClose, onShowToast }:
   const [showExportPreview, setShowExportPreview] = React.useState(false);
 
   const getAntragswegLabel = () => {
-    if (!program.antragsweg) return '—';
+    if (!program.antragsweg) return '';
     switch (program.antragsweg) {
       case 'eams': return 'eAMS Portal';
       case 'land_ooe_portal': return 'Land OÖ Portal';
@@ -105,9 +105,13 @@ Quelle: ${program.name} · S. ${program.quelle.seite} · Stand ${program.quelle.
             <div className="ml-11 space-y-2">
               <p className="text-gray-700 mb-3">Prüfen Sie, ob Sie zur Zielgruppe gehören und alle Voraussetzungen erfüllen:</p>
               <div className="space-y-1">
-                <div className="text-sm"><strong>Zielgruppe:</strong> {program.zielgruppe.join(', ')}</div>
-                <div className="text-sm"><strong>Region:</strong> {program.region}</div>
-                <div className="text-sm"><strong>Status:</strong> {program.status === 'aktiv' ? 'Aktiv' : program.status === 'endet_am' ? `Endet am ${program.frist.datum}` : 'Ausgesetzt'}</div>
+                {Array.isArray(program.zielgruppe) && program.zielgruppe.length > 0 && (
+                  <div className="text-sm"><strong>Zielgruppe:</strong> {program.zielgruppe.join(', ')}</div>
+                )}
+                {program.region && (
+                  <div className="text-sm"><strong>Region:</strong> {program.region}</div>
+                )}
+                <div className="text-sm"><strong>Status:</strong> {program.status === 'aktiv' ? 'Aktiv' : program.status === 'endet_am' ? `Endet am ${program.frist?.datum}` : 'Ausgesetzt'}</div>
               </div>
             </div>
           </div>
@@ -144,10 +148,16 @@ Quelle: ${program.name} · S. ${program.quelle.seite} · Stand ${program.quelle.
             </div>
             <div className="ml-11 space-y-2">
               <p className="text-gray-700 mb-3">Antrag rechtzeitig über das richtige Portal stellen:</p>
-              <div className="bg-blue-50 p-3 rounded">
-                <div className="text-sm"><strong>Antragsweg:</strong> {getAntragswegLabel()}</div>
-                <div className="text-sm"><strong>Frist:</strong> {!program.frist ? '—' : program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : `Bis ${program.frist.datum || '—'}`}</div>
-              </div>
+              {(program.antragsweg || program.frist) && (
+                <div className="bg-blue-50 p-3 rounded">
+                  {program.antragsweg && (
+                    <div className="text-sm"><strong>Antragsweg:</strong> {getAntragswegLabel()}</div>
+                  )}
+                  {program.frist && (
+                    <div className="text-sm"><strong>Frist:</strong> {program.frist.typ === 'laufend' ? 'Laufende Antragstellung' : `Bis ${program.frist.datum}`}</div>
+                  )}
+                </div>
+              )}
               <p className="text-sm text-gray-600 mt-2">
                 Tipp: Bei laufender Antragstellung mindestens 4-6 Wochen vor Kursbeginn beantragen.
               </p>
