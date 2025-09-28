@@ -1,10 +1,10 @@
 import { idbGet, idbSet, idbKeys, idbDel } from '../storage/idb';
 
 // Subpfad-sicherer Basis-Pfad (Vite BASE_URL)
-const URL_BASE = import.meta.env.BASE_URL || '/';
+const URL_BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const u = (p: string) => {
   // Einfache URL-Konstruktion ohne doppelte Slashes
-  const base = URL_BASE.endsWith('/') ? URL_BASE.slice(0, -1) : URL_BASE;
+  const base = URL_BASE;
   const path = p.startsWith('/') ? p : `/${p}`;
   const fullUrl = `${base}${path}`;
   console.log(`[ragCache] URL konstruiert: ${fullUrl}`);
@@ -60,8 +60,8 @@ export async function loadStats(): Promise<RagStats | undefined> {
     _lastInfo = { ..._lastInfo, buildId };
     console.log(`[ragCache] Stats erfolgreich verarbeitet:`, out);
     return out;
-  } catch {
-    console.warn(`[ragCache] Stats laden fehlgeschlagen`);
+  } catch (error) {
+    console.warn(`[ragCache] Stats laden fehlgeschlagen:`, error);
     return;
   }
 }
@@ -87,6 +87,12 @@ export async function loadChunksCached(stats: RagStats): Promise<{
   if (!r.ok) throw new Error('chunks.json nicht verfügbar');
   const text = await r.text();
   console.log(`[ragCache] Chunks Text-Länge: ${text.length} Zeichen`);
+  
+  if (text.length === 0) {
+    console.warn(`[ragCache] Chunks-Datei ist leer`);
+    throw new Error('chunks.json ist leer');
+  }
+  
   await idbSet(key, text);
   // alte Versionen räumen
   for (const k of await idbKeys()) {
