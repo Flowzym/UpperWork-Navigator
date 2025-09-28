@@ -182,7 +182,7 @@ export default function CompareTable({ programs }: CompareTableProps) {
               {displayPrograms.map((program) => (
                 <td key={program.id} className="compare-table-cell">
                   <div className="text-sm font-medium text-blue-700">
-                    {getAntragswegLabel(program.antragsweg)}
+                    {getAntragswegLabel(program.antragsweg || '')}
                   </div>
                 </td>
               ))}
