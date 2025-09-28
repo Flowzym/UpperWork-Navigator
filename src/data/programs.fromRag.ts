@@ -313,29 +313,3 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
   console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
   return [...byId.values()];
 }
-
-function push(arr: string[], s: string, rx: RegExp, max = 6) {
-  if (arr.length >= max) return;
-  if (!rx.test(s)) return;
-  const t = s.replace(/\s+/g,' ').trim();
-  if (!t) return;
-  const v = t.length > 180 ? t.slice(0,180)+' …' : t;
-  if (!arr.some(x => x.toLowerCase() === v.toLowerCase())) arr.push(v);
-}
-
-function splitToItems(segment: string): string[] {
-  return segment
-    .split(/\n|[•\u2022]|[\u2013-]/g)
-    .map(s => s.replace(/\s+/g,' ').trim())
-    .filter(s => s.length >= 6);
-}
-
-function extractBlock(text: string, head: RegExp): string[] {
-  const m = head.exec(text); 
-  if (!m) return [];
-  const start = m.index + m[0].length;
-  const rest = text.slice(start);
-  const stop = ANY_HEAD.exec(rest);
-  const seg = stop ? rest.slice(0, stop.index) : rest;
-  return splitToItems(seg);
-}
