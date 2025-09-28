@@ -207,11 +207,11 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
 
     // Antragsweg normalisieren
     // Antragsweg aus Text ableiten (nur wenn vorhanden)
-    const full = cs.map(c => c.text || '').join('\n').toLowerCase();
-    if (/(e-?ams|eams)/i.test(full)) p.antragsweg = 'eams';
-    else if (/(land\s*(oö|ooe)|amt\s*der\s*oö)/i.test(full)) p.antragsweg = 'land_ooe_portal';
-    else if (/\bwko\b|\bwirtschaftskammer/i.test(full)) p.antragsweg = 'wko_verbund';
-    else if (/(tr(ä|ae)ger|direkt\s+einreichen)/i.test(full)) p.antragsweg = 'traeger_direkt';
+    const antragswegText = cs.map(c => c.text || '').join('\n').toLowerCase();
+    if (/(e-?ams|eams)/i.test(antragswegText)) p.antragsweg = 'eams';
+    else if (/(land\s*(oö|ooe)|amt\s*der\s*oö)/i.test(antragswegText)) p.antragsweg = 'land_ooe_portal';
+    else if (/\bwko\b|\bwirtschaftskammer/i.test(antragswegText)) p.antragsweg = 'wko_verbund';
+    else if (/(tr(ä|ae)ger|direkt\s+einreichen)/i.test(antragswegText)) p.antragsweg = 'traeger_direkt';
 
     // 2) Förderhöhe: zuerst Abschnitt, sonst Beträge/Prozente im gesamten Text
     const fh = extractBlock(full, HEADS.foerderhoehe);
