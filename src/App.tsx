@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Program, Answer } from './types';
-import { samplePrograms } from './data/samplePrograms';
+import { usePrograms } from './data/usePrograms';
 import AppShell from './components/AppShell';
 import ToastHost from './components/ToastHost';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -62,9 +62,11 @@ export interface AppState {
 }
 
 function App() {
+  const { programs: loadedPrograms, source: programSource, loading: programsLoading } = usePrograms();
+  
   const [state, setState] = useState<AppState>({
-    programs: samplePrograms,
-    filteredPrograms: samplePrograms,
+    programs: [],
+    filteredPrograms: [],
     selectedProgram: null,
     comparedPrograms: [],
     starredPrograms: [],
@@ -101,6 +103,17 @@ function App() {
     kiWithSources: true,
     kiAnswers: []
   });
+
+  // Update programs when loaded
+  useEffect(() => {
+    if (!programsLoading && loadedPrograms.length > 0) {
+      setState(prev => ({
+        ...prev,
+        programs: loadedPrograms,
+        filteredPrograms: loadedPrograms
+      }));
+    }
+  }, [loadedPrograms, programsLoading]);
 
   // Apply theme to document
   useEffect(() => {

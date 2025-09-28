@@ -26,4 +26,8 @@ dist-ssr
 # Broschüren-Daten müssen mit ins Repo
 !public/rag/
 !public/rag/*.json
+
+# Broschüren-Daten müssen mit ins Repo
+!public/rag/
+!public/rag/*.json
 .env

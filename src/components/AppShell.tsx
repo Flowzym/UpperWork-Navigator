@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AppState, HistoryEntry, Program, NavigationTab, HelpTab, FilterState, FacetGroup, Provider, Mode, ContextType, Answer } from '../types';
-import { samplePrograms } from '../data/samplePrograms';
 import { buildIndex, search, generateSuggestions, SearchSuggestion } from '../search/searchIndex';
 import { applyFilters } from '../filters/applyFilters';
 import { expandQueryTokens, checkForEntfallenProgram } from '../search/synonyms';
@@ -40,7 +39,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ state, setState, showToast, addToHistory }: AppShellProps) {
-  const [searchIndex, setSearchIndex] = useState(buildIndex(samplePrograms));
+  const [searchIndex, setSearchIndex] = useState(buildIndex([]));
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   const [activeTab, setActiveTab] = useState<NavigationTab>('explorer');
@@ -54,6 +53,13 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
   const [customEndpoint, setCustomEndpoint] = useState(defaultEndpoints.custom);
   const [localConnectionStatus, setLocalConnectionStatus] = useState({ isConnected: false });
   const [customConnectionStatus, setCustomConnectionStatus] = useState({ isConnected: false });
+
+  // Update search index when programs change
+  useEffect(() => {
+    if (state.programs.length > 0) {
+      setSearchIndex(buildIndex(state.programs));
+    }
+  }, [state.programs]);
 
   // Initialize RAG on mount
   useEffect(() => {
