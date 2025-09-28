@@ -1,6 +1,6 @@
 import React from 'react';
 import { Program } from '../types';
-import ProgramCard from './ProgramCard';
+import { ProgramCardV2 } from './cards/ProgramCardV2';
 
 interface ProgramGridProps {
   programs: Program[];
@@ -31,20 +31,11 @@ export default function ProgramGrid({
 }: ProgramGridProps) {
   return (
     <div className="program-grid">
-      {programs.map((program) => (
-        <ProgramCard
+      {programs.map((program: Program) => (
+        <ProgramCardV2
           key={program.id}
-          program={program}
-          onShowDetail={onShowDetail}
-          onToggleCompare={onToggleCompare}
-          onToggleStar={onToggleStar}
-          onOpenChat={onOpenChat}
-          onShowOnePager={onShowOnePager}
-          onShowEmail={onShowEmail}
-          onShowChecklist={onShowChecklist}
-          onShowToast={onShowToast}
-          isCompared={comparedPrograms.includes(program.id)}
-          isStarred={starredPrograms.includes(program.id)}
+          p={program}
+          onOpen={(id) => onShowDetail(id)}
         />
       ))}
     </div>
