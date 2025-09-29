@@ -1,71 +1,73 @@
-import type { Program } from '../../types/program';
-import { hasList, hasText } from '../../lib/ui/guards';
+import type { Program } from '@/types/program';
+import { hasList, hasText } from '@/lib/ui/guards';
+import { normalizeProgram, prettyFoerderart, prettyAntragsweg } from '@/lib/text/normalizeProgram';
 
 export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
-  const formatValue = (v: any): string => {
-    if (typeof v === 'string') return v;
-    if (typeof v === 'object' && v !== null) {
-      // Handle objects like {typ: "something"} by extracting meaningful value
-      if ('typ' in v) return v.typ;
-      return JSON.stringify(v);
-    }
-    return String(v);
+  const program = normalizeProgram(p);
+  const foerderart = prettyFoerderart(program.foerderart)?.[0];
+  const antrag = prettyAntragsweg(program.antragsweg)?.[0];
+
+  const limitList = (items?: string[]) => {
+    if (!Array.isArray(items) || items.length === 0) return undefined;
+    const first = items.slice(0, 3);
+    if (items.length > 3) first.push(`+${items.length - 3} mehr`);
+    return first.join(', ');
   };
 
   return (
     <div className="rounded-xl border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow bg-white">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-medium text-sm truncate text-gray-900">{p.title}</div>
-          {hasText(p.provider) && (
-            <div className="text-xs text-gray-500 truncate">{p.provider}</div>
+          <div className="font-medium text-sm truncate text-gray-900">{program.title}</div>
+          {hasText(program.provider) && (
+            <div className="text-xs text-gray-500 truncate">{program.provider}</div>
           )}
         </div>
         {onOpen && (
-          <button 
-            className="text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors" 
-            onClick={()=>onOpen(p.id)}
+          <button
+            className="text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors"
+            onClick={()=>onOpen(program.id)}
           >
             Öffnen
           </button>
         )}
       </div>
       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-        {p.foerderart && (
+        {foerderart && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Art: {formatValue(p.foerderart)}
+            Art: {foerderart}
           </span>
         )}
-        {p.antragsweg && (
+        {antrag && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Antrag: {formatValue(p.antragsweg)}
+            Antrag: {antrag}
           </span>
         )}
-        {p.frist && (
+        {program.frist && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Frist: {formatValue(p.frist)}
+            Frist: {program.frist}
           </span>
         )}
-        {p.region && (
+        {program.region && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            {p.region}
+            {program.region}
           </span>
         )}
       </div>
-      {hasText(p.summary) && (
-        <p className="mt-1.5 text-xs leading-snug text-gray-700 line-clamp-2">{p.summary}</p>
+      {hasText(program.summary) && (
+        <p className="mt-1.5 text-xs leading-snug text-gray-700 line-clamp-2">{program.summary}</p>
       )}
       <div className="mt-1.5 space-y-0.5 text-xs">
-        {hasList(p.zielgruppe) && (
+        {hasList(program.zielgruppe) && (
           <div>
             <span className="text-gray-500">Zielgruppe: </span>
-            <span className="text-gray-700">{p.zielgruppe!.join(', ')}</span>
+            <span className="text-gray-700">{limitList(program.zielgruppe)}</span>
           </div>
         )}
-        {hasList(p.voraussetzungen) && (
+        {hasList(program.voraussetzungen) && (
           <div>
             <span className="text-gray-500">Voraussetzungen: </span>
-            <span className="text-gray-700">{p.voraussetzungen!.join(', ')}</span>
+            <span className="text-gray-700">{limitList(program.voraussetzungen)}</span>
           </div>
         )}
       </div>

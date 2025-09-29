@@ -46,20 +46,29 @@ const sectionPatterns = [
   { name: 'passt_wenn', pattern: /^passt,?\s+wenn/i },
   { name: 'passt_nicht_wenn', pattern: /^passt\s+nicht,?\s+wenn/i },
   { name: 'überblick', pattern: /^(überblick|beschreibung)/i },
-  { name: 'region', pattern: /^region|(gilt|verf(ü|ue)gbar)\s+in\s+(obero(ö|oe)sterreich|o(ö|oe))/i },
+  { name: 'region', pattern: /^region|(gilt|verf(ü|ue)gbar)\s+in\s+(ober(ö|oe)sterreich|oö|ooe|österreichweit|bundesweit)/i },
   { name: 'quelle', pattern: /^(quelle|stand)/i }
 ];
 
 function detectSection(line) {
   const trimmedLine = line.trim();
   if (!trimmedLine) return null;
-  
+
   for (const { name, pattern } of sectionPatterns) {
     if (pattern.test(trimmedLine)) {
       return name;
     }
   }
   return null;
+}
+
+function cleanse(text) {
+  return String(text || '')
+    .replace(/\s+/g, ' ')
+    .replace(/Scanne den Link\d+/gi, '')
+    .replace(/Kontakt .*?straße .*?\d+/gi, '')
+    .replace(/^(\?|·|•|-)\s*/, '')
+    .trim();
 }
 
 // Chunking mit Overlap
@@ -271,9 +280,12 @@ async function ingestBrochure() {
       let currentSection = 'allgemein';
       let sectionText = '';
       
-      for (const line of lines) {
+      for (const rawLine of lines) {
+        const line = cleanse(rawLine);
+        if (!line) continue;
+
         const detectedSection = detectSection(line);
-        
+
         if (detectedSection) {
           // Vorherige Section abschließen
           if (sectionText.trim()) {
@@ -291,7 +303,7 @@ async function ingestBrochure() {
           currentSection = detectedSection;
           sectionText = line;
         } else {
-          sectionText += '\n' + line;
+          sectionText = sectionText ? `${sectionText}\n${line}` : line;
         }
       }
       
