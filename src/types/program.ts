@@ -4,10 +4,10 @@ export interface Program {
   id: string;
   title: string;
   provider?: string;
-  region?: string;
-  frist?: string;
+  region?: string | any;
+  frist?: string | any;
   antragsweg?: string;
-  foerderart?: Foerderart;
+  foerderart?: Foerderart | any;
   zielgruppe?: string[];
   voraussetzungen?: string[];
   summary?: string;
