@@ -545,12 +545,14 @@ export default function AppShell({ state, setState, showToast, addToHistory }: A
           cardDensity: state.viewMode,
           noExternalProviders: false
         }}
-        onSettingsChange={(settings) => setState(prev => ({ 
-          ...prev, 
+        onSettingsChange={(settings) => setState(prev => ({
+          ...prev,
           theme: settings.themeMode === 'dark' ? 'dark' : 'light',
           viewMode: settings.viewMode === 'list' ? 'compact' : 'comfort'
         }))}
         onShowToast={showToast}
+        ragStats={state.ragStats}
+        ragWarnings={state.ragWarnings}
       />
     </div>
   );

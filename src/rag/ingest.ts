@@ -1,4 +1,16 @@
-import { DocChunk, ProgramMeta, IngestionStats } from './schema';
+import {
+  DocChunk,
+  IngestionStats,
+  migrateStats,
+  migrateProgramMeta,
+  migrateChunks,
+  validateStats as validateRagStats,
+  validateMeta as validateRagMeta,
+  validateChunks as validateRagChunks,
+  type RagStats,
+  type RagMeta,
+  type RagChunk
+} from './schema';
 import { programMeta } from '../data/programMeta';
 import { showToast } from '../lib/ui/toast';
 import { loadStats, loadChunksCached, getRagCacheInfo } from '../lib/cache/ragCache';
@@ -9,6 +21,49 @@ const BASE = new URL(
   location.href
 );
 const url = (p: string) => new URL(p.replace(/^\//, ''), BASE).toString();
+
+export async function loadRagFiles(): Promise<{
+  stats: RagStats;
+  chunks: RagChunk[];
+  meta: RagMeta;
+  source: 'network';
+  warnings: string[];
+}> {
+  const [rawStats, rawChunks, rawMeta] = await Promise.all([
+    fetch(url('rag/stats.json')).then(r => {
+      if (!r.ok) throw new Error(`stats.json ${r.status}`);
+      return r.json();
+    }),
+    fetch(url('rag/chunks.json')).then(r => {
+      if (!r.ok) throw new Error(`chunks.json ${r.status}`);
+      return r.json();
+    }),
+    fetch(url('rag/programMeta.json')).then(r => {
+      if (!r.ok) throw new Error(`programMeta.json ${r.status}`);
+      return r.json();
+    })
+  ]);
+
+  const stats = migrateStats(rawStats);
+  const chunks = migrateChunks(rawChunks);
+  const meta = migrateProgramMeta(rawMeta);
+
+  const warnings = [
+    ...validateRagStats(stats),
+    ...validateRagMeta(meta),
+    ...validateRagChunks(chunks)
+  ];
+
+  if ((stats.programs === 0 || stats.chunks === 0) && chunks.length > 0) {
+    warnings.push('stats counters are zero, but chunks array is non-empty');
+  }
+
+  if (warnings.length) {
+    console.warn('[RAG] Schema warnings:', warnings);
+  }
+
+  return { stats, chunks, meta, source: 'network', warnings };
+}
 
 // Normalisierung für Suche (wie in searchIndex.ts)
 function normalizeText(text: string): string {

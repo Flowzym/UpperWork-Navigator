@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Monitor, Bot, FileText, Settings, Eye, EyeOff, TestTube, Trash2, RefreshCw } from 'lucide-react';
 import { Provider } from '../types';
+import type { RagStats } from '../rag/schema';
 import { EndpointConfig, defaultEndpoints } from '../config/endpoints';
 import { useChatApi } from '../hooks/useChatApi';
 import { getRagCacheInfo, clearRagCache } from '../lib/cache/ragCache';
@@ -20,6 +21,8 @@ interface SettingsModalProps {
   };
   onSettingsChange: (settings: any) => void;
   onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
+  ragStats?: RagStats | null;
+  ragWarnings?: string[];
 }
 
 const tabLabels: Record<SettingsTab, { label: string; icon: React.ReactNode }> = {
@@ -35,7 +38,9 @@ export default function SettingsModal({
   onClose,
   settings,
   onSettingsChange,
-  onShowToast
+  onShowToast,
+  ragStats,
+  ragWarnings
 }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('display');
   const [selectedProvider, setSelectedProvider] = useState<Provider>('ChatGPT');
@@ -100,7 +105,8 @@ export default function SettingsModal({
     lastUpdate: '',
     source: 'network' as 'network' | 'idb',
     buildId: '',
-    urlBase: ''
+    urlBase: '',
+    programs: 0
   });
 
   const chatApi = useChatApi();
@@ -142,7 +148,8 @@ export default function SettingsModal({
           lastUpdate: new Date().toLocaleDateString('de-DE'),
           source: cacheInfo.source,
           buildId: cacheInfo.buildId || 'unbekannt',
-          urlBase: cacheInfo.urlBase
+          urlBase: cacheInfo.urlBase,
+          programs: stats.programsFound || stats.programs || 0
         });
       } else {
         setBrochureStatus({
@@ -152,7 +159,8 @@ export default function SettingsModal({
           lastUpdate: '',
           source: cacheInfo.source,
           buildId: cacheInfo.buildId || 'unbekannt',
-          urlBase: cacheInfo.urlBase
+          urlBase: cacheInfo.urlBase,
+          programs: 0
         });
       }
     } catch (error) {
@@ -163,10 +171,35 @@ export default function SettingsModal({
         lastUpdate: '',
         source: cacheInfo.source,
         buildId: cacheInfo.buildId || 'unbekannt',
-        urlBase: cacheInfo.urlBase
+        urlBase: cacheInfo.urlBase,
+        programs: 0
       });
     }
   };
+
+  useEffect(() => {
+    if (!ragStats) return;
+    setBrochureStatus(prev => ({
+      ...prev,
+      loaded: true,
+      buildId: ragStats.buildId || prev.buildId,
+      chunks: typeof ragStats.chunks === 'number' ? ragStats.chunks : prev.chunks,
+      programs: typeof ragStats.programs === 'number' ? ragStats.programs : prev.programs,
+      filename: ragStats.source || prev.filename || 'brochure.json'
+    }));
+  }, [ragStats]);
+
+  const schemaWarnings = useMemo(() => {
+    const list = [...(ragWarnings ?? [])];
+    if (ragStats && (ragStats.programs === 0 || ragStats.chunks === 0)) {
+      list.push('Keine Inhalte geladen. Prüfe public/rag/*.json (Status 200) und camelCase-Schlüssel.');
+    }
+    return list;
+  }, [ragWarnings, ragStats]);
+
+  const displayedPrograms = ragStats?.programs ?? brochureStatus.programs ?? 0;
+  const displayedChunks = ragStats?.chunks ?? brochureStatus.chunks ?? 0;
+  const displayedBuildId = (ragStats?.buildId ?? brochureStatus.buildId) || 'unbekannt';
 
   const handleProviderConfigChange = (provider: Provider, field: string, value: any) => {
     setProviderConfigs(prev => ({
@@ -433,12 +466,18 @@ export default function SettingsModal({
                 📄 {brochureStatus.filename}
               </div>
               <div className="settings-brochure-meta">
-                {brochureStatus.chunks} Chunks • {getSourceBadge(brochureStatus.source)}
+                {displayedPrograms} Programme • {displayedChunks} Chunks • {getSourceBadge(brochureStatus.source)}
               </div>
               <div className="settings-brochure-meta">
-                Build: <code className="text-xs">{brochureStatus.buildId}</code> • BASE_URL: <code className="text-xs">{brochureStatus.urlBase || '/'}</code>
+                Build: <code className="text-xs">{displayedBuildId}</code> • BASE_URL: <code className="text-xs">{brochureStatus.urlBase || '/'}</code>
               </div>
             </div>
+            {schemaWarnings.length > 0 && (
+              <div className="mt-2 text-sm text-amber-700">
+                ⚠ {schemaWarnings[0]}
+                {schemaWarnings.length > 1 ? ' (weitere Hinweise unten)' : ''}
+              </div>
+            )}
             <div className="settings-brochure-actions">
               <button
                 className="btn btn-secondary"
@@ -474,15 +513,19 @@ export default function SettingsModal({
               <div className="flex items-center justify-between mt-1">
                 <span>Build-ID:</span>
                 <code className="text-xs bg-white px-2 py-1 rounded border">
-                  {brochureStatus.buildId || 'unbekannt'}
+                  {displayedBuildId}
                 </code>
               </div>
               <div className="flex items-center justify-between mt-1">
+                <span>Programme erkannt:</span>
+                <span className="font-medium">{displayedPrograms}</span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
                 <span>Chunks geladen:</span>
-                <span className="font-medium">{brochureStatus.chunks}</span>
+                <span className="font-medium">{displayedChunks}</span>
               </div>
             </div>
-            
+
             <div className="flex gap-2 pt-2 border-t">
               <button
                 className="btn btn-secondary btn-sm"
@@ -508,10 +551,21 @@ export default function SettingsModal({
             </div>
           </div>
         </div>
-        
+
         <div className="mt-3 text-xs text-gray-600">
           💡 "Cache leeren & neu laden" hilft bei veralteten Daten oder nach Hinzufügen neuer JSON-Dateien
         </div>
+
+        {schemaWarnings.length > 0 && (
+          <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            <div className="font-semibold">Schema-Warnungen</div>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {schemaWarnings.map((warn, idx) => (
+                <li key={idx}>{warn}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="settings-section">
         <h3 className="settings-section-title">Neue Broschüre hochladen</h3>

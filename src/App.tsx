@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Program, Answer } from './types';
+import type { RagStats } from './rag/schema';
 import { usePrograms } from './data/usePrograms';
 import AppShell from './components/AppShell';
 import ToastHost from './components/ToastHost';
@@ -59,10 +60,12 @@ export interface AppState {
   kiOnlyBrochure: boolean;
   kiWithSources: boolean;
   kiAnswers: Answer[];
+  ragStats: RagStats | null;
+  ragWarnings: string[];
 }
 
 function App() {
-  const { programs: loadedPrograms, source: programSource, loading: programsLoading } = usePrograms();
+  const { programs: loadedPrograms, loading: programsLoading, stats: ragStats, warnings: ragWarnings } = usePrograms();
   
   const [state, setState] = useState<AppState>({
     programs: [],
@@ -101,19 +104,33 @@ function App() {
     kiContext: 'Freie Frage',
     kiOnlyBrochure: true,
     kiWithSources: true,
-    kiAnswers: []
+    kiAnswers: [],
+    ragStats: null,
+    ragWarnings: []
   });
 
-  // Update programs when loaded
+  // Update programs and RAG diagnostics when loader changes
   useEffect(() => {
-    if (!programsLoading && loadedPrograms.length > 0) {
-      setState(prev => ({
-        ...prev,
-        programs: loadedPrograms,
-        filteredPrograms: loadedPrograms
-      }));
+    if (programsLoading) {
+      setState(prev => {
+        if (prev.ragStats === ragStats && prev.ragWarnings === ragWarnings) return prev;
+        return {
+          ...prev,
+          ragStats: ragStats ?? prev.ragStats,
+          ragWarnings: ragWarnings ?? prev.ragWarnings
+        };
+      });
+      return;
     }
-  }, [loadedPrograms, programsLoading]);
+
+    setState(prev => ({
+      ...prev,
+      programs: loadedPrograms,
+      filteredPrograms: loadedPrograms,
+      ragStats: ragStats ?? prev.ragStats,
+      ragWarnings: ragWarnings ?? prev.ragWarnings
+    }));
+  }, [loadedPrograms, programsLoading, ragStats, ragWarnings]);
 
   // Apply theme to document
   useEffect(() => {

@@ -1,3 +1,5 @@
+import type { RagStats } from './rag/schema';
+
 export interface Program {
   id: string;
   name: string;
@@ -114,4 +116,6 @@ export interface AppState {
   history: HistoryEntry[];
   theme: 'light' | 'dark' | 'high-contrast';
   viewMode: 'comfort' | 'compact';
+  ragStats: RagStats | null;
+  ragWarnings: string[];
 }
