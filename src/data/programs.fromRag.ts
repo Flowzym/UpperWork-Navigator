@@ -3,7 +3,7 @@ import { Program, FoerderHoehe, Frist, Quelle } from '../types';
 
 export type RagMeta = { 
   programId: string; 
-  programName: string; 
+  title: string; 
   pages: [number, number]; 
   stand?: string | null; 
   status?: string | null 
@@ -103,7 +103,7 @@ function buildPageIndex(meta: RagMeta[]) {
       start: m.pages[0], 
       end: m.pages[1], 
       id: m.programId, 
-      name: m.programName, 
+      name: m.title, 
       stand: m.stand ?? null, 
       status: m.status ?? null 
     }))
@@ -126,8 +126,8 @@ function chunksForRange(chunks: RagChunk[], start: number, end: number) {
   return chunks.filter(c => c.page >= start && c.page <= end);
 }
 
-function isLikelyProgram(cs: RagChunk[], title: string) {
-  if (SKIP_TITLE.test(title)) return false;
+function isLikelyProgram(cs: RagChunk[], name: string) {
+  if (SKIP_TITLE.test(name)) return false;
   if (!cs.length) return false;
   const head = cs.slice(0, 8).map(c => c.text).join(' ');
   return K_PROG.test(head) && cs.some(c => K_SECT.test(c.text));
