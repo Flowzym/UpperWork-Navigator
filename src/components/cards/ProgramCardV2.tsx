@@ -1,12 +1,13 @@
 import type { Program } from '@/types/program';
 import { hasList, hasText } from '@/lib/ui/guards';
 import { FieldRow } from './FieldRow';
-import { normalizeProgram, prettyFoerderart, prettyAntragsweg } from '@/lib/text/normalizeProgram';
+import { normalizeProgram, prettyFoerderart, prettyAntragsweg, asText } from '@/lib/text/normalizeProgram';
 
 export function ProgramCardV2({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
   const program = normalizeProgram(p);
-  const foerderart = prettyFoerderart(program.foerderart)?.[0];
-  const antrag = prettyAntragsweg(program.antragsweg)?.[0];
+  const art = prettyFoerderart(p.foerderart as any)?.[0];
+  const antrag = prettyAntragsweg(p.antragsweg as any)?.[0];
+  const frist = asText(p.frist);
 
   const limitList = (items?: string[]) => {
     if (!Array.isArray(items) || items.length === 0) return undefined;
@@ -33,19 +34,19 @@ export function ProgramCardV2({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        {foerderart && (
+        {typeof art === 'string' && art && (
           <span className="inline-flex items-center rounded-full px-2 py-0.5 border">
-            <span className="opacity-60 mr-1">Art:</span>{foerderart}
+            <span className="opacity-60 mr-1">Art:</span>{art}
           </span>
         )}
-        {antrag && (
+        {typeof antrag === 'string' && antrag && (
           <span className="inline-flex items-center rounded-full px-2 py-0.5 border">
             <span className="opacity-60 mr-1">Antrag:</span>{antrag}
           </span>
         )}
-        {program.frist && (
+        {typeof frist === 'string' && frist && (
           <span className="inline-flex items-center rounded-full px-2 py-0.5 border">
-            <span className="opacity-60 mr-1">Frist:</span>{program.frist}
+            <span className="opacity-60 mr-1">Frist:</span>{frist}
           </span>
         )}
       </div>
