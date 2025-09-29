@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { Program } from '../types';
+import { normalizeProgram } from '../lib/text/normalizeProgram';
 import { ProgramCardV2, ProgramCardCompact } from './cards';
 
 interface ProgramGridProps {
@@ -47,11 +48,12 @@ export default function ProgramGrid({
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {programs.map((program: Program) => (
-          compact
+        {programs.map((raw: Program) => {
+          const program = normalizeProgram(raw);
+          return compact
             ? <ProgramCardCompact key={program.id} p={program} onOpen={(id) => onShowDetail(id)} />
-            : <ProgramCardV2 key={program.id} p={program} onOpen={(id) => onShowDetail(id)} />
-        ))}
+            : <ProgramCardV2 key={program.id} p={program} onOpen={(id) => onShowDetail(id)} />;
+        })}
       </div>
     </div>
   );
