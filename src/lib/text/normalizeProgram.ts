@@ -16,15 +16,15 @@ export function dedup<T>(arr?: T[] | null): T[] | undefined {
   if (!Array.isArray(arr)) return undefined;
   const seen = new Set<string>(), out: T[] = [];
   for (const x of arr) {
-    const k = String(x).trim().toLowerCase();
+    const cand = v.typ ?? v.type ?? v.value ?? v.label ?? v.name ?? v.text ?? v.title;
     if (!k || seen.has(k)) continue;
     seen.add(k); out.push(x);
   }
   return out.length ? out : undefined;
 }
 
-export function prettyFoerderart(v?: string | string[]) {
-  const arr = Array.isArray(v) ? v : (v ? [v] : []);
+// Neu (export): beliebige Eingaben → String extrahieren
+export function asText(v: any): string | undefined {
   const mapped = arr.map(s => {
     const k = s.toLowerCase();
     const hit = Object.keys(FOERDERART_MAP).find(p => k.includes(p));
@@ -88,9 +88,11 @@ export function normalizeProgram(p: Program): Program {
     ...p,
     foerderart: prettyFoerderart(p.foerderart)?.[0],
     antragsweg: prettyAntragsweg(p.antragsweg)?.[0],
-    region: canonicalRegion(p.region) ?? p.region,
-    zielgruppe: dedup((p.zielgruppe || []).map(cleanText).filter(Boolean) as string[]),
-    voraussetzungen: dedup((p.voraussetzungen || []).map(cleanText).filter(Boolean) as string[]),
+    region: canonicalRegion(asText(p.region)) ?? asText(p.region),
+    zielgruppe: dedup((Array.isArray(p.zielgruppe)?p.zielgruppe:[])
+      .map(asText).filter(Boolean).map(cleanText) as string[]),
+    voraussetzungen: dedup((Array.isArray(p.voraussetzungen)?p.voraussetzungen:[])
+      .map(asText).filter(Boolean).map(cleanText) as string[]),
     summary: clampWords(cleanText(p.summary), 55)
   };
 }
