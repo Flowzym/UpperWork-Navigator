@@ -1,5 +1,6 @@
 import type { Program } from '../../types';
 import { hasList, hasText } from '../../lib/ui/guards';
+import { prettyFoerderart, prettyAntragsweg } from '../../lib/text/normalizeProgram';
 
 export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
   const formatValue = (v: any): string => {
@@ -31,14 +32,14 @@ export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:stri
         )}
       </div>
       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-        {p.foerderart && (
+        {prettyFoerderart(p.foerderart)?.[0] && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Art: {formatValue(p.foerderart)}
+            Art: {prettyFoerderart(p.foerderart)![0]}
           </span>
         )}
-        {p.antragsweg && (
+        {prettyAntragsweg(p.antragsweg)?.[0] && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Antrag: {formatValue(p.antragsweg)}
+            Antrag: {prettyAntragsweg(p.antragsweg)![0]}
           </span>
         )}
         {p.frist && (
@@ -52,8 +53,8 @@ export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:stri
           </span>
         )}
       </div>
-      {hasText(p.summary) && (
-        <p className="mt-1.5 text-xs leading-snug text-gray-700 line-clamp-2">{p.summary}</p>
+      {hasText(p.teaser) && (
+        <p className="mt-1.5 text-xs leading-snug text-gray-700 line-clamp-2">{p.teaser}</p>
       )}
       <div className="mt-1.5 space-y-0.5 text-xs">
         {hasList(p.zielgruppe) && (
