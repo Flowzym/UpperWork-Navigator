@@ -21,6 +21,7 @@ import { Program } from '../types';
 
 // Normalisierung: Umlaute, ß, Diakritika, lowercase
 export function normalizeText(text: string): string {
+  if (!text || typeof text !== 'string') return '';
   return text
     .toLowerCase()
     .replace(/ä/g, 'ae')
@@ -98,11 +99,11 @@ export function buildIndex(programs: Program[]): SearchIndex {
     
     // Gewichtete Felder
     addToIndex(program.name, 'title', 5);
-    addToIndex(program.teaser, 'teaser', 2);
-    program.zielgruppe.forEach(z => addToIndex(z, 'zielgruppe', 3));
-    program.themen.forEach(t => addToIndex(t, 'themen', 3));
-    program.foerderart.forEach(f => addToIndex(f, 'foerderart', 3));
-    program.voraussetzungen.forEach(v => addToIndex(v, 'voraussetzungen', 1));
+    if (program.teaser) addToIndex(program.teaser, 'teaser', 2);
+    (program.zielgruppe || []).forEach(z => z && addToIndex(z, 'zielgruppe', 3));
+    (program.themen || []).forEach(t => t && addToIndex(t, 'themen', 3));
+    (program.foerderart || []).forEach(f => f && addToIndex(f, 'foerderart', 3));
+    (program.voraussetzungen || []).forEach(v => v && addToIndex(v, 'voraussetzungen', 1));
   });
   
   return { programs, titleIndex, contentIndex };
