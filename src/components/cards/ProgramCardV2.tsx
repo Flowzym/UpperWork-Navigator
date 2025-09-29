@@ -1,4 +1,4 @@
-import { Program } from '../../types/program';
+import { Program } from '../../types';
 import { hasList, hasText } from '../../lib/ui/guards';
 import { FieldRow } from './FieldRow';
 import { BadgeList } from './BadgeList';
@@ -8,7 +8,7 @@ export function ProgramCardV2({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>
     <div className="rounded-2xl border border-gray-200 p-4 hover:shadow-sm transition-shadow bg-white">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold leading-tight text-gray-900">{p.title}</h3>
+          <h3 className="text-base font-semibold leading-tight text-gray-900">{p.name}</h3>
           {hasText(p.provider) && <div className="text-sm text-gray-500">{p.provider}</div>}
         </div>
         {onOpen && (

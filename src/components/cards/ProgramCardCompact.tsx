@@ -1,4 +1,4 @@
-import type { Program } from '../../types/program';
+import type { Program } from '../../types';
 import { hasList, hasText } from '../../lib/ui/guards';
 
 export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
@@ -16,7 +16,7 @@ export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:stri
     <div className="rounded-xl border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow bg-white">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-medium text-sm truncate text-gray-900">{p.title}</div>
+          <div className="font-medium text-sm truncate text-gray-900">{p.name}</div>
           {hasText(p.provider) && (
             <div className="text-xs text-gray-500 truncate">{p.provider}</div>
           )}

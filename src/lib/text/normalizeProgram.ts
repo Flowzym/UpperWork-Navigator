@@ -1,4 +1,4 @@
-import type { Program } from '../../types/program';
+import type { Program } from '../../types';
 
 const FOERDERART_MAP: Record<string,string> = {
   'kurs':'kurskosten','kurskosten':'kurskosten','kurskostenförderung':'kurskosten',
@@ -78,11 +78,10 @@ export function clampWords(s?: string, max=40) {
 export function normalizeProgram(p: Program): Program {
   return {
     ...p,
-    foerderart: prettyFoerderart(p.foerderart)?.[0],
-    antragsweg: prettyAntragsweg(p.antragsweg)?.[0],
+    foerderart: prettyFoerderart(p.foerderart),
+    antragsweg: prettyAntragsweg(p.antragsweg),
     region: canonicalRegion(p.region) ?? p.region,
     zielgruppe: dedup((p.zielgruppe || []).map(cleanText).filter(Boolean) as string[]),
-    voraussetzungen: dedup((p.voraussetzungen || []).map(cleanText).filter(Boolean) as string[]),
-    summary: clampWords(cleanText(p.summary), 55)
+    voraussetzungen: dedup((p.voraussetzungen || []).map(cleanText).filter(Boolean) as string[])
   };
 }
