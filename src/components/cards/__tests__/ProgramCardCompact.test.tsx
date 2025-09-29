@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { ProgramCardCompact } from '../ProgramCardCompact';
-import type { Program } from '../../../types';
+import type { Program } from '../../../types/program';
 
-const base: Program = { id: 'p1', name: 'Testprogramm' };
+const base: Program = { id: 'p1', title: 'Testprogramm' };
 
 it('kompakt: zeigt nichts Leeres', () => {
   render(<ProgramCardCompact p={base} />);

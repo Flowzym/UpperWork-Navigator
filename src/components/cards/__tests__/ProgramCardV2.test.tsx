@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { ProgramCardV2 } from '../ProgramCardV2';
-import type { Program } from '../../../types';
+import type { Program } from '../../../types/program';
 
-const base: Program = { id: 'p1', name: 'Testprogramm' };
+const base: Program = { id: 'p1', title: 'Testprogramm' };
 
 it('rendert Pflichttitel und keine leeren Felder', () => {
   render(<ProgramCardV2 p={base} />);

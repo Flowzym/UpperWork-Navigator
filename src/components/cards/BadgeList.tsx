@@ -1,4 +1,4 @@
-import { Program } from '../../types';
+import { Program } from '../../types/program';
 
 export function BadgeList({p}:{p:Program}) {
   const formatValue = (v: any): string => {

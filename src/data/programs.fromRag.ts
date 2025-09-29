@@ -1,6 +1,5 @@
 // src/data/programs.fromRag.ts
-import type { Program } from '../types';
-import { normalizeProgram } from '../lib/text/normalizeProgram';
+import { Program, FoerderHoehe, Frist, Quelle } from '../types';
 
 export type RagMeta = { 
   programId: string; 
@@ -307,7 +306,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.themeField = p.themen.length > 0 ? p.themen[0] : '';
     p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
 
-    byId.set(p.id, normalizeProgram(p));
+    byId.set(p.id, p);
   }
 
   console.info('[RAG] Programme gebaut:', byId.size, 'von', idx.arr.length);
