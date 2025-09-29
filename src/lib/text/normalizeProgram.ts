@@ -1,11 +1,13 @@
-import type { Program } from '@/types/program';
+import type { Program } from '../../types/program';
 
+// --- Mappings ---
 const FOERDERART_MAP: Record<string,string> = {
   'kurs':'kurskosten','kurskosten':'kurskosten','kurskostenförderung':'kurskosten',
   'beratung':'beratung','coaching':'beratung',
   'lohn':'lohnkostenzuschuss','gehalt':'lohnkostenzuschuss','lohnkostenzuschuss':'lohnkostenzuschuss',
   'betrieb':'betrieb','invest':'betrieb','anschaffung':'betrieb'
 };
+
 const ANTRAG_MAP: Record<string,string> = {
   'eams':'eAMS','e-ams':'eAMS','ams':'eAMS',
   'traeger_direkt':'Träger direkt','träger direkt':'Träger direkt','traeger direkt':'Träger direkt',
@@ -14,32 +16,55 @@ const ANTRAG_MAP: Record<string,string> = {
 
 export function dedup<T>(arr?: T[] | null): T[] | undefined {
   if (!Array.isArray(arr)) return undefined;
-  const seen = new Set<string>(), out: T[] = [];
+  const seen = new Set<string>(); 
+  const out: T[] = [];
   for (const x of arr) {
-    const cand = v.typ ?? v.type ?? v.value ?? v.label ?? v.name ?? v.text ?? v.title;
+    const k = String(x).trim().toLowerCase();
     if (!k || seen.has(k)) continue;
-    seen.add(k); out.push(x);
+    seen.add(k); 
+    out.push(x);
   }
   return out.length ? out : undefined;
 }
 
 // Neu (export): beliebige Eingaben → String extrahieren
 export function asText(v: any): string | undefined {
-  const mapped = arr.map(s => {
-    const k = s.toLowerCase();
+  if (v == null) return undefined;
+  if (typeof v === 'string') return v.trim() || undefined;
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  if (Array.isArray(v)) {
+    const first = v.find(x => asText(x));
+    return asText(first);
+  }
+  if (typeof v === 'object') {
+    // häufige Felder: typ/type/value/label/name
+    const cand = v.typ ?? v.type ?? v.value ?? v.label ?? v.name ?? v.text ?? v.title;
+    if (cand) return asText(cand);
+  }
+  try { return JSON.stringify(v); } catch { return undefined; }
+}
+
+export function prettyFoerderart(v?: any) {
+  const arr = Array.isArray(v) ? v : (v ? [v] : []);
+  const mapped = arr.map((s: any) => {
+    const text = asText(s);
+    if (!text) return null;
+    const k = text.toLowerCase();
     const hit = Object.keys(FOERDERART_MAP).find(p => k.includes(p));
-    return hit ? FOERDERART_MAP[hit] : s.trim();
-  });
+    return hit ? FOERDERART_MAP[hit] : text.trim();
+  }).filter(Boolean) as string[];
   return dedup(mapped);
 }
 
-export function prettyAntragsweg(v?: string | string[]) {
+export function prettyAntragsweg(v?: any) {
   const arr = Array.isArray(v) ? v : (v ? [v] : []);
-  const mapped = arr.map(s => {
-    const k = s.toLowerCase().replace(/\s+/g,' ').trim();
+  const mapped = arr.map((s: any) => {
+    const text = asText(s);
+    if (!text) return null;
+    const k = text.toLowerCase().replace(/\s+/g,' ').trim();
     const hit = Object.keys(ANTRAG_MAP).find(p => k.includes(p));
-    return hit ? ANTRAG_MAP[hit] : s.trim();
-  });
+    return hit ? ANTRAG_MAP[hit] : text.trim();
+  }).filter(Boolean) as string[];
   return dedup(mapped);
 }
 
@@ -68,6 +93,7 @@ const OCR_NOISE = [
   /scanne\s+den\s+link\d+/i,
   /kontakt\s+.*?straße.*?\d+/i
 ];
+
 export function cleanText(s?: string) {
   if (!s) return s;
   let t = s.replace(/\s+/g,' ').replace(/\s+,/g,',').trim();
@@ -93,6 +119,6 @@ export function normalizeProgram(p: Program): Program {
       .map(asText).filter(Boolean).map(cleanText) as string[]),
     voraussetzungen: dedup((Array.isArray(p.voraussetzungen)?p.voraussetzungen:[])
       .map(asText).filter(Boolean).map(cleanText) as string[]),
-    summary: clampWords(cleanText(p.summary), 55)
+    summary: clampWords(cleanText(asText(p.summary)), 55)
   };
 }
