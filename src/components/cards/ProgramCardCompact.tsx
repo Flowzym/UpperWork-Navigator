@@ -53,20 +53,9 @@ export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:stri
             {p.region}
           </span>
         )}
-        )}
-        {typeof antrag === 'string' && antrag && (
+        {typeof p.region === 'string' && p.region && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Antrag: {antrag}
-          </span>
-        )}
-        {typeof frist === 'string' && frist && (
-          <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Frist: {frist}
-          </span>
-        )}
-        {typeof program.region === 'string' && program.region && (
-          <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            {program.region}
+            {p.region}
           </span>
         )}
       </div>
