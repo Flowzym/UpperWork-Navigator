@@ -1,0 +1,847 @@
+[
+  {
+    "id": "ak-bauhandwerkerbonus",
+    "title": "AK-Bauhandwerkerbonus . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 24,
+    "endPage": 24,
+    "pages": [
+      24,
+      24
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "ak-bildungsbonus-und-ak-leistungskarten-rabatt",
+    "title": "AK-Bildungsbonus und AK-Leistungskarten-Rabatt . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 25,
+    "endPage": 25,
+    "pages": [
+      25,
+      25
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "ak-forderprogramm-fur-abschlussarbeiten-an-universitaten-und-fachhochschulen",
+    "title": "AK-Förderprogramm für Abschlussarbeiten an Universitäten und Fachhochschulen . . . . . . . . . . .",
+    "startPage": 26,
+    "endPage": 26,
+    "pages": [
+      26,
+      26
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "ak-reifeprufungsbonus",
+    "title": "AK-Reifeprüfungsbonus . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 27,
+    "endPage": 27,
+    "pages": [
+      27,
+      27
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "angebot-fur-arbeitsmarktferne-personen-bezieher-innen-von-bedarfsorientierter-mi",
+    "title": "Angebot für arbeitsmarktferne Personen & Bezieher:innen von bedarfsorientierter Mindestsicherung . . . .",
+    "startPage": 28,
+    "endPage": 28,
+    "pages": [
+      28,
+      28
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "arbeitsplatznahe-qualifizierung-aqua",
+    "title": "Arbeitsplatznahe Qualifizierung (AQUA) . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 29,
+    "endPage": 29,
+    "pages": [
+      29,
+      29
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "bildungsteilzeitgeld",
+    "title": "Bildungsteilzeitgeld . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 30,
+    "endPage": 30,
+    "pages": [
+      30,
+      30
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "du-kannst-was",
+    "title": "„Du kannst was!“ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 31,
+    "endPage": 31,
+    "pages": [
+      31,
+      31
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "erasmus-eu-programm-fur-bildung-jugend-und-sport",
+    "title": "ERASMUS+ – EU-Programm für Bildung, Jugend und Sport . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 32,
+    "endPage": 32,
+    "pages": [
+      32,
+      32
+    ],
+    "provider": "EU",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "fit-programm",
+    "title": "FiT-Programm . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 33,
+    "endPage": 33,
+    "pages": [
+      33,
+      33
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "implacementstiftung",
+    "title": "Implacementstiftung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 34,
+    "endPage": 34,
+    "pages": [
+      34,
+      34
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "umweltstiftung-implacementstiftung",
+    "title": "Umweltstiftung (Implacementstiftung) . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 35,
+    "endPage": 35,
+    "pages": [
+      35,
+      35
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "forderungen-im-rahmen-des-oo-bildungskontos",
+    "title": "Förderungen im Rahmen des oö. Bildungskontos . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 36,
+    "endPage": 37,
+    "pages": [
+      36,
+      37
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "weiterbildungsgeld",
+    "title": "Weiterbildungsgeld . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 38,
+    "endPage": 38,
+    "pages": [
+      38,
+      38
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "pflegestipendium",
+    "title": "Pflegestipendium . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 39,
+    "endPage": 39,
+    "pages": [
+      39,
+      39
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "industrienahe-dissertationen-2025",
+    "title": "Industrienahe Dissertationen 2025 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 40,
+    "endPage": 40,
+    "pages": [
+      40,
+      40
+    ],
+    "provider": null,
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "insolvenzstiftung",
+    "title": "Insolvenzstiftung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 41,
+    "endPage": 43,
+    "pages": [
+      41,
+      43
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Frauen und Männer",
+    "container": false
+  },
+  {
+    "id": "ausbildungsforderung",
+    "title": "Ausbildungsförderung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 44,
+    "endPage": 44,
+    "pages": [
+      44,
+      44
+    ],
+    "provider": "Land OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "basisforderung-und-lehrbetriebsberatung",
+    "title": "Basisförderung und Lehrbetriebsberatung . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 45,
+    "endPage": 45,
+    "pages": [
+      45,
+      45
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "lehrlingsausbildung-fur-erwachsene",
+    "title": "Lehrlingsausbildung für Erwachsene . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 46,
+    "endPage": 46,
+    "pages": [
+      46,
+      46
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "ausgezeichnete-und-gute-lehrabschlussprufungen",
+    "title": "Ausgezeichnete und gute Lehrabschlussprüfungen . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 47,
+    "endPage": 47,
+    "pages": [
+      47,
+      47
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "coaching-fur-lehrlinge-und-lehrbetriebe",
+    "title": "Coaching für Lehrlinge und Lehrbetriebe . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 48,
+    "endPage": 48,
+    "pages": [
+      48,
+      48
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "forderung-auslandsaufenthalt",
+    "title": "Förderung Auslandsaufenthalt . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 49,
+    "endPage": 49,
+    "pages": [
+      49,
+      49
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "projektforderung-rund-um-die-lehre",
+    "title": "Projektförderung rund um die Lehre . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 50,
+    "endPage": 50,
+    "pages": [
+      50,
+      50
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "manahmen-fur-lehrlinge-mit-lernschwierigkeiten",
+    "title": "Maßnahmen für Lehrlinge mit Lernschwierigkeiten . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 51,
+    "endPage": 51,
+    "pages": [
+      51,
+      51
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "zertifizierte-r-lehrabschlussprufer-in",
+    "title": "Zertifizierte:r Lehrabschlussprüfer:in . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 52,
+    "endPage": 52,
+    "pages": [
+      52,
+      52
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "zwischen-und-uberbetriebliche-ausbildungsmanahmen",
+    "title": "Zwischen- und überbetriebliche Ausbildungsmaßnahmen. . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 53,
+    "endPage": 53,
+    "pages": [
+      53,
+      53
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "bfi-lehrlingsermaigung",
+    "title": "BFI-Lehrlingsermäßigung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 54,
+    "endPage": 54,
+    "pages": [
+      54,
+      54
+    ],
+    "provider": "Land OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "ausbilderweiterbildung",
+    "title": "Ausbilderweiterbildung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 55,
+    "endPage": 55,
+    "pages": [
+      55,
+      55
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "forderung-der-lehrausbildung",
+    "title": "Förderung der Lehrausbildung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 56,
+    "endPage": 56,
+    "pages": [
+      56,
+      56
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "lehre-mit-matura-in-oberosterreich",
+    "title": "Lehre mit Matura in Oberösterreich . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 57,
+    "endPage": 57,
+    "pages": [
+      57,
+      57
+    ],
+    "provider": "Land OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "wiederholter-antritt-zur-lehrabschlussprufung",
+    "title": "Wiederholter Antritt zur Lehrabschlussprüfung . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 58,
+    "endPage": 58,
+    "pages": [
+      58,
+      58
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "ubernahme-von-lehrlingen-aus-uberbetrieblichen-ausbildungseinrichtungen-uba",
+    "title": "Übernahme von Lehrlingen aus überbetrieblichen Ausbildungseinrichtungen (ÜBA) . . . . . . . . . . .",
+    "startPage": 59,
+    "endPage": 59,
+    "pages": [
+      59,
+      59
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "vorbereitungskurse-fur-die-lehrabschlussprufung",
+    "title": "Vorbereitungskurse für die Lehrabschlussprüfung . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 60,
+    "endPage": 60,
+    "pages": [
+      60,
+      60
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "forderung-der-lehrausbildung-18",
+    "title": "Förderung der Lehrausbildung 18+ . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 61,
+    "endPage": 61,
+    "pages": [
+      61,
+      61
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "discover-europe",
+    "title": "Discover Europe . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 62,
+    "endPage": 62,
+    "pages": [
+      62,
+      62
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Lehrlinge und Lehrbetriebe",
+    "container": false
+  },
+  {
+    "id": "gruberstrae",
+    "title": "Gruberstraße",
+    "startPage": 63,
+    "endPage": 65,
+    "pages": [
+      63,
+      65
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "arbeitsplatzsicherungszuschuss",
+    "title": "Arbeitsplatzsicherungszuschuss . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 66,
+    "endPage": 66,
+    "pages": [
+      66,
+      66
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "ausbildungsbeihilfen-fur-menschen-mit-behinderungen",
+    "title": "Ausbildungsbeihilfen für Menschen mit Behinderungen . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 67,
+    "endPage": 67,
+    "pages": [
+      67,
+      67
+    ],
+    "provider": "Sozialministeriumservice OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "entgeltzuschuss",
+    "title": "Entgeltzuschuss . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 68,
+    "endPage": 68,
+    "pages": [
+      68,
+      68
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "inklusionsforderung-inklusionsforderungplus",
+    "title": "Inklusionsförderung/InklusionsförderungPlus . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 69,
+    "endPage": 69,
+    "pages": [
+      69,
+      69
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "inklusionsbonus-fur-lehrlinge",
+    "title": "Inklusionsbonus für Lehrlinge . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 70,
+    "endPage": 70,
+    "pages": [
+      70,
+      70
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "barrierefreie-arbeitsplatzadaptierung-fur-menschen-mit-behinderung-bzw-fur-unter",
+    "title": "Barrierefreie Arbeitsplatzadaptierung für Menschen mit Behinderung bzw. für Unternehmen . . . . . . .",
+    "startPage": 71,
+    "endPage": 71,
+    "pages": [
+      71,
+      71
+    ],
+    "provider": "Sozialministeriumservice OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "erhohter-kundigungsschutz",
+    "title": "Erhöhter Kündigungsschutz . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 72,
+    "endPage": 72,
+    "pages": [
+      72,
+      72
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "oo-inklusionszuschuss-fur-unternehmen-gemeinden",
+    "title": "Oö. Inklusionszuschuss für Unternehmen/Gemeinden . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 73,
+    "endPage": 75,
+    "pages": [
+      73,
+      75
+    ],
+    "provider": "Land OÖ",
+    "group": "Förderungen für Menschen mit Behinderung",
+    "container": false
+  },
+  {
+    "id": "beihilfe-fur-ein-personen-unternehmen",
+    "title": "Beihilfe für Ein-Personen-Unternehmen . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 76,
+    "endPage": 76,
+    "pages": [
+      76,
+      76
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "initiative-1plus1",
+    "title": "Initiative 1plus1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 77,
+    "endPage": 77,
+    "pages": [
+      77,
+      77
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "eingliederungsbeihilfe-comeback",
+    "title": "Eingliederungsbeihilfe – Comeback . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 78,
+    "endPage": 78,
+    "pages": [
+      78,
+      78
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "outplacement-arbeitsstiftung",
+    "title": "Outplacement – Arbeitsstiftung . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 79,
+    "endPage": 79,
+    "pages": [
+      79,
+      79
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "bildungskarenz-plus-weiterbildung-statt-kundigung",
+    "title": "Bildungskarenz plus – Weiterbildung statt Kündigung . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 80,
+    "endPage": 80,
+    "pages": [
+      80,
+      80
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "ak-zukunftsfonds-arbeit-menschen-digital",
+    "title": "AK Zukunftsfonds Arbeit – Menschen – Digital . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 81,
+    "endPage": 81,
+    "pages": [
+      81,
+      81
+    ],
+    "provider": "AK OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "menschen-qualifikation-und-gender-nachwuchs",
+    "title": "Menschen, Qualifikation und Gender: Nachwuchs . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 82,
+    "endPage": 82,
+    "pages": [
+      82,
+      82
+    ],
+    "provider": null,
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "menschen-qualifikation-und-gender-chancengleichheit-vielfalt-organisationskultur",
+    "title": "Menschen, Qualifikation und Gender: Chancengleichheit, Vielfalt, Organisationskultur . . . . . . . . . .",
+    "startPage": 83,
+    "endPage": 83,
+    "pages": [
+      83,
+      83
+    ],
+    "provider": null,
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "vereinbarung-uber-altersteilzeitarbeit",
+    "title": "Vereinbarung über Altersteilzeitarbeit . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 84,
+    "endPage": 84,
+    "pages": [
+      84,
+      84
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "qualifizierungsforderung-fur-beschaftigte-qbn",
+    "title": "Qualifizierungsförderung für Beschäftigte (QBN) . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 85,
+    "endPage": 85,
+    "pages": [
+      85,
+      85
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "innovative-skills-fur-kmu",
+    "title": "Innovative Skills für KMU . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 86,
+    "endPage": 86,
+    "pages": [
+      86,
+      86
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "forderung-der-bauhandwerkerausbildung",
+    "title": "Förderung der Bauhandwerkerausbildung . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 87,
+    "endPage": 87,
+    "pages": [
+      87,
+      87
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "forderung-von-weiterbildungen-im-qualifizierungsverbund-digitale-kompetenz-nachh",
+    "title": "Förderung von Weiterbildungen im Qualifizierungsverbund Digitale Kompetenz & Nachhaltigkeit . . . . . .",
+    "startPage": 88,
+    "endPage": 88,
+    "pages": [
+      88,
+      88
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "impuls-qualifizierungsverbund-iqv",
+    "title": "Impuls-Qualifizierungsverbund (IQV). . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 89,
+    "endPage": 89,
+    "pages": [
+      89,
+      89
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "impulsberatung-ibb",
+    "title": "Impulsberatung (IBB) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 90,
+    "endPage": 90,
+    "pages": [
+      90,
+      90
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "demografieberatung-digi-unternehmens-beratung-fur-beschaftigte-und-betriebe",
+    "title": "Demografieberatung Digi+, Unternehmens beratung für Beschäftigte und Betriebe. . . . . . . . . . . .",
+    "startPage": 91,
+    "endPage": 91,
+    "pages": [
+      91,
+      91
+    ],
+    "provider": null,
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "qualifizierungsprojekte-im-rahmen-der-transformationsoffensive-des-bmaw",
+    "title": "Qualifizierungsprojekte im Rahmen der Transformationsoffensive des BMAW. . . . . . . . . . . . . .",
+    "startPage": 92,
+    "endPage": 93,
+    "pages": [
+      92,
+      93
+    ],
+    "provider": "Sozialministeriumservice OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "hoherqualifizierung-von-beschaftigten-im-bereich-soziale-dienstleistungen-von-al",
+    "title": "Höherqualifizierung von Beschäftigten im Bereich soziale Dienstleistungen von allgemeinem Interesse . . . .",
+    "startPage": 94,
+    "endPage": 94,
+    "pages": [
+      94,
+      94
+    ],
+    "provider": "AMS OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "erfolg-plus",
+    "title": "ERFOLG.PLUS . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 95,
+    "endPage": 95,
+    "pages": [
+      95,
+      95
+    ],
+    "provider": "WKO OÖ",
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  },
+  {
+    "id": "gleichstellung-der-geschlechter",
+    "title": "Gleichstellung der Geschlechter . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .",
+    "startPage": 96,
+    "endPage": 100,
+    "pages": [
+      96,
+      100
+    ],
+    "provider": null,
+    "group": "Förderungen für Unternehmen",
+    "container": false
+  }
+]

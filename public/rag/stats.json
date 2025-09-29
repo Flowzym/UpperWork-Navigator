@@ -1,0 +1,37 @@
+{
+  "buildId": "5cedaa271c",
+  "builtAt": "2025-09-29T18:11:00.614099Z",
+  "pages": 100,
+  "programs": 65,
+  "chunks": 233,
+  "sectionsCount": {
+    "zielgruppe": 3,
+    "voraussetzungen": 13,
+    "frist": 13,
+    "region": 0,
+    "foerderhoehe": 59,
+    "antragsweg": 15,
+    "kontakt": 65,
+    "allgemein": 65
+  },
+  "facets": {
+    "provider": {
+      "AMS OÖ": 29,
+      "WKO OÖ": 14,
+      "AK OÖ": 9,
+      "Land OÖ": 4,
+      "Sozialministeriumservice OÖ": 3,
+      "EU": 1
+    },
+    "gruppe": {
+      "Förderungen für Unternehmen": 21,
+      "Förderungen für Lehrlinge und Lehrbetriebe": 19,
+      "Förderungen für Frauen und Männer": 17,
+      "Förderungen für Menschen mit Behinderung": 8
+    },
+    "region": {
+      "Oberösterreich": 65
+    }
+  },
+  "source": "brochure.pdf"
+}
