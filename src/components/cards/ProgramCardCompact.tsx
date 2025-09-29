@@ -1,11 +1,12 @@
 import type { Program } from '@/types/program';
 import { hasList, hasText } from '@/lib/ui/guards';
-import { normalizeProgram, prettyFoerderart, prettyAntragsweg } from '@/lib/text/normalizeProgram';
+import { normalizeProgram, prettyFoerderart, prettyAntragsweg, asText } from '@/lib/text/normalizeProgram';
 
 export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
   const program = normalizeProgram(p);
-  const foerderart = prettyFoerderart(program.foerderart)?.[0];
-  const antrag = prettyAntragsweg(program.antragsweg)?.[0];
+  const foerderart = prettyFoerderart(program.foerderart as any)?.[0];
+  const antrag = prettyAntragsweg(program.antragsweg as any)?.[0];
+  const frist = asText(program.frist);
 
   const limitList = (items?: string[]) => {
     if (!Array.isArray(items) || items.length === 0) return undefined;
@@ -33,22 +34,22 @@ export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:stri
         )}
       </div>
       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-        {foerderart && (
+        {typeof foerderart === 'string' && foerderart && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             Art: {foerderart}
           </span>
         )}
-        {antrag && (
+        {typeof antrag === 'string' && antrag && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             Antrag: {antrag}
           </span>
         )}
-        {program.frist && (
+        {typeof frist === 'string' && frist && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            Frist: {program.frist}
+            Frist: {frist}
           </span>
         )}
-        {program.region && (
+        {typeof program.region === 'string' && program.region && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             {program.region}
           </span>
