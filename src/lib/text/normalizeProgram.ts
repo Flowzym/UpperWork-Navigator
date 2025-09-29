@@ -21,7 +21,7 @@ export function dedup<T>(arr?: T[] | null): T[] | undefined {
     if (!k || seen.has(k)) continue;
     seen.add(k); out.push(x);
   }
-  return out.length ? out : undefined;
+  return out;
 }
 
 export function prettyFoerderart(v?: string | string[]) {
