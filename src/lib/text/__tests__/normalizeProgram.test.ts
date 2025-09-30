@@ -1,7 +1,7 @@
 import { prettyFoerderart, prettyAntragsweg, canonicalRegion, cleanText, normalizeProgram } from '../normalizeProgram';
 
 it('dedupliziert foerderart und mappt Synonyme', () => {
-  expect(prettyFoerderart(['Kurs', 'kurskosten', 'Kurskosten'])).toEqual(['kurskosten']);
+  expect(prettyFoerderart(['Kurs', 'kurskosten', 'Kurskosten'])).toEqual(['Kurskosten']);
 });
 
 it('mappt antragsweg lesbar', () => {
@@ -31,7 +31,7 @@ it('normalizeProgram kürzt Summary und bereinigt Listen', () => {
   });
 
   expect(program.summary?.endsWith('…')).toBe(true);
-  expect(program.foerderart).toBe('kurskosten');
+  expect(program.foerderart).toBe('Kurskosten');
   expect(program.antragsweg).toBe('eAMS');
   expect(program.zielgruppe).toEqual(['Beschäftigte']);
   expect(program.voraussetzungen).toEqual(['Nachweis', 'Wohnsitz OÖ']);
