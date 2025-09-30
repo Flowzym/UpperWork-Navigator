@@ -1,12 +1,12 @@
 import type { Program } from '@/types/program';
 import { hasList, hasText } from '@/lib/ui/guards';
-import { prettyFoerderart, prettyAntragsweg, asText, normalizeProgram } from '@/lib/text/normalizeProgram';
+import { asText } from '@/lib/text/normalizeProgram';
 
-export function ProgramCardCompact({ p:raw, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
-  const p = normalizeProgram(raw);
-  const foerderart = prettyFoerderart(p.foerderart)?.[0];
-  const antrag = prettyAntragsweg(p.antragsweg)?.[0];
+export function ProgramCardCompact({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
+  const foerderart = asText(p.foerderart);
+  const antrag = asText(p.antragsweg);
   const frist = asText(p.frist);
+  const region = asText(p.region);
   const fmt = (v?: string[]) => (Array.isArray(v) && v.length)
     ? v.slice(0,2).join(', ') + (v.length>2?`, +${v.length-2} mehr`:'')
     : undefined;
@@ -15,7 +15,7 @@ export function ProgramCardCompact({ p:raw, onOpen }:{ p: Program; onOpen?: (id:
     <div className="rounded-xl border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow bg-white">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-medium text-sm truncate text-gray-900">{p.title}</div>
+          <div className="font-medium text-sm truncate text-gray-900">{p.title || p.name}</div>
           {hasText(p.provider) && (
             <div className="text-xs text-gray-500 truncate">{p.provider}</div>
           )}
@@ -30,24 +30,24 @@ export function ProgramCardCompact({ p:raw, onOpen }:{ p: Program; onOpen?: (id:
         )}
       </div>
       <div className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
-        {typeof foerderart === 'string' && foerderart && (
+        {foerderart && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             Art: {foerderart}
           </span>
         )}
-        {typeof antrag === 'string' && antrag && (
+        {antrag && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             Antrag: {antrag}
           </span>
         )}
-        {typeof frist === 'string' && frist && (
+        {frist && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
             Frist: {frist}
           </span>
         )}
-        {typeof p.region === 'string' && p.region && (
+        {region && (
           <span className="border border-gray-300 bg-gray-50 rounded-full px-2 py-0.5">
-            {p.region}
+            {region}
           </span>
         )}
       </div>

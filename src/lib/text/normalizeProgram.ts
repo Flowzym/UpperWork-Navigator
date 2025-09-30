@@ -7,6 +7,7 @@ const FOERDERART_MAP: Record<string,string> = {
   'lohn':'lohnkostenzuschuss','gehalt':'lohnkostenzuschuss','lohnkostenzuschuss':'lohnkostenzuschuss',
   'betrieb':'betrieb','invest':'betrieb','anschaffung':'betrieb'
 };
+
 const ANTRAG_MAP: Record<string,string> = {
   'eams':'eAMS','e-ams':'eAMS','ams':'eAMS',
   'traeger_direkt':'Träger direkt','träger direkt':'Träger direkt','traeger direkt':'Träger direkt',
@@ -131,6 +132,7 @@ const REGION_CANON = [
   { rx: /(ober(ö|oe)sterreich)/i, label:'Oberösterreich' },
   { rx: /\b(österreichweit|bundesweit)\b/i, label:'Österreichweit' },
 ];
+
 export function canonicalRegion(t?: any) {
   const s = asText(t);
   if (!s) return undefined;

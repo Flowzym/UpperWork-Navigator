@@ -72,18 +72,18 @@ function dedupe(a: string[]) {
 
 function push(arr: string[], s: string, rx: RegExp, max = 6) {
   if (arr.length >= max) return;
-  if (!rx.test(s)) return;
-  const t = s.replace(/\s+/g,' ').trim();
-  if (!t) return;
-  const v = t.length > 180 ? t.slice(0,180)+' …' : t;
-  if (!arr.some(x => x.toLowerCase() === v.toLowerCase())) arr.push(v);
+  const cleaned = cleanText(s);
+  const tag = shortTag(cleaned);
+  if (!tag || !rx.test(tag)) return;
+  if (!arr.some(x => x.toLowerCase() === tag.toLowerCase())) arr.push(tag);
 }
 
 function splitToItems(segment: string): string[] {
   return segment
-    .split(/\n|[•\u2022]|[\u2013-]/g)
-    .map(s => s.replace(/\s+/g,' ').trim())
-    .filter(s => s.length >= 6);
+    .split(/\n|[•\u2022]|[\u2013-]|;/g)
+    .map(s => cleanText(s))
+    .map(s => shortTag(s))
+    .filter(Boolean) as string[];
 }
 
 function extractBlock(text: string, head: RegExp): string[] {
@@ -128,6 +128,9 @@ function chunksForRange(chunks: RagChunk[], start: number, end: number) {
 
 function isLikelyProgram(cs: RagChunk[], name: string) {
   if (SKIP_TITLE.test(name)) return false;
+  if (name.toLowerCase().includes('inhaltsverzeichnis')) return false;
+  if (name.toLowerCase().includes('vorwort')) return false;
+  if (name.toLowerCase().includes('kontakt')) return false;
   if (!cs.length) return false;
   const head = cs.slice(0, 8).map(c => c.text).join(' ');
   return K_PROG.test(head) && cs.some(c => K_SECT.test(c.text));
@@ -199,17 +202,25 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     const zielgruppeItems = extractBlock(full, HEADS.zielgruppe);
     const foerderartItems = extractBlock(full, HEADS.foerderart);
     const voraussetzungenItems = extractBlock(full, HEADS.voraussetzungen);
-    const antragswegItems = extractBlock(full, HEADS.antragsweg);
 
-    p.zielgruppe = dedupe(zielgruppeItems).slice(0, 6);
-    p.foerderart = dedupe(foerderartItems).slice(0, 6).map(art => {
-      if (art.toLowerCase().includes('kurs')) return 'kurskosten';
-      if (art.toLowerCase().includes('personal')) return 'personalkosten';
-      if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
-      if (art.toLowerCase().includes('beratung')) return 'beratung';
-      return 'kurskosten'; // default
-    }) as any;
-    p.voraussetzungen = dedupe(voraussetzungenItems).slice(0, 6);
+    // Nur evidenzbasierte Felder setzen
+    if (zielgruppeItems.length > 0) {
+      p.zielgruppe = dedupe(zielgruppeItems).slice(0, 6);
+    }
+    if (voraussetzungenItems.length > 0) {
+      p.voraussetzungen = dedupe(voraussetzungenItems).slice(0, 6);
+    }
+    
+    // Förderart nur bei klarer Evidenz
+    if (foerderartItems.length > 0) {
+      p.foerderart = dedupe(foerderartItems).slice(0, 6).map(art => {
+        if (art.toLowerCase().includes('kurs')) return 'kurskosten';
+        if (art.toLowerCase().includes('personal')) return 'personalkosten';
+        if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
+        if (art.toLowerCase().includes('beratung')) return 'beratung';
+        return undefined; // Kein Default mehr
+      }).filter(Boolean) as any;
+    }
 
     // Antragsweg normalisieren
     // Antragsweg aus Text ableiten (nur wenn vorhanden)
@@ -219,92 +230,65 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     else if (/\bwko\b|\bwirtschaftskammer/i.test(antragswegText)) p.antragsweg = 'wko_verbund';
     else if (/(tr(ä|ae)ger|direkt\s+einreichen)/i.test(antragswegText)) p.antragsweg = 'traeger_direkt';
 
-    // 2) Förderhöhe: zuerst Abschnitt, sonst Beträge/Prozente im gesamten Text
+    // Förderhöhe nur bei Evidenz
     const fh = extractBlock(full, HEADS.foerderhoehe);
     if (fh.length) {
       p.foerderhoehe = dedupe(fh).slice(0, 6).map(hoehe => ({
         label: hoehe
       }));
-    } else {
-      const amounts = full.match(new RegExp(RX.betrag.source, 'gi')) || [];
-      p.foerderhoehe = dedupe(amounts.map(s => s.replace(/\s+/g,' ').trim())).slice(0, 4).map(hoehe => ({
-        label: hoehe
-      }));
     }
 
-    // Frist direkt als kurze Info
+    // Frist nur bei klarer Evidenz
     const date = full.match(/\b(\d{1,2}\.\d{1,2}\.\d{2,4})\b/);
     if (/\blaufend(e)?\b/i.test(full)) p.frist = { typ: 'laufend' };
     else if (date) p.frist = { typ: 'stichtag', datum: date[1] };
 
-    // 3) Falls in den Chunks etwas markiert war, ergänzend aufnehmen
-    const tempZielgruppe: string[] = [...p.zielgruppe];
-    const tempFoerderart: string[] = [];
-    const tempFoerderhoehe: string[] = [];
-    const tempVoraussetzungen: string[] = [...p.voraussetzungen];
-    const tempAntragsweg: string[] = [];
-    const tempRegion: string[] = [];
-    const tempThemen: string[] = [];
-
-    for (const c of cs) {
-      const s = c.text || '';
-      
-      switch ((c.section || '').toLowerCase()) {
-        case 'region':          push(tempRegion, s, RX.region); break;
-        case 'foerderart':      push(tempFoerderart, s, RX.foerderart); break;
-        case 'foerderhoehe':    push(tempFoerderhoehe, s, RX.betrag); break;
-        case 'zielgruppe':      push(tempZielgruppe, s, RX.ziel); break;
-        case 'voraussetzungen': push(tempVoraussetzungen, s, RX.vrs); break;
-        case 'antragsweg':      push(tempAntragsweg, s, RX.antrag); break;
-        default:
-          // opportunistisch
-          push(tempFoerderhoehe, s, RX.betrag);
-          push(tempFoerderart, s, RX.foerderart);
-          push(tempZielgruppe, s, RX.ziel);
-          push(tempVoraussetzungen, s, RX.vrs);
-          push(tempAntragsweg, s, RX.antrag);
-          push(tempRegion, s, RX.region);
-          push(tempThemen, s, /\b(bildung|qualifizierung|innovation|digitalisierung|nachhaltigkeit)\b/i, 6);
+    // Region nur kanonisiert
+    const regionChunks = cs.filter(c => c.section === 'region');
+    if (regionChunks.length > 0) {
+      const regionText = regionChunks.map(c => c.text).join(' ');
+      const canonical = canonicalRegion(regionText);
+      if (canonical) {
+        p.region = canonical;
       }
     }
 
-    // 4) Finales Dedupe/Trim und Ergänzung
-    p.zielgruppe = dedupe([...p.zielgruppe, ...tempZielgruppe]);
-    
-    // Ergänze Förderart falls noch leer
-    if (p.foerderart.length === 0) {
-      p.foerderart = dedupe(tempFoerderart).map(art => {
-        if (art.toLowerCase().includes('kurs')) return 'kurskosten';
-        if (art.toLowerCase().includes('personal')) return 'personalkosten';
-        if (art.toLowerCase().includes('beihilfe')) return 'beihilfe';
-        if (art.toLowerCase().includes('beratung')) return 'beratung';
-        return undefined; // kein Default mehr
-      }).filter(Boolean) as any;
-    }
-    
-    // Ergänze Förderhöhe falls noch leer
-    if (p.foerderhoehe.length === 0) {
-      p.foerderhoehe = dedupe(tempFoerderhoehe).map(hoehe => ({
-        label: hoehe
-      }));
-    }
-    
-    p.voraussetzungen = dedupe([...p.voraussetzungen, ...tempVoraussetzungen]);
-    p.themen = dedupe(tempThemen);
-    
-    // Region normalisieren
-    if (tempRegion.length > 0) {
-      p.region = tempRegion[0];
+    // Summary aus allgemein-Section
+    const allgemeinChunks = cs.filter(c => c.section === 'allgemein');
+    if (allgemeinChunks.length > 0) {
+      const summaryText = allgemeinChunks[0].text;
+      const cleaned = cleanText(summaryText);
+      if (cleaned && !STOP_PHRASES.some(phrase => cleaned.toLowerCase().includes(phrase))) {
+        p.teaser = clampWords(cleaned, 40);
+      }
     }
 
-    // Legacy fields befüllen - nur wenn Daten vorhanden
-    p.targetGroup = [...p.zielgruppe];
-    p.requirements = [...p.voraussetzungen];
-    p.tags = [...p.themen];
-    p.fundingType = p.foerderart.length > 0 ? p.foerderart[0] : '';
-    p.budget = p.foerderhoehe.length > 0 ? p.foerderhoehe[0].label : '';
-    p.themeField = p.themen.length > 0 ? p.themen[0] : '';
+    // Themen aus verschiedenen Sections ableiten
+    const themenSet = new Set<string>();
+    cs.forEach(c => {
+      const text = c.text.toLowerCase();
+      if (text.includes('digital')) themenSet.add('Digitalisierung');
+      if (text.includes('sprach') || text.includes('deutsch')) themenSet.add('Sprachen');
+      if (text.includes('nachhaltig')) themenSet.add('Nachhaltigkeit');
+      if (text.includes('innovation')) themenSet.add('Innovation');
+      if (text.includes('qualifizierung')) themenSet.add('Qualifizierung');
+    });
+    p.themen = Array.from(themenSet);
+
+    // Legacy fields nur wenn Daten vorhanden
+    p.targetGroup = p.zielgruppe ? [...p.zielgruppe] : [];
+    p.requirements = p.voraussetzungen ? [...p.voraussetzungen] : [];
+    p.tags = p.themen ? [...p.themen] : [];
+    p.fundingType = '';
+    if (Array.isArray(p.foerderart) && p.foerderart.length > 0) {
+      p.fundingType = p.foerderart[0];
+    } else if (typeof p.foerderart === 'string') {
+      p.fundingType = p.foerderart;
+    }
+    p.budget = p.foerderhoehe && p.foerderhoehe.length > 0 ? p.foerderhoehe[0].label : '';
+    p.themeField = p.themen && p.themen.length > 0 ? p.themen[0] : '';
     p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
+    p.description = p.teaser || '';
 
     byId.set(p.id, p);
   }
