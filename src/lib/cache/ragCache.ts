@@ -44,7 +44,10 @@ export async function loadStats(): Promise<RagStats | undefined> {
     console.log(`[ragCache] Lade Stats von: ${url}`);
     const r = await fetch(url, { cache: 'no-store' });
     console.log(`[ragCache] Stats Response: ${r.status} ${r.statusText}`);
-    if (!r.ok) return;
+    if (!r.ok) {
+      console.error(`[ragCache] Stats fetch failed: ${r.status} ${r.statusText}`);
+      return;
+    }
     const s = await r.json();
     console.log(`[ragCache] Stats geladen:`, s);
     const buildId =
@@ -61,7 +64,7 @@ export async function loadStats(): Promise<RagStats | undefined> {
     console.log(`[ragCache] Stats erfolgreich verarbeitet:`, out);
     return out;
   } catch (error) {
-    console.warn(`[ragCache] Stats laden fehlgeschlagen:`, error);
+    console.error(`[ragCache] Stats laden fehlgeschlagen:`, error);
     return;
   }
 }
@@ -84,7 +87,10 @@ export async function loadChunksCached(stats: RagStats): Promise<{
   console.log(`[ragCache] Lade Chunks von: ${url}`);
   const r = await fetch(url, { cache: 'no-store' });
   console.log(`[ragCache] Chunks Response: ${r.status} ${r.statusText}`);
-  if (!r.ok) throw new Error('chunks.json nicht verfügbar');
+  if (!r.ok) {
+    console.error(`[ragCache] Chunks fetch failed: ${r.status} ${r.statusText}`);
+    throw new Error(`chunks.json nicht verfügbar: ${r.status}`);
+  }
   const text = await r.text();
   console.log(`[ragCache] Chunks Text-Länge: ${text.length} Zeichen`);
   

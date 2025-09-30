@@ -157,17 +157,24 @@ function deriveSummary(r: any): string | undefined {
 
 // Hauptfunktion
 export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Program[] {
+  console.log('[buildProgramsFromRag] Input:', { meta: meta.length, chunks: chunks.length });
+  
   const idx = buildPageIndex(meta);
   const byId = new Map<string, Program>();
+
+  console.log('[buildProgramsFromRag] Page index built:', idx.arr.length, 'entries');
 
   for (const m of idx.arr) {
     const status = normalizeStatus(m.status);
     if (status === 'entfallen') continue;
 
     const cs = chunksForRange(chunks, m.start, m.end);
+    console.log(`[buildProgramsFromRag] Program ${m.id}: ${cs.length} chunks in range ${m.start}-${m.end}`);
+    
     if (!isLikelyProgram(cs, m.name)) continue; // Container/Adressen raus
 
     const full = cs.map(c => (c.text || '').replace(/\s+/g,' ').trim()).filter(Boolean).join('\n');
+    console.log(`[buildProgramsFromRag] Program ${m.id}: ${full.length} chars full text`);
 
     const p: Program = {
       id: m.id,
@@ -202,6 +209,12 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     const zielgruppeItems = extractBlock(full, HEADS.zielgruppe);
     const foerderartItems = extractBlock(full, HEADS.foerderart);
     const voraussetzungenItems = extractBlock(full, HEADS.voraussetzungen);
+
+    console.log(`[buildProgramsFromRag] Program ${m.id} extracted:`, {
+      zielgruppe: zielgruppeItems.length,
+      foerderart: foerderartItems.length,
+      voraussetzungen: voraussetzungenItems.length
+    });
 
     // Nur evidenzbasierte Felder setzen
     if (zielgruppeItems.length > 0) {
@@ -289,6 +302,14 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     p.themeField = p.themen && p.themen.length > 0 ? p.themen[0] : '';
     p.deadline = p.frist?.typ === 'laufend' ? 'laufend' : p.frist?.datum || '';
     p.description = p.teaser || '';
+
+    console.log(`[buildProgramsFromRag] Program ${m.id} final:`, {
+      name: p.name,
+      zielgruppe: p.zielgruppe?.length || 0,
+      foerderart: p.foerderart?.length || 0,
+      voraussetzungen: p.voraussetzungen?.length || 0,
+      teaser: p.teaser?.length || 0
+    });
 
     byId.set(p.id, p);
   }

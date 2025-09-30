@@ -22,6 +22,15 @@ const BASE = new URL(
 );
 const url = (p: string) => new URL(p.replace(/^\//, ''), BASE).toString();
 
+// Debug-Logging für URL-Konstruktion
+console.log('[RAG] BASE_URL:', import.meta.env.BASE_URL);
+console.log('[RAG] BASE konstruiert:', BASE.toString());
+console.log('[RAG] Test-URLs:', {
+  stats: url('rag/stats.json'),
+  chunks: url('rag/chunks.json'),
+  meta: url('rag/programMeta.json')
+});
+
 export async function loadRagFiles(): Promise<{
   stats: RagStats;
   chunks: RagChunk[];
@@ -29,24 +38,41 @@ export async function loadRagFiles(): Promise<{
   source: 'network';
   warnings: string[];
 }> {
+  console.log('[RAG] Starte loadRagFiles...');
+  
   const [rawStats, rawChunks, rawMeta] = await Promise.all([
     fetch(url('rag/stats.json')).then(r => {
+      console.log('[RAG] stats.json Response:', r.status, r.statusText);
       if (!r.ok) throw new Error(`stats.json ${r.status}`);
       return r.json();
     }),
     fetch(url('rag/chunks.json')).then(r => {
+      console.log('[RAG] chunks.json Response:', r.status, r.statusText);
       if (!r.ok) throw new Error(`chunks.json ${r.status}`);
       return r.json();
     }),
     fetch(url('rag/programMeta.json')).then(r => {
+      console.log('[RAG] programMeta.json Response:', r.status, r.statusText);
       if (!r.ok) throw new Error(`programMeta.json ${r.status}`);
       return r.json();
     })
   ]);
 
+  console.log('[RAG] Raw data loaded:', {
+    statsKeys: Object.keys(rawStats || {}),
+    chunksLength: Array.isArray(rawChunks) ? rawChunks.length : 'not array',
+    metaLength: Array.isArray(rawMeta) ? rawMeta.length : 'not array'
+  });
+
   const stats = migrateStats(rawStats);
   const chunks = migrateChunks(rawChunks);
   const meta = migrateProgramMeta(rawMeta);
+
+  console.log('[RAG] After migration:', {
+    stats: { buildId: stats.buildId, programs: stats.programs, chunks: stats.chunks },
+    chunksLength: chunks.length,
+    metaLength: meta.length
+  });
 
   const warnings = [
     ...validateRagStats(stats),
@@ -62,6 +88,7 @@ export async function loadRagFiles(): Promise<{
     console.warn('[RAG] Schema warnings:', warnings);
   }
 
+  console.log('[RAG] Final result:', { stats, chunks: chunks.length, meta: meta.length, warnings });
   return { stats, chunks, meta, source: 'network', warnings };
 }
 

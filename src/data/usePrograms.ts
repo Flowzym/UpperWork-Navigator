@@ -24,8 +24,16 @@ export function usePrograms() {
     let cancelled = false;
 
     (async () => {
+      console.log('[usePrograms] Starting data load...');
       try {
         const { stats, meta, chunks, warnings } = await loadRagFiles();
+
+        console.log('[usePrograms] loadRagFiles result:', {
+          stats: stats ? { buildId: stats.buildId, programs: stats.programs, chunks: stats.chunks } : null,
+          metaLength: meta.length,
+          chunksLength: chunks.length,
+          warnings
+        });
 
         if (cancelled) return;
 
@@ -63,8 +71,15 @@ export function usePrograms() {
           })
           .filter((c): c is DerivedRagChunk => !!c);
 
+        console.log('[usePrograms] After normalization:', {
+          normalizedMeta: normalizedMeta.length,
+          normalizedChunks: normalizedChunks.length
+        });
+
         if (normalizedMeta.length && normalizedChunks.length) {
+          console.log('[usePrograms] Building programs from RAG...');
           const progs = buildProgramsFromRag(normalizedMeta, normalizedChunks);
+          console.log('[usePrograms] Programs built:', progs.length);
           const derivedStats = stats ? { ...stats } : null;
           const derivedWarnings = [...warnings];
 
@@ -79,6 +94,11 @@ export function usePrograms() {
             }
           }
 
+          console.log('[usePrograms] Setting final state:', {
+            programs: progs.length,
+            stats: derivedStats,
+            warnings: derivedWarnings
+          });
           set({ programs: progs, source: 'rag', loading: false, stats: derivedStats, warnings: derivedWarnings });
           return;
         }
@@ -90,10 +110,16 @@ export function usePrograms() {
           });
         }
       } catch (e) {
-        console.warn('[Programs] rag load failed', e);
+        console.error('[Programs] rag load failed:', e);
+        console.error('[Programs] Error details:', {
+          name: e?.name,
+          message: e?.message,
+          stack: e?.stack
+        });
       }
 
       if (!cancelled) {
+        console.warn('[usePrograms] Setting empty state due to load failure');
         set({
           programs: [],
           source: 'empty',

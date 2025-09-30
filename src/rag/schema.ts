@@ -102,6 +102,7 @@ const mapKeys = (obj: any, map: Record<string, string>) => {
 };
 
 export function migrateStats(input: any): RagStats {
+  console.log('[migrateStats] Input:', input);
   const mapped = mapKeys(input, {
     build_id: 'buildId',
     built_at: 'builtAt',
@@ -117,6 +118,7 @@ export function migrateStats(input: any): RagStats {
     facets: mapped.facets,
     source: mapped.source
   } satisfies RagStats;
+  console.log('[migrateStats] Output:', stats);
   return stats;
 }
 
@@ -140,14 +142,17 @@ export function migrateProgramMeta(input: any): RagMeta {
 }
 
 export function migrateChunks(input: any): RagChunk[] {
+  console.log('[migrateChunks] Input type:', typeof input, 'isArray:', Array.isArray(input), 'length:', input?.length);
   const arr = Array.isArray(input) ? input : [];
   const mapped = mapKeys(arr, {
     program_id: 'programId'
   }) as any[];
-  return mapped.map(c => {
+  const result = mapped.map(c => {
     if (c.seite && !c.page) c.page = c.seite;
     return c;
   }) as RagChunk[];
+  console.log('[migrateChunks] Output length:', result.length);
+  return result;
 }
 
 export function validateStats(s: RagStats | undefined | null): string[] {
