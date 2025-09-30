@@ -1,19 +1,20 @@
 import type { Program } from '@/types/program';
 import { hasList, hasText } from '@/lib/ui/guards';
 import { FieldRow } from './FieldRow';
-import { prettyFoerderart, prettyAntragsweg, asText } from '@/lib/text/normalizeProgram';
+import { prettyFoerderart, prettyAntragsweg, asText, normalizeProgram } from '@/lib/text/normalizeProgram';
 
-export function ProgramCardV2({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
+function fmtList(v?: string[], limit=3): string | undefined {
+  if (!Array.isArray(v) || v.length===0) return undefined;
+  const shown = v.slice(0, limit).join(', ');
+  const more = v.length - limit;
+  return more > 0 ? `${shown}, +${more} mehr` : shown;
+}
+
+export function ProgramCardV2({ p:raw, onOpen }:{ p: Program; onOpen?: (id:string)=>void }) {
+  const p = normalizeProgram(raw);
   const art = prettyFoerderart(p.foerderart)?.[0];
   const antrag = prettyAntragsweg(p.antragsweg)?.[0];
   const frist = asText(p.frist);
-
-  const limitList = (items?: string[]) => {
-    if (!Array.isArray(items) || items.length === 0) return undefined;
-    const first = items.slice(0, 3);
-    if (items.length > 3) first.push(`+${items.length - 3} mehr`);
-    return first.join(', ');
-  };
 
   return (
     <div className="rounded-2xl border p-4 hover:shadow-sm transition min-h-[220px] bg-white">
@@ -54,10 +55,10 @@ export function ProgramCardV2({ p, onOpen }:{ p: Program; onOpen?: (id:string)=>
         <p className="mt-3 text-sm leading-relaxed line-clamp-3 text-gray-700">{p.summary}</p>
       )}
 
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="mt-3 flex flex-col gap-1.5">
         {hasText(p.region) && <FieldRow label="Region" value={p.region} />}
-        {hasList(p.zielgruppe) && <FieldRow label="Zielgruppe" value={limitList(p.zielgruppe)} />}
-        {hasList(p.voraussetzungen) && <FieldRow label="Voraussetzungen" value={limitList(p.voraussetzungen)} />}
+        {hasList(p.zielgruppe) && <FieldRow label="Zielgruppe" value={fmtList(p.zielgruppe!)} />}
+        {hasList(p.voraussetzungen) && <FieldRow label="Voraussetzungen" value={fmtList(p.voraussetzungen!)} />}
       </div>
     </div>
   );
