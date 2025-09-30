@@ -1,5 +1,6 @@
 // src/data/programs.fromRag.ts
 import { Program, FoerderHoehe, Frist, Quelle } from '../types';
+import { cleanText } from '../lib/text/normalizeProgram';
 
 export type RagMeta = { 
   programId: string; 
