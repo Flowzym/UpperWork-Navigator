@@ -1,4 +1,4 @@
-import type { Program } from '@/types/program';
+import type { Program } from '@/types';
 
 // --- Mappings ---
 const FOERDERART_MAP: Record<string,string> = {

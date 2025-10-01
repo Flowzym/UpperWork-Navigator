@@ -57,11 +57,13 @@ export function usePrograms() {
 
         const normalizedChunks: DerivedRagChunk[] = (chunks as RagChunk[])
           .map(chunk => {
+            const programId = chunk.programId ?? '';
             const page = Number(chunk.page ?? chunk.seite ?? 0) || 0;
             const section = typeof chunk.section === 'string' ? chunk.section : '';
             const text = typeof chunk.text === 'string' ? chunk.text : '';
-            if (!text) return null;
+            if (!text || !programId) return null;
             return {
+              programId,
               page,
               section,
               text,

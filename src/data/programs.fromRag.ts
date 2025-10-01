@@ -10,12 +10,13 @@ export type RagMeta = {
   status?: string | null 
 };
 
-export type RagChunk = { 
-  page: number; 
-  section: string; 
-  text: string; 
-  status?: string | null; 
-  stand?: string | null 
+export type RagChunk = {
+  programId: string;
+  page: number;
+  section: string;
+  text: string;
+  status?: string | null;
+  stand?: string | null
 };
 
 type ProgramStatus = 'aktiv' | 'ausgesetzt' | 'endet_am' | 'entfallen';
@@ -123,8 +124,12 @@ function buildPageIndex(meta: RagMeta[]) {
   return { arr, find };
 }
 
-function chunksForRange(chunks: RagChunk[], start: number, end: number) {
-  return chunks.filter(c => c.page >= start && c.page <= end);
+function chunksForRange(chunks: RagChunk[], start: number, end: number, programId: string) {
+  return chunks.filter(c =>
+    c.page >= start &&
+    c.page <= end &&
+    c.programId === programId
+  );
 }
 
 function isLikelyProgram(cs: RagChunk[], name: string) {
@@ -169,7 +174,7 @@ export function buildProgramsFromRag(meta: RagMeta[], chunks: RagChunk[]): Progr
     const status = normalizeStatus(m.status);
     if (status === 'entfallen') continue;
 
-    const cs = chunksForRange(chunks, m.start, m.end);
+    const cs = chunksForRange(chunks, m.start, m.end, m.id);
     console.log(`[buildProgramsFromRag] Program ${m.id}: ${cs.length} chunks in range ${m.start}-${m.end}`);
     
     if (!isLikelyProgram(cs, m.name)) continue; // Container/Adressen raus

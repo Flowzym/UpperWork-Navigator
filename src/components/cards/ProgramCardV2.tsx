@@ -1,4 +1,4 @@
-import type { Program } from '@/types/program';
+import type { Program } from '@/types';
 import { hasList, hasText } from '@/lib/ui/guards';
 import { FieldRow } from './FieldRow';
 import { asText } from '@/lib/text/normalizeProgram';

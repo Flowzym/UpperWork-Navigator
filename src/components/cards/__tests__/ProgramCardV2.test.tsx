@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { ProgramCardV2 } from '../ProgramCardV2';
-import type { Program } from '@/types/program';
+import type { Program } from '@/types';
 
 const base: Program = { id: 'p1', title: 'Testprogramm' };
 
