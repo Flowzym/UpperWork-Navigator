@@ -1,6 +1,13 @@
 // src/data/programs.fromRag.ts
 import { Program, FoerderHoehe, Frist, Quelle } from '../types';
-import { cleanText, shortTag } from '../lib/text/normalizeProgram';
+import { cleanText, shortTag, clampWords, canonicalRegion } from '../lib/text/normalizeProgram';
+
+const STOP_PHRASES = [
+  'wer wird gefördert','wer wird gefoerdert',
+  'was wird gefördert','was wird gefoerdert',
+  'fördervoraussetzungen','foerdervoraussetzungen',
+  'kurzüberblick','kurzueberblick'
+];
 
 export type RagMeta = { 
   programId: string; 
@@ -133,13 +140,41 @@ function chunksForRange(chunks: RagChunk[], start: number, end: number, programI
 }
 
 function isLikelyProgram(cs: RagChunk[], name: string) {
-  if (SKIP_TITLE.test(name)) return false;
-  if (name.toLowerCase().includes('inhaltsverzeichnis')) return false;
-  if (name.toLowerCase().includes('vorwort')) return false;
-  if (name.toLowerCase().includes('kontakt')) return false;
-  if (!cs.length) return false;
+  // Überspringe offensichtliche Nicht-Programme
+  if (SKIP_TITLE.test(name)) {
+    console.log(`[isLikelyProgram] Skipping '${name}' - matches SKIP_TITLE`);
+    return false;
+  }
+  if (name.toLowerCase().includes('inhaltsverzeichnis')) {
+    console.log(`[isLikelyProgram] Skipping '${name}' - is table of contents`);
+    return false;
+  }
+  if (name.toLowerCase().includes('vorwort')) {
+    console.log(`[isLikelyProgram] Skipping '${name}' - is preface`);
+    return false;
+  }
+
+  // Wenn keine Chunks vorhanden sind, trotzdem akzeptieren (könnte valides Programm sein)
+  if (!cs.length) {
+    console.log(`[isLikelyProgram] Accepting '${name}' despite no chunks - will use meta only`);
+    return true;
+  }
+
+  // Entspanne die Heuristik: akzeptiere, wenn ENTWEDER K_PROG ODER K_SECT matcht
   const head = cs.slice(0, 8).map(c => c.text).join(' ');
-  return K_PROG.test(head) && cs.some(c => K_SECT.test(c.text));
+  const hasProgPattern = K_PROG.test(head);
+  const hasSectPattern = cs.some(c => K_SECT.test(c.text));
+
+  // Akzeptiere auch Programme, die mindestens 3 Chunks mit substantiellem Text haben
+  const hasSubstantialContent = cs.filter(c => c.text && c.text.length > 50).length >= 3;
+
+  const isLikely = hasProgPattern || hasSectPattern || hasSubstantialContent;
+
+  if (!isLikely) {
+    console.log(`[isLikelyProgram] Rejecting '${name}' - no pattern match (hasProgPattern:${hasProgPattern}, hasSectPattern:${hasSectPattern}, hasSubstantialContent:${hasSubstantialContent})`);
+  }
+
+  return isLikely;
 }
 
 function deriveTeaser(cs: RagChunk[]) {

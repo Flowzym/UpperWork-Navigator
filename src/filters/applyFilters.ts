@@ -12,10 +12,15 @@ export function applyFilters(programs: Program[], filters: FilterState): Program
     
     // Zielgruppe Filter (OR)
     if (filters.zielgruppe.length > 0) {
-      const hasMatch = filters.zielgruppe.some(filter => 
-        program.zielgruppe.some(ziel => 
-          ziel.toLowerCase().includes(filter.toLowerCase()) ||
-          filter.toLowerCase().includes(ziel.toLowerCase())
+      if (!program.zielgruppe || !Array.isArray(program.zielgruppe) || program.zielgruppe.length === 0) {
+        return false;
+      }
+      const hasMatch = filters.zielgruppe.some(filter =>
+        program.zielgruppe.some(ziel =>
+          ziel && typeof ziel === 'string' && (
+            ziel.toLowerCase().includes(filter.toLowerCase()) ||
+            filter.toLowerCase().includes(ziel.toLowerCase())
+          )
         )
       );
       if (!hasMatch) return false;
@@ -23,7 +28,10 @@ export function applyFilters(programs: Program[], filters: FilterState): Program
     
     // Förderart Filter (OR)
     if (filters.foerderart.length > 0) {
-      const hasMatch = filters.foerderart.some(filter => 
+      if (!program.foerderart || !Array.isArray(program.foerderart) || program.foerderart.length === 0) {
+        return false;
+      }
+      const hasMatch = filters.foerderart.some(filter =>
         program.foerderart.includes(filter as any)
       );
       if (!hasMatch) return false;
@@ -36,16 +44,16 @@ export function applyFilters(programs: Program[], filters: FilterState): Program
           case 'eams':
             return program.antragsweg === 'eams';
           case 'min75':
-            return program.voraussetzungen.some(v => 
-              v.toLowerCase().includes('75%') || v.toLowerCase().includes('anwesenheit')
+            return program.voraussetzungen && Array.isArray(program.voraussetzungen) && program.voraussetzungen.some(v =>
+              v && typeof v === 'string' && (v.toLowerCase().includes('75%') || v.toLowerCase().includes('anwesenheit'))
             );
           case 'anbieter':
-            return program.voraussetzungen.some(v => 
-              v.toLowerCase().includes('anerkannt') || v.toLowerCase().includes('anbieter')
+            return program.voraussetzungen && Array.isArray(program.voraussetzungen) && program.voraussetzungen.some(v =>
+              v && typeof v === 'string' && (v.toLowerCase().includes('anerkannt') || v.toLowerCase().includes('anbieter'))
             );
           case 'vorlauf7':
-            return program.frist.typ === 'stichtag' || 
-                   program.voraussetzungen.some(v => v.toLowerCase().includes('vorlauf'));
+            return (program.frist && program.frist.typ === 'stichtag') ||
+                   (program.voraussetzungen && Array.isArray(program.voraussetzungen) && program.voraussetzungen.some(v => v && typeof v === 'string' && v.toLowerCase().includes('vorlauf')));
           default:
             return false;
         }
@@ -55,10 +63,15 @@ export function applyFilters(programs: Program[], filters: FilterState): Program
     
     // Themen Filter (OR)
     if (filters.themen.length > 0) {
-      const hasMatch = filters.themen.some(filter => 
-        program.themen.some(thema => 
-          thema.toLowerCase().includes(filter.toLowerCase()) ||
-          filter.toLowerCase().includes(thema.toLowerCase())
+      if (!program.themen || !Array.isArray(program.themen) || program.themen.length === 0) {
+        return false;
+      }
+      const hasMatch = filters.themen.some(filter =>
+        program.themen.some(thema =>
+          thema && typeof thema === 'string' && (
+            thema.toLowerCase().includes(filter.toLowerCase()) ||
+            filter.toLowerCase().includes(thema.toLowerCase())
+          )
         )
       );
       if (!hasMatch) return false;
@@ -66,14 +79,17 @@ export function applyFilters(programs: Program[], filters: FilterState): Program
     
     // Frist Filter (OR)
     if (filters.frist.length > 0) {
-      if (!filters.frist.includes(program.frist.typ as any)) {
+      if (!program.frist || !program.frist.typ || !filters.frist.includes(program.frist.typ as any)) {
         return false;
       }
     }
     
     // Region Filter (OR)
     if (filters.region.length > 0) {
-      const hasMatch = filters.region.some(filter => 
+      if (!program.region || typeof program.region !== 'string') {
+        return false;
+      }
+      const hasMatch = filters.region.some(filter =>
         program.region.toLowerCase().includes(filter.toLowerCase()) ||
         filter.toLowerCase().includes(program.region.toLowerCase())
       );
